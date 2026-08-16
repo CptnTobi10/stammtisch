@@ -233,6 +233,46 @@ test('full random Quick Pong game terminates with exactly one winner and consist
   }
 });
 
+test('Quick Pong is genuinely faster: reduced-filler deck needs meaningfully fewer draws to win than the old full 32-card deck', ()=>{
+  const N = 500;
+  function playOutDrawCount(g){
+    let draws=0, guard=0;
+    while(!g.winner){
+      if(guard++>500) throw new Error('did not terminate');
+      CP.cpQuickDraw(g);
+      draws++;
+    }
+    return draws;
+  }
+  let totalNew=0, totalOld=0;
+  for(let seed=1; seed<=N; seed++){
+    // New method: current cpStartQuick (reduced filler deck).
+    const gNew = CP.cpStartQuick({seed: seed*2});
+    totalNew += playOutDrawCount(gNew);
+
+    // Old method reconstructed from exported building blocks: full 32-card
+    // skat deck as the draw pile (pre-redesign behaviour), same target logic.
+    const rng = CP.cdMakeRng(seed*2+1);
+    const targets = CP.cpBuildQuickTargets(rng);
+    const gOld = {
+      mode:'quick', rng,
+      teams:{
+        red:  { side:'red',  ...CP.CP_TEAM_META.red,  targets: targets.red },
+        blue: { side:'blue', ...CP.CP_TEAM_META.blue, targets: targets.blue }
+      },
+      drawDeck: CP.cpSkatDeck(rng),
+      discard: [],
+      drawnCard:null, lastEvent:null,
+      locked:false, winner:null, phase:'active'
+    };
+    totalOld += playOutDrawCount(gOld);
+  }
+  const avgNew = totalNew / N;
+  const avgOld = totalOld / N;
+  console.log(`       (avg draws to win over ${N} seeded games: new=${avgNew.toFixed(2)}, old=${avgOld.toFixed(2)})`);
+  assert.ok(avgNew <= avgOld * 0.7, `expected new average (${avgNew.toFixed(2)}) to be at least 30% lower than old average (${avgOld.toFixed(2)})`);
+});
+
 /* =========================================================
    ACTION PONG
 ========================================================= */
@@ -512,7 +552,9 @@ test('Quick Pong rematch (fresh cpStartQuick) fully resets targets, deck, discar
   assert.strictEqual(fresh.phase, 'active');
   assert.strictEqual(fresh.teams.red.targets.filter(t=>t.active).length, 6);
   assert.strictEqual(fresh.teams.blue.targets.filter(t=>t.active).length, 6);
-  assert.strictEqual(fresh.drawDeck.length, 32);
+  // Quick Pong deck was intentionally shrunk (all 12 target cards + a reduced
+  // filler ratio of non-target cards) to raise hit density and speed up games.
+  assert.strictEqual(fresh.drawDeck.length, 12 + Math.ceil(20 * CP.CP_QUICK_FILLER_RATIO));
   assert.strictEqual(fresh.discard.length, 0);
 });
 test('Action Pong rematch (fresh cpStartAction) fully resets teams, decks, jokers, streaks and winner', ()=>{

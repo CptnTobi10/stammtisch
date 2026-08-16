@@ -1099,6 +1099,15 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
 .cp-teamlabel.blue{ color:var(--cp-blue); text-shadow:0 0 10px rgba(53,167,255,0.55); }
 .cp-teamlabel.red{ color:var(--cp-red); text-shadow:0 0 10px rgba(255,59,77,0.55); }
 
+/* aktives Team (Action Pong "am Zug"): deutlich hervorgehoben, damit der
+   Wechsel auf einen Blick erkennbar ist. */
+.cp-teamzone.active-team{ position:relative; }
+.cp-teamzone.active-team .cp-teamlabel{ font-size:clamp(14px,4.2vw,20px); }
+.cp-teamzone.blue.active-team .cp-teamlabel{ text-shadow:0 0 18px rgba(53,167,255,0.95), 0 0 34px rgba(53,167,255,0.5); }
+.cp-teamzone.red.active-team .cp-teamlabel{ text-shadow:0 0 18px rgba(255,59,77,0.95), 0 0 34px rgba(255,59,77,0.5); }
+.cp-teamzone:not(.active-team){ opacity:0.72; transition:opacity .25s ease; }
+.cp-teamzone.active-team{ opacity:1; transition:opacity .25s ease; }
+
 /* --- team banner (Action Pong) — compact, no separate box --- */
 .cp-banner{
   display:flex; align-items:center; gap:8px; flex:0 0 auto; width:100%; max-width:420px;
@@ -1171,6 +1180,8 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
   animation:flipin .22s ease; border:1.5px solid rgba(255,255,255,0.5);
 }
 .cp-drawncard .r{ font-size:clamp(24px,7vw,38px); } .cp-drawncard .s{ font-size:clamp(17px,5vw,27px); margin-top:2px; }
+.cp-drawncard.red-suit{ color:#C21F2E; text-shadow:0 1px 0 rgba(255,255,255,0.4); }
+.cp-drawncard.black-suit{ color:#141018; text-shadow:0 1px 0 rgba(255,255,255,0.4); }
 .cp-drawncard.joker{ background:linear-gradient(160deg,#2A1749,#0B0F1A); color:var(--cp-cyan,#51E5FF); font-size:clamp(9px,2.6vw,12px); letter-spacing:0.06em; text-align:center; border-color:var(--cp-cyan,#51E5FF); }
 /* Leerer Stapel-Platzhalter zeigt das CARDPONG-Branding (statt leerer Fläche),
    analog zur Referenz: dunkle Kartenrückseite mit "CARD / PONG"-Schriftzug. */
@@ -1368,6 +1379,7 @@ function jsAttr(s){
 --------------------------------------------------------- */
 let soundOn = true;
 let kcSpeaker = false; // Kings Cup: Regeln der gezogenen Karte vorlesen
+let busSpeaker = false; // Busfahrer: Ergebnis-/Kartenansagen vorlesen
 let audioCtx = null;
 function ensureAudio(){
   try{
@@ -1444,6 +1456,7 @@ function feedback(kind){
 }
 function toggleSound(){ soundOn = !soundOn; if(soundOn){ ensureAudio(); feedback('tap'); } saveStore(); render(); }
 function toggleKcSpeaker(){ kcSpeaker = !kcSpeaker; saveStore(); if(kcSpeaker) pfSpeak('Sprecher an. Ich lese die Regeln vor.'); render(); }
+function toggleBusSpeaker(){ busSpeaker = !busSpeaker; saveStore(); if(busSpeaker) pfSpeak('Sprecher an.'); else{ try{ if('speechSynthesis' in window) window.speechSynthesis.cancel(); }catch(e){} } render(); }
 
 /* ---------------------------------------------------------
    SPEICHERN — Spielerliste, aktive Runde, Schluck-Bilanz, Rekord
@@ -1455,7 +1468,7 @@ const STORE_KEY = 'stammtisch_v1';
 function saveStore(){
   try{
     localStorage.setItem(STORE_KEY, JSON.stringify({
-      savedPlayers, roster, busBestTime, sipTally, soundOn, kcSpeaker
+      savedPlayers, roster, busBestTime, sipTally, soundOn, kcSpeaker, busSpeaker
     }));
   }catch(e){}
 }
@@ -1470,6 +1483,7 @@ function loadStore(){
     if(d.sipTally && typeof d.sipTally==='object') sipTally = d.sipTally;
     if(typeof d.soundOn==='boolean') soundOn = d.soundOn;
     if(typeof d.kcSpeaker==='boolean') kcSpeaker = d.kcSpeaker;
+    if(typeof d.busSpeaker==='boolean') busSpeaker = d.busSpeaker;
   }catch(e){}
 }
 
@@ -1570,6 +1584,9 @@ let timers = {}; // active intervals to clear on re-render
 function clearTimers(){
   Object.values(timers).forEach(t=>clearInterval(t));
   timers = {};
+  // Laufende/geplante Sprachausgabe sofort stoppen: beim Verlassen, Beenden
+  // oder Neustart eines Spiels darf keine verzögerte Ansage mehr nachfeuern.
+  try{ if('speechSynthesis' in window) window.speechSynthesis.cancel(); }catch(e){}
 }
 // reset(): wipes all state and starts a screen completely fresh (used from Home)
 function reset(screen){
@@ -1746,6 +1763,9 @@ function helpHTML(key){
 }
 function helpBtnHTML(key){
   return `<div class="helpbtn" onclick="showHelp('${key}')">?</div>`;
+}
+function busSpeakerBtnHTML(){
+  return `<div class="iconbtn" title="Sprecher" onclick="toggleBusSpeaker()">${busSpeaker?'🎙️':'🔇'}</div>`;
 }
 
 /* ---------------------------------------------------------
@@ -2848,6 +2868,7 @@ function renderBusPhase1(){
     <div class="topbar">
       <div class="backbtn" onclick="askLeave('home')">‹</div>
       <div><h1>Busfahrer</h1><div class="sub">Runde ${state.busRound+1} von 4</div></div>
+      ${busSpeakerBtnHTML()}
       ${helpBtnHTML('busfahrer')}
     </div>
     <div class="section">
@@ -2892,6 +2913,7 @@ function busAnswer(val){
   state.busResult = {card, correct};
   triggerBurst(card);
   if(!correct) feedback('wrong');
+  if(busSpeaker) pfSpeak(`${card.rank} ${card.suit}. ${correct ? player+' liegt richtig.' : player+' liegt daneben, trinken!'}`);
   render();
 }
 function busNextTurn(){
@@ -2979,6 +3001,7 @@ function renderBusPhase2(){
     <div class="topbar">
       <div class="backbtn" onclick="askLeave('home')">‹</div>
       <div><h1>Busfahrer</h1><div class="sub">Phase 2 · Pyramide</div></div>
+      ${busSpeakerBtnHTML()}
       ${helpBtnHTML('busfahrer')}
     </div>
     <div class="section">
@@ -3010,8 +3033,10 @@ function renderBusPhase2(){
 function busRevealNext(){
   state.busRevealStep++;
   state.busFreshReveal = true;
+  const revealedLevel = state.busFlat[state.busRevealStep-1].level;
   const revealedCard = state.busFlat[state.busRevealStep-1].card;
   triggerBurst(revealedCard);
+  if(busSpeaker) pfSpeak(`${revealedCard.rank} ${revealedCard.suit}. Ebene ${revealedLevel}.`);
   render();
 }
 function busPlayCard(player, cardIdx, level, rank){
@@ -3127,6 +3152,7 @@ function renderBusPhase3(){
     <div class="topbar">
       <div class="backbtn" onclick="askLeave('home')">‹</div>
       <div><h1>Busfahrer</h1><div class="sub">Phase 3 · Die Busfahrt</div></div>
+      ${busSpeakerBtnHTML()}
       ${helpBtnHTML('busfahrer')}
     </div>
     <div class="section">
@@ -3894,6 +3920,22 @@ function cpBuildQuickTargets(rng){
     blue: chosen.slice(6, 12).map(c=>({card:c, active:true}))
   };
 }
+// Quick Pong soll spürbar schneller sein: statt aus dem vollen 32er-Skat-
+// Deck zu ziehen (12 Ziele von 32 Karten -> ~37,5% Trefferquote), enthält
+// der Zugstapel alle 12 Zielkarten plus nur einen reduzierten Anteil der
+// übrigen (Nicht-Ziel-)Karten. Alle Zielkarten bleiben garantiert im Stapel
+// -> kein Deadlock, kein unerreichbarer Becher, nur eine höhere Trefferdichte
+// pro Zug. cpQuickDraw() reshuffled die Ablage automatisch, falls der (jetzt
+// kleinere) Stapel doch mal leergezogen wird.
+const CP_QUICK_FILLER_RATIO = 0.35; // Anteil der Nicht-Ziel-Karten, der im Stapel verbleibt
+function cpQuickDrawDeck(targets, rng){
+  const targetKeys = new Set([...targets.red, ...targets.blue].map(t=>t.card.rank+'|'+t.card.suit));
+  const full = buildDeck(32);
+  const targetCards = full.filter(c=> targetKeys.has(c.rank+'|'+c.suit));
+  const others = cdShuffle(full.filter(c=> !targetKeys.has(c.rank+'|'+c.suit)), rng);
+  const keepCount = Math.ceil(others.length * CP_QUICK_FILLER_RATIO);
+  return cdShuffle([...targetCards, ...others.slice(0, keepCount)], rng);
+}
 function cpStartQuick({seed}){
   const rng = cdMakeRng(seed);
   const targets = cpBuildQuickTargets(rng);
@@ -3903,7 +3945,7 @@ function cpStartQuick({seed}){
       red:  { side:'red',  ...CP_TEAM_META.red,  targets:targets.red },
       blue: { side:'blue', ...CP_TEAM_META.blue, targets:targets.blue }
     },
-    drawDeck: cpSkatDeck(rng),
+    drawDeck: cpQuickDrawDeck(targets, rng),
     discard: [],
     drawnCard:null, lastEvent:null,
     locked:false, winner:null, phase:'active'
@@ -4093,7 +4135,7 @@ function cpActionResolveAirball(g, targetCardId){
 if(typeof window!=='undefined'){
   window.CardPongEngine = {
     CP_CONFIG, CP_TEAM_META, cpOther, cpSkatDeck, cpPersonalDeck,
-    cpBuildQuickTargets, cpStartQuick, cpQuickFindTarget, cpQuickDraw,
+    cpBuildQuickTargets, cpStartQuick, cpQuickFindTarget, cpQuickDraw, cpQuickDrawDeck, CP_QUICK_FILLER_RATIO,
     cpBuildActionTargets, cpMakeActionTeam, cpStartAction, cpActionFindTarget,
     cpDrawReplacementAction, cpActionDraw, cpActionResolveAirball,
     buildDeck, cdMakeRng, cdShuffle
@@ -4226,11 +4268,13 @@ function cpDeckZoneHTML(deckCount, discardCount, drawnCard){
     const cc = drawnCard.color==='red' ? 'red-suit' : 'black-suit';
     drawnHTML = `<div class="cp-drawncard ${cc}"><div class="r">${drawnCard.rank}</div><div class="s">${drawnCard.suit}</div></div>`;
   }
+  // Zieh-/Ablagestapel sind bewusst NICHT mehr sichtbar (reine Spielübersicht
+  // zeigt nur die gezogene Karte + den Becher-Draw-Button) — die Anzahlen
+  // bleiben unsichtbar im DOM, falls Tests/Logik sie referenzieren.
   return `
     <div class="cp-decks">
-      <div class="cp-stack">🂠<div class="cnt">${deckCount}</div></div>
       <div class="cp-drawnwrap">${drawnHTML}</div>
-      <div class="cp-stack" style="opacity:0.6;">🗑️<div class="cnt">${discardCount}</div></div>
+      <span style="display:none;" data-deck-count="${deckCount}" data-discard-count="${discardCount}"></span>
     </div>`;
 }
 function cpPopupHTML(g){
@@ -4335,7 +4379,7 @@ function renderCardpongAction(g){
       ${helpBtnHTML('cardpong')}
     </div>
     <div class="cp-field">
-      <div class="cp-teamzone blue">
+      <div class="cp-teamzone blue ${active==='blue'?'active-team':''}">
         ${cpBannerHTML(g,'blue')}
         ${cpPyramidHTML(g,'blue',true,opts)}
       </div>
@@ -4343,7 +4387,7 @@ function renderCardpongAction(g){
         ${cpDeckZoneHTML(activeTeam.deck.length, activeTeam.discard.length, g.drawnCard)}
         <button class="btn btn-primary cp-drawbtn" ${(g.locked||g.pendingAirball)?'disabled':''} onclick="cpTapDrawAction()">🥤 DRAW</button>
       </div>
-      <div class="cp-teamzone red">
+      <div class="cp-teamzone red ${active==='red'?'active-team':''}">
         ${cpPyramidHTML(g,'red',false,opts)}
         ${cpBannerHTML(g,'red')}
       </div>
