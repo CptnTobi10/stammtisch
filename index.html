@@ -837,127 +837,167 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
 =========================================================== */
 .cover-cd{
   background:
-    radial-gradient(circle at 50% 42%, rgba(255,77,94,0.32) 0%, transparent 28%),
-    radial-gradient(circle at 50% 42%, rgba(45,166,90,0.24) 0%, transparent 44%),
-    linear-gradient(to top, rgba(10,8,20,0.9), rgba(10,8,20,0.2) 55%, transparent),
+    radial-gradient(circle at 50% 42%, rgba(45,166,90,0.20) 0%, transparent 30%),
+    radial-gradient(circle at 50% 42%, rgba(168,36,48,0.28) 0%, transparent 20%),
+    linear-gradient(to top, rgba(10,8,20,0.92), rgba(10,8,20,0.2) 55%, transparent),
     radial-gradient(circle at 50% 42%, #333 0%, #161616 58%, #060606 100%);
 }
 .cover-cd .glyph{ opacity:0.16; }
 
-.setup-screen.cd{ background:radial-gradient(120% 260px at 50% 0, rgba(255,77,94,0.22), transparent 70%); }
+.setup-screen.cd{ background:radial-gradient(120% 260px at 50% 0, rgba(168,36,48,0.18), transparent 70%); }
 
+/* Opaque, near-black backdrop: deliberately overrides the app's usual
+   colourful body gradient for this one screen so the board — not the
+   background — is what draws the eye. Nothing outside .cd-screen changes. */
 .cd-screen{
   position:relative; min-height:100dvh; display:flex; flex-direction:column;
-  background:radial-gradient(120% 340px at 50% 0, rgba(255,77,94,0.10), transparent 60%);
+  background:
+    radial-gradient(120% 46% at 50% 0%, rgba(120,30,40,0.16) 0%, transparent 60%),
+    radial-gradient(90% 40% at 50% 100%, rgba(20,60,45,0.14) 0%, transparent 65%),
+    radial-gradient(140% 90% at 50% 8%, #17101f 0%, #0c0810 45%, #060409 80%, #030205 100%);
 }
 
 .cd-modepill{
-  display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:20px;
-  font-family:'Bebas Neue',sans-serif; font-size:13px; letter-spacing:0.05em; flex-shrink:0;
+  display:inline-flex; align-items:center; gap:6px; padding:5px 13px; border-radius:20px;
+  font-family:'Bebas Neue',sans-serif; font-size:12.5px; letter-spacing:0.06em; flex-shrink:0;
 }
-.cd-modepill.classic{ background:rgba(45,232,208,0.14); color:var(--teal); border:1px solid rgba(45,232,208,0.35); }
-.cd-modepill.action{ background:rgba(255,77,94,0.16); color:#FF7A87; border:1px solid rgba(255,77,94,0.4); }
-.cd-round{ font-family:'Bebas Neue',sans-serif; font-size:14px; color:var(--ash); letter-spacing:0.03em; text-align:center; flex:1; }
+.cd-modepill.classic{ background:rgba(45,232,208,0.10); color:var(--teal); border:1px solid rgba(45,232,208,0.4); }
+.cd-modepill.action{ background:rgba(255,77,94,0.12); color:#FF7A87; border:1px solid rgba(255,77,94,0.45); }
+.cd-round{ font-family:'Bebas Neue',sans-serif; font-size:13.5px; color:rgba(255,255,255,0.75); letter-spacing:0.04em; text-align:center; flex:1; }
 
-.cd-strip{ display:flex; gap:8px; padding:6px 20px 10px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+.cd-strip{ display:flex; gap:7px; padding:4px 18px 8px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
 .cd-strip::-webkit-scrollbar{ display:none; }
 .cd-pcard{
   flex-shrink:0; display:flex; flex-direction:column; align-items:center; gap:3px;
-  background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:8px 12px; min-width:70px;
-  position:relative;
+  background:linear-gradient(180deg,#171018,#0e0a10); border:1px solid rgba(255,255,255,0.08);
+  border-radius:12px; padding:7px 10px; min-width:62px; position:relative;
 }
-.cd-pcard.active{ border-color:var(--gold); box-shadow:0 0 0 1px var(--gold), 0 0 14px rgba(255,182,39,0.4); }
+.cd-pcard.active{ border-color:rgba(255,182,39,0.85); box-shadow:0 0 0 1px rgba(255,182,39,0.5), 0 0 10px rgba(255,182,39,0.25); }
 .cd-pcard.active::after{
-  content:''; position:absolute; bottom:-6px; left:50%; transform:translateX(-50%);
-  border-left:6px solid transparent; border-right:6px solid transparent; border-top:6px solid var(--gold);
+  content:''; position:absolute; bottom:-5px; left:50%; transform:translateX(-50%);
+  border-left:5px solid transparent; border-right:5px solid transparent; border-top:5px solid var(--gold);
 }
-.cd-pname{ font-size:10.5px; font-weight:700; color:var(--cream); max-width:64px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.cd-pscore{ font-family:'Bebas Neue',sans-serif; font-size:19px; color:var(--ash); line-height:1; }
+.cd-pname{ font-size:10px; font-weight:700; color:rgba(255,255,255,0.85); max-width:58px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cd-pscore{ font-family:'Bebas Neue',sans-serif; font-size:17px; color:rgba(255,255,255,0.45); line-height:1; }
 .cd-pcard.active .cd-pscore{ color:var(--gold); }
 
-.cd-boardwrap{ position:relative; margin:4px auto 0; }
+.cd-boardwrap{ position:relative; margin:6px auto 0; }
+/* Metal bezel: dark brushed rim with a thin bright groove just inside its edge. */
 .cd-rim{
   position:absolute; inset:0; border-radius:50%;
-  background:radial-gradient(circle at 32% 28%, #3a3a3a, #161616 55%, #060606 100%);
-  box-shadow:0 16px 34px rgba(0,0,0,0.55), inset 0 0 0 3px rgba(255,255,255,0.06), inset 0 2px 10px rgba(0,0,0,0.6);
+  background:radial-gradient(circle at 30% 26%, #4b4b4b 0%, #232323 40%, #131313 68%, #070707 100%);
+  box-shadow:0 18px 38px rgba(0,0,0,0.6), inset 0 0 0 2px rgba(255,255,255,0.05), inset 0 3px 12px rgba(0,0,0,0.65);
+}
+.cd-rim::after{
+  content:''; position:absolute; inset:1.6%; border-radius:50%; pointer-events:none;
+  box-shadow:0 0 0 1px rgba(255,255,255,0.09), inset 0 0 0 1px rgba(0,0,0,0.55);
 }
 .cd-outerzone{
   position:absolute; left:3%; top:3%; right:3%; bottom:3%; border-radius:50%;
-  background:repeating-conic-gradient(from 0deg, rgba(120,20,24,0.55) 0deg 14deg, rgba(10,10,10,0.72) 14deg 28deg);
-  box-shadow:inset 0 0 24px rgba(0,0,0,0.6);
+  background:
+    repeating-conic-gradient(from 0deg, rgba(255,255,255,0.03) 0deg 0.5deg, transparent 0.5deg 18deg),
+    radial-gradient(circle at 32% 26%, #262a27 0%, #16191a 55%, #0a0c0d 100%);
+  box-shadow:inset 0 0 0 1px rgba(110,150,120,0.14), inset 0 0 30px rgba(0,0,0,0.6);
 }
 .cd-middlezone{
-  position:absolute; left:19%; top:19%; right:19%; bottom:19%; border-radius:50%;
-  background:radial-gradient(circle at 35% 30%, #1F6B44, #0E3F27 65%, #082A1A 100%);
-  box-shadow:inset 0 0 20px rgba(0,0,0,0.55), 0 0 0 2px rgba(0,0,0,0.4);
+  position:absolute; left:22%; top:22%; right:22%; bottom:22%; border-radius:50%;
+  background:radial-gradient(circle at 32% 26%, #1c6540 0%, #0f4429 48%, #082e1c 78%, #051c11 100%);
+  box-shadow:inset 0 0 0 1px rgba(217,184,110,0.16), inset 0 0 22px rgba(0,0,0,0.5), inset 0 2px 8px rgba(0,0,0,0.4);
 }
 .cd-centerzone{
-  position:absolute; left:38%; top:38%; right:38%; bottom:38%; border-radius:50%;
-  background:radial-gradient(circle at 35% 30%, #A82430, #6E0F1A 65%, #430A12 100%);
-  box-shadow:inset 0 0 16px rgba(0,0,0,0.55), 0 0 0 2px var(--gold-dim);
+  position:absolute; left:37%; top:37%; right:37%; bottom:37%; border-radius:50%;
+  background:radial-gradient(circle at 34% 28%, #922230 0%, #641220 55%, #3e0a10 85%, #240508 100%);
+  box-shadow:inset 0 0 0 2px rgba(217,164,65,0.55), inset 0 0 16px rgba(0,0,0,0.5), 0 0 10px rgba(150,25,35,0.2);
 }
 .cd-ringlabel{
-  position:absolute; font-family:'Bebas Neue',sans-serif; letter-spacing:0.04em; color:rgba(255,255,255,0.85);
-  text-shadow:0 2px 4px rgba(0,0,0,0.65); pointer-events:none; z-index:3; white-space:nowrap;
+  position:absolute; font-family:'Bebas Neue',sans-serif; letter-spacing:0.12em; color:rgba(255,255,255,0.72);
+  text-shadow:0 1px 3px rgba(0,0,0,0.8); pointer-events:none; z-index:3; white-space:nowrap;
 }
-.cd-ringlabel.outer{ top:2%; left:50%; transform:translateX(-50%); font-size:11px; }
-.cd-ringlabel.middle{ top:19%; left:50%; transform:translateX(-50%); font-size:11px; }
-.cd-ringlabel.center{ top:50%; left:50%; transform:translate(-50%,-50%); font-size:10px; z-index:4; }
+.cd-ringlabel.outer{ top:4.5%; left:50%; transform:translateX(-50%); font-size:9.5px; }
+.cd-ringlabel.middle{ top:23.5%; left:50%; transform:translateX(-50%); font-size:9.5px; color:rgba(190,255,220,0.75); }
+.cd-ringlabel.center{ top:39.5%; left:50%; transform:translateX(-50%); font-size:9px; color:rgba(255,214,150,0.85); z-index:4; }
 
 .cd-slot{
-  position:absolute; border-radius:5px; overflow:hidden;
-  background:linear-gradient(160deg,#FBF3E3,var(--cream));
-  box-shadow:0 3px 8px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(0,0,0,0.08);
+  position:absolute; border-radius:4px; overflow:hidden;
+  background:linear-gradient(165deg,#FBF6EC 0%,#F4EDDD 55%,#ECE2CC 100%);
+  box-shadow:0 2px 6px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(120,90,40,0.3), inset 0 0 0 2px rgba(255,255,255,0.55);
   display:flex; flex-direction:column; align-items:center; justify-content:center;
   transition:transform .18s ease, opacity .2s ease, filter .2s ease;
   z-index:2;
 }
 .cd-slot .r{ font-family:'Bebas Neue',sans-serif; line-height:1; }
-.cd-slot .s{ line-height:1; margin-top:2px; }
-.cd-slot.red{ color:var(--wine); }
-.cd-slot.black{ color:#241835; }
-.cd-slot.blocked{ filter:saturate(0.35) brightness(0.55); }
+.cd-slot .s{ line-height:1; margin-top:1px; }
+.cd-slot.red{ color:#A8222E; }
+.cd-slot.black{ color:#1a1512; }
+.cd-slot.blocked{ filter:saturate(0.4) brightness(0.6); }
 .cd-slot.blocked::after{
   content:'🔒'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  font-size:65%; background:rgba(0,0,0,0.3);
+  font-size:60%; background:rgba(0,0,0,0.32); opacity:0.85;
 }
-.cd-slot.acquiring{ animation:pulse .3s ease; filter:brightness(1.55); z-index:6; box-shadow:0 0 0 2px var(--gold), 0 0 14px rgba(255,182,39,0.85); }
-.cd-slot.hitpulse{ animation:cdhitpulse .3s ease; z-index:6; box-shadow:0 0 0 2px var(--gold), 0 0 16px rgba(255,182,39,0.9); }
-@keyframes cdhitpulse{ 0%{transform:scale(1);} 45%{transform:scale(0.86);} 100%{transform:scale(1);} }
+.cd-slot.acquiring{ animation:pulse .3s ease; filter:brightness(1.35); z-index:6; box-shadow:0 0 0 1.5px var(--gold), 0 0 8px rgba(255,182,39,0.6); }
+.cd-slot.hitpulse{ animation:cdhitpulse .3s ease; z-index:6; box-shadow:0 0 0 1.5px var(--gold), 0 0 10px rgba(255,182,39,0.65); }
+@keyframes cdhitpulse{ 0%{transform:scale(1);} 45%{transform:scale(0.9);} 100%{transform:scale(1);} }
 .cd-slot.removing{ animation:cdremove .22s ease forwards; z-index:6; }
-@keyframes cdremove{ to{ transform:scale(0.25) translateY(-14px); opacity:0; } }
+@keyframes cdremove{ to{ transform:scale(0.3) translateY(-10px); opacity:0; } }
 .cd-slot.entering{ animation:cdenter .28s ease; }
-@keyframes cdenter{ from{ transform:scale(0.25); opacity:0; } to{ transform:scale(1); opacity:1; } }
+@keyframes cdenter{ from{ transform:scale(0.3); opacity:0; } to{ transform:scale(1); opacity:1; } }
 
 .cd-popupwrap{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:9; }
-.cd-popup{ font-family:'Bebas Neue',sans-serif; text-align:center; animation:winpopKF 0.4s cubic-bezier(.2,1.4,.4,1); }
-.cd-popup .big{ font-size:44px; color:var(--gold); text-shadow:0 4px 16px rgba(0,0,0,0.75); }
-.cd-popup .callout{ font-size:27px; color:#FF7A87; letter-spacing:0.03em; text-shadow:0 4px 16px rgba(0,0,0,0.75); }
-.cd-popup.miss .big{ color:#E28584; font-size:27px; }
+.cd-popup{ font-family:'Bebas Neue',sans-serif; text-align:center; animation:winpopKF 0.35s cubic-bezier(.2,1.4,.4,1); }
+.cd-popup .big{ font-size:36px; color:var(--gold); text-shadow:0 3px 10px rgba(0,0,0,0.7); }
+.cd-popup .callout{ font-size:22px; color:#FF7A87; letter-spacing:0.03em; text-shadow:0 3px 10px rgba(0,0,0,0.7); }
+.cd-popup.miss .big{ color:#D98C88; font-size:22px; }
 
-.cd-activepanel{ text-align:center; padding:10px 20px 0; }
-.cd-activename{ font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--gold); letter-spacing:0.02em; }
-.cd-activepts{ font-size:12px; color:var(--ash); }
-.cd-instr{ font-size:12px; color:var(--gold-dim); letter-spacing:0.06em; margin:8px 0 2px; font-weight:700; }
+.cd-activepanel{ text-align:center; padding:8px 20px 0; }
+.cd-activename{ font-family:'Bebas Neue',sans-serif; font-size:21px; color:var(--gold); letter-spacing:0.03em; }
+.cd-activepts{ font-size:11.5px; color:rgba(255,255,255,0.55); letter-spacing:0.03em; }
+.cd-instr{ font-size:11.5px; color:var(--gold-dim); letter-spacing:0.1em; margin:9px 0 2px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:10px; }
+.cd-instr::before, .cd-instr::after{ content:''; height:1px; width:26px; background:linear-gradient(90deg,transparent,var(--gold-dim)); }
+.cd-instr::after{ background:linear-gradient(90deg,var(--gold-dim),transparent); }
 
-.cd-hand{ display:flex; gap:12px; justify-content:center; padding:8px 20px 4px; }
-.cd-handcard{ width:64px; height:90px; border-radius:10px; cursor:pointer; position:relative; transition:transform .12s ease; }
+.cd-bottomrow{ display:flex; align-items:center; justify-content:center; gap:10px; padding:8px 14px 4px; }
+.cd-hand{ display:flex; gap:10px; justify-content:center; }
+.cd-handcard{ width:60px; height:84px; border-radius:9px; cursor:pointer; position:relative; transition:transform .12s ease, box-shadow .12s ease; }
 .cd-handcard:active{ transform:translateY(-4px); }
 .cd-handcard.locked, .cd-handcard.resolved{ cursor:default; pointer-events:none; }
-.cd-handcard.resolving{ transform:translateY(-8px); box-shadow:0 10px 18px rgba(0,0,0,0.45); border-color:var(--gold); }
+.cd-handcard.resolving{ transform:scale(1.05) translateY(-6px); box-shadow:0 10px 18px rgba(0,0,0,0.5); }
+.cd-handcard.resolving.facedown{ border-color:rgba(255,182,39,0.9); }
 .cd-handcard.facedown{
-  background:repeating-linear-gradient(45deg,#1F1238 0 4px,#170A29 4px 8px);
-  border:2px solid var(--gold-dim);
-  display:flex; align-items:center; justify-content:center; font-size:22px;
+  background:linear-gradient(165deg,#251633 0%,#170d24 55%,#0e0817 100%);
+  border:1.5px solid rgba(217,164,65,0.5);
+  box-shadow:0 6px 14px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.07), inset 0 -8px 12px rgba(0,0,0,0.35);
+  display:flex; align-items:center; justify-content:center;
 }
+.cd-handcard.facedown .glyph{ font-size:19px; opacity:0.5; filter:grayscale(0.3); }
 .cd-handcard.faceup{
-  background:linear-gradient(160deg,#FBF3E3,var(--cream));
-  border:2px solid transparent; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  background:linear-gradient(165deg,#FBF6EC 0%,#F4EDDD 55%,#ECE2CC 100%);
+  border:1.5px solid rgba(120,90,40,0.25); display:flex; flex-direction:column; align-items:center; justify-content:center;
+  box-shadow:0 4px 10px rgba(0,0,0,0.4);
   animation:flipin .22s ease;
 }
-.cd-handcard.faceup.miss{ opacity:0.55; }
-.cd-handcard .r{ font-family:'Bebas Neue',sans-serif; font-size:26px; line-height:1; }
-.cd-handcard .s{ font-size:18px; margin-top:2px; }
+.cd-handcard.faceup.miss{ opacity:0.6; }
+.cd-handcard .r{ font-family:'Bebas Neue',sans-serif; font-size:24px; line-height:1; }
+.cd-handcard .r.red{ color:#A8222E; } .cd-handcard .r.black{ color:#1a1512; }
+.cd-handcard .s{ font-size:16px; margin-top:2px; }
+.cd-handcard .s.red{ color:#A8222E; } .cd-handcard .s.black{ color:#1a1512; }
+
+.cd-iconbtn2{
+  display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; flex-shrink:0; width:56px;
+}
+.cd-iconbtn2 .ic{
+  width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  background:radial-gradient(circle at 32% 28%, #232323, #0d0d0d); border:1px solid rgba(217,164,65,0.4);
+  box-shadow:0 4px 10px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06); font-size:15px;
+}
+.cd-iconbtn2 .lbl{ font-size:8px; letter-spacing:0.06em; color:rgba(217,164,65,0.85); font-weight:700; text-align:center; }
+.cd-iconbtn2:active .ic{ border-color:var(--gold); }
+
+.cd-histcard{ font-family:'JetBrains Mono',monospace; font-size:11px; padding:3px 7px; border-radius:6px; background:var(--ink); border:1px solid var(--line); }
+.cd-histcard.hit{ color:var(--gold); border-color:rgba(255,182,39,0.4); }
+.cd-histcard.double{ color:#FF7A87; border-color:rgba(255,77,94,0.4); }
+.cd-histcard.triple{ color:var(--gold); border-color:var(--gold); }
+.cd-histcard.miss{ color:var(--ash); opacity:0.7; }
+.cd-histcard.pending{ color:var(--line); }
 
 .cd-summary{ text-align:center; padding:20px; }
 .cd-summary .h{ font-family:'Bebas Neue',sans-serif; font-size:26px; color:var(--gold); letter-spacing:0.03em; }
@@ -984,8 +1024,9 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
 .cd-statline{ font-size:12px; color:var(--ash); margin-bottom:16px; }
 
 @media (max-height:700px){
-  .cd-hand{ padding:6px 20px 2px; }
-  .cd-handcard{ width:54px; height:76px; }
+  .cd-bottomrow{ padding:6px 14px 2px; }
+  .cd-handcard{ width:52px; height:73px; }
+  .cd-iconbtn2 .ic{ width:32px; height:32px; }
 }
 
 /* ===========================================================
@@ -3117,9 +3158,12 @@ const CD_CONFIG = {
   },
   matchLengths: { quick:{rounds:1}, standard:{rounds:3}, long:{formula:'max(playerCount,4)'} },
   startPlayerRotation: 1,
-  radii: { center:0.0, middle:0.43, outer:0.78 },
+  // Premium-board pass: cards sit further apart and noticeably smaller than
+  // before, so the three scoring zones stay dominant and legible even with
+  // the board fully dealt (24 cards on the 8-player board).
+  radii: { center:0.0, middle:0.47, outer:0.82 },
   startAngleDeg: -90,
-  cardHeightFrac: { 15:0.24, 18:0.22, 21:0.20, 24:0.18 },
+  cardHeightFrac: { 15:0.15, 18:0.125, 21:0.105, 24:0.09 },
   centerScale: 1.08,
   timing: { tapLift:100, flip:220, targetAcquire:150, hitResolve:240, scoreSettle:200, actionRemove:220, actionMove:280, roundGather:520, shuffle:420, redeal:650 },
   actionMultipliers: { A:3, K:2 } // Action-only. Q/J stay ordinary; no entry = ×1.
@@ -3432,12 +3476,20 @@ function cdBoardDiameterPx(){
 }
 function cdSlotPosStyle(ring, indexWithinRing, ringCount, boardTotal, diameterPx){
   const radiusNorm = CD_CONFIG.radii[ring];
-  const angleDeg = CD_CONFIG.startAngleDeg + (ringCount>0 ? indexWithinRing*(360/ringCount) : 0);
+  const angleStep = ringCount>0 ? 360/ringCount : 0;
+  // The middle ring is shifted by half a step so a gap (not a card) always
+  // sits at 12 o'clock — that's where the "2 PTS" label lives. Same generic
+  // formula for every player count, nothing hardcoded per board size.
+  const halfStepOffset = ring==='middle' ? angleStep/2 : 0;
+  const angleDeg = CD_CONFIG.startAngleDeg + halfStepOffset + indexWithinRing*angleStep;
   const angleRad = angleDeg*Math.PI/180;
   const r = radiusNorm*(diameterPx/2);
   const x = diameterPx/2 + r*Math.cos(angleRad);
   const y = diameterPx/2 + r*Math.sin(angleRad);
-  const rotateDeg = ring==='center' ? 0 : angleDeg+90;
+  // Cards stay upright (premium-board look, not a "sunburst" of tilted
+  // cards). Only the outer ring leans very slightly toward its side of the
+  // board, purely for a touch of life — never more than a few degrees.
+  const rotateDeg = ring==='outer' ? Math.cos(angleRad)*6 : 0;
   return { x, y, rotateDeg };
 }
 function cdBoardHTML(g){
@@ -3496,20 +3548,64 @@ function cdStripHTML(g){
 function cdHandHTML(g){
   const activeName = g.playerOrder[g.activePlayerIndex];
   const hand = g.hands[activeName] || [];
-  return `<div class="cd-hand">
-    ${hand.map((tc,i)=>{
-      if(tc.status==='faceDown'){
-        const resolving = g.uiResolvingIdx===i ? ' resolving' : '';
-        return `<div class="cd-handcard facedown${g.locked?' locked':''}${resolving}" onclick="cdTapHand(${i})">🎯</div>`;
-      }
-      const colorClass = tc.card.color==='red'?'red':'black';
-      const missCls = tc.result==='miss' ? 'miss':'';
-      return `<div class="cd-handcard faceup resolved ${missCls}">
-        <div class="r ${colorClass}">${tc.card.rank}</div>
-        <div class="s ${colorClass}">${tc.card.suit}</div>
-      </div>`;
-    }).join('')}
+  const cards = hand.map((tc,i)=>{
+    if(tc.status==='faceDown'){
+      const resolving = g.uiResolvingIdx===i ? ' resolving' : '';
+      return `<div class="cd-handcard facedown${g.locked?' locked':''}${resolving}" onclick="cdTapHand(${i})"><span class="glyph">🎯</span></div>`;
+    }
+    const colorClass = tc.card.color==='red'?'red':'black';
+    const missCls = tc.result==='miss' ? 'miss':'';
+    return `<div class="cd-handcard faceup resolved ${missCls}">
+      <div class="r ${colorClass}">${tc.card.rank}</div>
+      <div class="s ${colorClass}">${tc.card.suit}</div>
+    </div>`;
+  }).join('');
+  // Two secondary, read-only utility buttons flank the three hand cards
+  // (current standings / this round's reveals so far) — pure display of
+  // data the engine already tracks, no game-state changes.
+  return `<div class="cd-bottomrow">
+    <div class="cd-iconbtn2" onclick="cdOpenModal('standings')"><div class="ic">📊</div><div class="lbl">PUNKTESTAND</div></div>
+    <div class="cd-hand">${cards}</div>
+    <div class="cd-iconbtn2" onclick="cdOpenModal('history')"><div class="ic">🕓</div><div class="lbl">VERLAUF</div></div>
   </div>`;
+}
+function cdOpenModal(kind){ if(!state.cd) return; state.cd.uiModal = kind; render(); }
+function cdCloseModal(){ if(state.cd) state.cd.uiModal = null; render(); }
+function cdModalHTML(g){
+  if(!g.uiModal) return '';
+  let title, body;
+  if(g.uiModal==='standings'){
+    title = 'PUNKTESTAND';
+    const ranked = [...g.players].sort((a,b)=>b.totalScore-a.totalScore);
+    body = `<div class="cd-ranklist">
+      ${ranked.map((p,i)=>`<div class="cd-rankrow"><div class="pos">${i+1}.</div>${avatarHTML(p.name,26)}<div class="nm">${esc(p.name)}</div><div class="sc">${p.totalScore}</div></div>`).join('')}
+    </div>`;
+  } else {
+    title = 'VERLAUF DIESER RUNDE';
+    body = `<div class="cd-ranklist">
+      ${g.playerOrder.map(nm=>{
+        const hand = g.hands[nm] || [];
+        const cardsTxt = hand.map(tc=>{
+          if(tc.status!=='faceUp') return '<span class="cd-histcard pending">—</span>';
+          const sign = tc.result==='hit' ? '+'+tc.awardedPoints : CD_COPY.miss;
+          const cls = tc.result==='hit' ? (tc.effect==='triple'?'triple':tc.effect==='double'?'double':'hit') : 'miss';
+          return `<span class="cd-histcard ${cls}">${tc.card.rank}${tc.card.suit} ${sign}</span>`;
+        }).join('');
+        return `<div class="cd-rankrow" style="flex-wrap:wrap;"><div class="nm" style="flex:0 0 auto; min-width:64px;">${esc(nm)}</div><div style="display:flex; gap:6px; flex-wrap:wrap;">${cardsTxt}</div></div>`;
+      }).join('')}
+    </div>`;
+  }
+  return `
+    <div class="helpwrap" onclick="if(event.target===this) cdCloseModal()">
+      <div class="helpcard">
+        <div class="helpheader">
+          <div class="display" style="font-size:20px;color:var(--gold);">${title}</div>
+          <div class="backbtn" onclick="cdCloseModal()">✕</div>
+        </div>
+        ${body}
+        <button class="btn btn-primary" style="margin-top:14px;" onclick="cdCloseModal()">Schließen</button>
+      </div>
+    </div>`;
 }
 function renderDarts(){
   const g = state.cd;
@@ -3534,9 +3630,10 @@ function renderDarts(){
     <div class="cd-activepanel">
       <div class="cd-activename">${esc(activeName)}</div>
       <div class="cd-activepts">${activePlayer.totalScore} POINTS</div>
-      <div class="cd-instr">${g.locked ? '&nbsp;' : CD_COPY.chooseCard}</div>
+      <div class="cd-instr"><span>${g.locked ? '&nbsp;' : CD_COPY.chooseCard}</span></div>
     </div>
     ${cdHandHTML(g)}
+    ${cdModalHTML(g)}
    </div>
   `;
 }

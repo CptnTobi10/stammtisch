@@ -402,6 +402,19 @@ test('1000 seeded rounds per player count (2-8) x mode (classic/action): board+d
 });
 
 console.log('UI smoke test (real render functions, not just the pure engine)');
+test('cdStart() glue: reads roster + mode/length and produces a valid live match', ()=>{
+  run(`
+    roster.length = 0;
+    ['Leroy','Adi','Leo'].forEach(n=>roster.push(n));
+    state.cdMode = 'action'; state.cdLength = 'quick';
+    cdStart();
+  `);
+  assert.strictEqual(run(`state.screen`), 'darts');
+  assert.strictEqual(run(`state.cd.mode`), 'action');
+  assert.strictEqual(run(`state.cd.playerOrder.length`), 3);
+  const html = run(`renderDarts(); document.getElementById('app').innerHTML`);
+  assert.ok(!html.includes('undefined'), 'live gameplay screen must not leak "undefined" into markup');
+});
 test('setup screen, live gameplay, round summary, sudden death and victory all render without throwing', ()=>{
   run(`
     roster.length = 0;
@@ -412,11 +425,15 @@ test('setup screen, live gameplay, round summary, sudden death and victory all r
   assert.ok(!setupHTML.includes('undefined'), 'setup screen must not leak "undefined" into markup');
 
   // Classic, 5 players, standard length -> drive the WHOLE match through the
-  // real UI phase functions (bypassing only the setTimeout choreography,
-  // which is pure animation pacing already covered by CD_CONFIG.timing).
+  // real UI phase functions. Uses a fixed seed (cdStartMatch directly, same
+  // code path cdStart() delegates to) so this loop is 100% deterministic —
+  // cdStart() itself seeds from Math.random(), which would make a full-match
+  // loop test flaky (e.g. an unlucky run could need many more Sudden Death
+  // iterations than another). The seed->deal->resolve engine is already
+  // covered exhaustively (and deterministically) by the stress test above.
   run(`
-    state.cdMode = 'classic'; state.cdLength = 'standard';
-    cdStart();
+    state.screen = 'darts';
+    state.cd = cdStartMatch({ names: roster.slice(), mode:'classic', matchLength:'standard', seed: 424242 });
   `);
   let guard = 0;
   while(true){
@@ -485,6 +502,69 @@ test('Action mode renders through a full 8-player board (24 cards) without throw
   }
   const finalHTML = run(`document.getElementById('app').innerHTML`);
   assert.ok(!finalHTML.includes('undefined'), 'final screen must not leak "undefined" into markup');
+});
+
+console.log('Board geometry (no card ever overlaps another, all card counts exact)');
+// Oriented-rectangle overlap test (Separating Axis Theorem) so the tilted
+// outer-ring cards are checked honestly, not just as if they were circles.
+function rectCorners(cx, cy, w, h, angleDeg){
+  const a = angleDeg*Math.PI/180, dx=w/2, dy=h/2;
+  return [[-dx,-dy],[dx,-dy],[dx,dy],[-dx,dy]].map(([px,py])=>[
+    cx + px*Math.cos(a) - py*Math.sin(a),
+    cy + px*Math.sin(a) + py*Math.cos(a)
+  ]);
+}
+function rectsOverlap(rA, rB){
+  for(const rect of [rA, rB]){
+    for(let i=0;i<4;i++){
+      const p1=rect[i], p2=rect[(i+1)%4];
+      const len = Math.hypot(p2[1]-p1[1], p2[0]-p1[0]) || 1;
+      const ax=-(p2[1]-p1[1])/len, ay=(p2[0]-p1[0])/len;
+      const projA = rA.map(p=>p[0]*ax+p[1]*ay), projB = rB.map(p=>p[0]*ax+p[1]*ay);
+      if(Math.max(...projA) < Math.min(...projB) || Math.max(...projB) < Math.min(...projA)) return false;
+    }
+  }
+  return true;
+}
+[2,3,4,5,6,7,8].forEach(n=>{
+  test(`n=${n}: board renders exactly the configured card count, no two cards overlap, none clipped outside the board`, ()=>{
+    const cfg = CD.cdBoardConfigFor(n);
+    // 210 and 360 are cdBoardDiameterPx()'s own clamp bounds (smallest/largest
+    // a real board is ever allowed to render at); 320/400 cover typical phones.
+    // Geometry is percentage/ratio based, so all four must hold equally.
+    [210, 320, 400, 360].forEach(diameter=>{
+      const rects = [];
+      ['center','middle','outer'].forEach(ring=>{
+        const ringCount = cfg[ring];
+        for(let i=0;i<ringCount;i++){
+          const pos = run(`cdSlotPosStyle('${ring}', ${i}, ${ringCount}, ${cfg.total}, ${diameter})`);
+          let heightPx = (CD.CD_CONFIG.cardHeightFrac[cfg.total]||0.20) * diameter;
+          if(ring==='center') heightPx *= CD.CD_CONFIG.centerScale;
+          const widthPx = heightPx*0.714;
+          rects.push({ ring, i, cx:pos.x, cy:pos.y, w:widthPx, h:heightPx, rot:pos.rotateDeg,
+            corners: rectCorners(pos.x, pos.y, widthPx, heightPx, pos.rotateDeg) });
+        }
+      });
+      assert.strictEqual(rects.length, cfg.total, `n=${n} d=${diameter}: expected exactly ${cfg.total} cards, got ${rects.length}`);
+
+      // No clipping outside the board circle: every corner must stay within
+      // the boardwrap's own box (0..diameter on both axes).
+      rects.forEach(r=>{
+        r.corners.forEach(([x,y])=>{
+          assert.ok(x>=-0.5 && x<=diameter+0.5 && y>=-0.5 && y<=diameter+0.5,
+            `n=${n} d=${diameter}: ${r.ring}#${r.i} corner (${x.toFixed(1)},${y.toFixed(1)}) is clipped outside the ${diameter}px board`);
+        });
+      });
+
+      // No two cards overlap, anywhere, including across rings.
+      for(let a=0;a<rects.length;a++){
+        for(let b=a+1;b<rects.length;b++){
+          const overlap = rectsOverlap(rects[a].corners, rects[b].corners);
+          assert.ok(!overlap, `n=${n} d=${diameter}: ${rects[a].ring}#${rects[a].i} overlaps ${rects[b].ring}#${rects[b].i}`);
+        }
+      }
+    });
+  });
 });
 
 console.log(`\n${passed} passed, ${failed} failed`);
