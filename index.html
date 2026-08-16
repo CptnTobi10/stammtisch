@@ -281,7 +281,8 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
 }
 .ringglow{
   position:absolute; inset:0; border-radius:50%; pointer-events:none;
-  background:radial-gradient(circle at 50% 50%, rgba(217,164,65,0.28) 0%, rgba(255,62,127,0.08) 45%, rgba(217,164,65,0.05) 60%, transparent 72%);
+  /* warme Glut-Töne (Orange/Rot) statt Gold/Pink — echte Ring-of-Fire-Stimmung */
+  background:radial-gradient(circle at 50% 50%, rgba(255,150,40,0.30) 0%, rgba(230,70,30,0.10) 45%, rgba(217,164,65,0.05) 60%, transparent 72%);
   animation:glowpulse 3.2s ease-in-out infinite;
 }
 @keyframes glowpulse{ 0%,100%{opacity:0.55; transform:scale(0.97);} 50%{opacity:1; transform:scale(1.03);} }
@@ -365,18 +366,39 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
 .rulesub{text-align:center; font-size:12.5px; color:var(--ash); padding-bottom:6px;}
 
 .deckcount{text-align:center; color:var(--ash); font-size:12px; margin-top:4px;}
-/* Kings-Cup-Ambiente: dunkler Spieltisch mit warmer Glut in der Mitte */
+/* Kings-Cup-Ambiente: dunkler Spieltisch mit warmer Glut in der Mitte.
+   Zusätzlich eine dezente ComfyUI-Glut-/Funken-Textur (kc-embers.jpg) als
+   leise Untergrund-Ebene hinter dem Ring, niedrige Deckkraft — reine
+   Atmosphäre, stört Lesbarkeit von Karten/Regeln nicht. */
 .kc-stage::before{
   content:''; position:absolute; left:50%; top:50%; width:60%; height:60%;
   transform:translate(-50%,-50%); border-radius:50%; z-index:0; pointer-events:none;
-  background:radial-gradient(circle, rgba(255,170,50,0.32) 0%, rgba(150,60,15,0.18) 42%, rgba(8,5,16,0.72) 74%, transparent 100%);
+  background:
+    radial-gradient(circle, rgba(255,170,50,0.32) 0%, rgba(150,60,15,0.18) 42%, rgba(8,5,16,0.72) 74%, transparent 100%),
+    url('assets/kc-embers.jpg') center/cover;
+  background-blend-mode:screen;
+  opacity:0.9;
 }
 .kc-stage .ringcup{ filter:drop-shadow(0 0 22px rgba(255,182,39,0.55)); }
-/* Kings-Cup-Ambiente-Hintergrund (Rahmen, Blätter, Strahlen, Podest) */
+/* Kings-Cup-Ambiente-Hintergrund (Rahmen, Blätter, Strahlen, Podest) plus
+   warme Glut-Lichtreflexe an den Bildschirmrändern (oben rechts / unten
+   links), damit der ganze Screen — nicht nur der Ring — nach Ring-of-Fire
+   aussieht, ohne die Kartenlesbarkeit in der Bildmitte zu beeinträchtigen. */
 .kc-screen{ position:relative; min-height:100dvh; }
 .kc-screen::before{ content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
-  background:#160a24 url('assets/kc-bg.jpg') center top/cover no-repeat; }
+  background:
+    radial-gradient(60% 40% at 92% 4%, rgba(255,140,40,0.22) 0%, transparent 68%),
+    radial-gradient(55% 38% at 4% 96%, rgba(255,90,30,0.18) 0%, transparent 68%),
+    #160a24 url('assets/kc-bg.jpg') center top/cover no-repeat; }
 .kc-screen > *{ position:relative; z-index:1; }
+/* Beleuchteter Kartenrahmen statt neutralem Rand: nur innerhalb Kings Cup
+   (Busfahrer nutzt dieselbe .playcard-Komponente unverändert neutral). */
+.kc-screen .playcard{
+  box-shadow:
+    0 12px 30px rgba(0,0,0,0.45),
+    inset 0 0 0 2px rgba(255,150,50,0.55), inset 0 0 0 4px rgba(0,0,0,0.05),
+    0 0 24px rgba(255,140,40,0.35), 0 0 46px rgba(255,90,30,0.16);
+}
 
 /* Kings-Cup-Layout: im Hochformat einfach eine gestapelte Spalte (Verlauf
    oben, Spielfeld/Regel/Effekte darunter). Im Querformat wird daraus ein
