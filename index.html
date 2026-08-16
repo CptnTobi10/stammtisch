@@ -378,6 +378,19 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
   background:#160a24 url('assets/kc-bg.jpg') center top/cover no-repeat; }
 .kc-screen > *{ position:relative; z-index:1; }
 
+/* Kings-Cup-Layout: im Hochformat einfach eine gestapelte Spalte (Verlauf
+   oben, Spielfeld/Regel/Effekte darunter). Im Querformat wird daraus ein
+   3-Spalten-Layout (siehe Landscape-Media-Query weiter unten). */
+.kc-layout{ display:flex; flex-direction:column; }
+.kc-col-right-only{ display:none; }
+.kc-histlabel{ font-family:'Bebas Neue',sans-serif; letter-spacing:0.08em; font-size:12px; color:var(--gold-dim); padding:8px 16px 2px; }
+.kc-histlist{ display:flex; flex-direction:column; gap:4px; padding:0 16px 6px; }
+.kc-hist-empty{ font-size:11.5px; color:var(--ash); padding:0 16px 6px; }
+.kc-histrow{ display:flex; align-items:center; gap:8px; font-size:11.5px; color:rgba(255,255,255,0.75); }
+.kc-histcard{ font-family:'Bebas Neue',sans-serif; font-size:13px; flex-shrink:0; width:30px; text-align:center; }
+.kc-histcard.red{ color:var(--wine); } .kc-histcard.black{ color:#cfcfcf; }
+.kc-histrule{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
 /* Timer */
 .timerbox{
   display:flex; align-items:center; justify-content:center; gap:14px;
@@ -830,6 +843,23 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
   .turnbanner{ padding:6px; margin-bottom:8px; }
   .turnbanner .who{ font-size:18px; }
   .pyramid{ transform:scale(0.85); margin:-14px 0; }
+
+  /* Kings Cup: eigenes 3-Spalten-Layout im Querformat — links Verlauf,
+     Mitte der große Kartenkreis (dominant), rechts aktuelle Regel/Effekte.
+     Jede Spalte scrollt notfalls für sich, damit der Screen nie insgesamt
+     scrollt. */
+  .kc-layout{
+    display:grid; grid-template-columns:minmax(120px,180px) minmax(0,1.4fr) minmax(150px,220px);
+    gap:8px; align-items:start; height:calc(100dvh - 64px); overflow:hidden;
+  }
+  .kc-col{ min-height:0; height:100%; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  .kc-col-center{ display:flex; flex-direction:column; align-items:center; }
+  .kc-col-center-only{ display:none; }
+  .kc-col-right-only{ display:block; }
+  .kc-histlabel{ padding:4px 8px 0; }
+  .kc-histlist{ padding:0 8px 6px; }
+  .kc-col-center .ringwrap{ transform:scale(0.72); margin:-30px auto -30px auto; }
+  .kc-col-center .kingdots{ margin-bottom:2px; }
 }
 
 /* ===========================================================
@@ -2121,6 +2151,7 @@ function kcInit(size){
   state.kcEffects = { J:null, '8':null, '10':null, 'Q':null, '5':null, '9':null }; // persistent per-player effects
   state.kcPendingAttrib = null;
   state.kcSuggestions = null;
+  state.kcHistory = []; // zuletzt gezogene Karten, neueste zuerst (fürs Landscape-Layout, linke Spalte)
 }
 function kcSetDeckSize(size){
   if(state.drawnCount>0) return; // locked once the round has started
@@ -2175,6 +2206,18 @@ function kcEffectsHTML(){
   `;
 }
 
+// Kompakte Verlaufsliste der zuletzt gezogenen Karten — nur sichtbar
+// genutzt im Landscape-3-Spalten-Layout (linke Spalte), im Hochformat
+// steht sie einfach oberhalb des Rings.
+function kcHistoryHTML(){
+  const hist = state.kcHistory || [];
+  if(!hist.length) return `<div class="kc-hist-empty">Noch keine Karte gezogen</div>`;
+  return hist.map(c=>`
+    <div class="kc-histrow">
+      <span class="kc-histcard ${c.color}">${c.rank}${c.suit}</span>
+      <span class="kc-histrule">${esc((KC_RULES[c.rank]||{}).t||'')}</span>
+    </div>`).join('');
+}
 function renderKingsCup(){
   if(!state.ring){ kcInit(); }
 
@@ -2242,6 +2285,13 @@ function renderKingsCup(){
     </div>
   ` : '';
 
+  const ruleBlockHTML = rule ? `
+      <div class="section">
+        <div class="ruletext">${rule.t}</div>
+        <div class="rulesub">${rule.s}</div>
+      </div>
+    ` : '';
+
   app.innerHTML = `
    <div class="kc-screen">
     <div class="topbar">
@@ -2253,37 +2303,41 @@ function renderKingsCup(){
       ${helpBtnHTML('kingscup')}
     </div>
 
-    <div class="section">
-      <div class="kingdots" style="margin-bottom:10px;">${dots}</div>
-      <div class="ringwrap kc-stage">
-        <div class="ringglow"></div>
-        <div class="ringslots">${kcRingSVG()}</div>
-        <div class="ringcup">${cupSVG(cupPercent)}</div>
+    <div class="kc-layout">
+      <div class="kc-col kc-col-left">
+        <div class="kc-histlabel">Verlauf</div>
+        <div class="kc-histlist">${kcHistoryHTML()}</div>
       </div>
-    </div>
 
-    <div class="section">
-      ${cardHTML}
-      ${undoSnap ? `<button class="btn btn-ghost btn-sm" style="margin:12px auto 0;" onclick="undo()">↶ Zug zurück</button>` : ''}
-    </div>
+      <div class="kc-col kc-col-center">
+        <div class="section">
+          <div class="kingdots" style="margin-bottom:10px;">${dots}</div>
+          <div class="ringwrap kc-stage">
+            <div class="ringglow"></div>
+            <div class="ringslots">${kcRingSVG()}</div>
+            <div class="ringcup">${cupSVG(cupPercent)}</div>
+          </div>
+        </div>
 
-    ${rule ? `
-      <div class="section">
-        <div class="ruletext">${rule.t}</div>
-        <div class="rulesub">${rule.s}</div>
+        <div class="section">
+          ${cardHTML}
+          ${undoSnap ? `<button class="btn btn-ghost btn-sm" style="margin:12px auto 0;" onclick="undo()">↶ Zug zurück</button>` : ''}
+        </div>
+
+        <div class="kc-col-center-only">${ruleBlockHTML}</div>
+
+        ${suggestBlock ? `<div class="section">${suggestBlock}</div>` : ''}
+        ${attribBlock ? `<div class="section">${attribBlock}</div>` : ''}
+        ${wfBlock ? `<div class="section">${wfBlock}</div>` : ''}
+        ${gameOverBlock ? `<div class="section">${gameOverBlock}</div>` : ''}
       </div>
-    ` : ''}
 
-    ${suggestBlock ? `<div class="section">${suggestBlock}</div>` : ''}
-
-    ${attribBlock ? `<div class="section">${attribBlock}</div>` : ''}
-
-    ${wfBlock ? `<div class="section">${wfBlock}</div>` : ''}
-
-    ${gameOverBlock ? `<div class="section">${gameOverBlock}</div>` : ''}
-
-    <div class="section">
-      ${kcEffectsHTML()}
+      <div class="kc-col kc-col-right">
+        <div class="kc-col-right-only">${ruleBlockHTML}</div>
+        <div class="section">
+          ${kcEffectsHTML()}
+        </div>
+      </div>
     </div>
    </div>
   `;
@@ -2331,13 +2385,20 @@ function kcPick(i){
   }
   if(ring.length===0){ state.gameOver=true; }
 
-  state.kcPendingAttrib = (['J','8','10','Q','5','9'].includes(card.rank) && roster.length>0) ? card.rank : null;
+  // Spielerabfrage NUR bei Regeln, die tatsächlich eine Person markieren
+  // (Fragenmeister, Daumenmeister, Trinkpartner, Himmel, Boden). Alle
+  // anderen Karten (z.B. Regel/J, Kategorie/5, Reim/9) wenden ihre Regel
+  // direkt an, ohne nach einer Person zu fragen.
+  state.kcPendingAttrib = (['4','7','8','10','Q'].includes(card.rank) && roster.length>0) ? card.rank : null;
 
   if(card.rank==='5') state.kcSuggestions = kcRandomSuggestions(CATEGORY_SUGGESTIONS);
   else if(card.rank==='9') state.kcSuggestions = kcRandomSuggestions(RHYME_SUGGESTIONS);
   else state.kcSuggestions = null;
 
   triggerBurst(card);
+  state.kcHistory = state.kcHistory || [];
+  state.kcHistory.unshift(card);
+  if(state.kcHistory.length>10) state.kcHistory.length = 10;
   // Sprecher liest die Regel der gezogenen Karte vor (falls aktiviert)
   if(kcSpeaker){ const r = KC_RULES[card.rank]; if(r) pfSpeak(r.t + '. ' + r.s); }
   render();
