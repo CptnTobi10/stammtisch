@@ -503,7 +503,8 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
   width:52px; height:74px; border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:center;
   font-family:'Bebas Neue',sans-serif; cursor:pointer; position:relative;
 }
-.pyc.hidden{background:url('assets/card-back.png') center/cover; border:2px solid var(--gold-dim);}
+.pyc.hidden{background:linear-gradient(160deg,#241634,#150c22 60%,#0d0718); border:2px solid var(--gold-dim); display:flex; align-items:center; justify-content:center;}
+.pyc.hidden::before{content:"🚌"; font-size:22px; filter:drop-shadow(0 0 4px rgba(217,164,65,0.55));}
 .pyc.shown{background:var(--cream); border:2px solid transparent;}
 .pyc .lvl{position:absolute; top:-8px; right:-6px; background:var(--party); color:#fff; font-size:9px; font-family:'Inter'; font-weight:700; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(255,62,127,0.4);}
 
@@ -757,7 +758,8 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
 .busbench.active .busbench-name{ color:var(--gold); }
 .busbench-slots{ display:flex; gap:6px; flex-shrink:0; }
 .benchcard{ width:30px; height:42px; border-radius:6px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:15px; background:linear-gradient(160deg,#FBF3E3,var(--cream)); box-shadow:0 2px 4px rgba(0,0,0,0.3); }
-.benchcard.facedown{ background:url('assets/card-back.png') center/cover; border:1px solid var(--gold-dim); }
+.benchcard.facedown{ background:linear-gradient(160deg,#241634,#150c22 60%,#0d0718); border:1px solid var(--gold-dim); font-size:13px; }
+.benchcard.facedown::before{content:"🚌"; filter:drop-shadow(0 0 3px rgba(217,164,65,0.55));}
 .buscardrow{ display:flex; gap:16px; justify-content:center; margin-bottom:16px; }
 .buscard{ width:88px; height:120px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:46px; box-shadow:0 12px 26px rgba(0,0,0,0.45), inset 0 2px 0 rgba(255,255,255,0.15); animation:riseIn .4s ease both; }
 .buscard.red{ background:linear-gradient(160deg,#FF6B7A,var(--wine)); }
