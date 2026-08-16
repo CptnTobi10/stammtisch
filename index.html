@@ -866,14 +866,18 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
    CARD DARTS — dark arcade dartboard built entirely from
    programmatic layers (no static board image per player count).
 =========================================================== */
+/* cover-cd.png hat einen eigenen Titel-Schriftzug eingebrannt, der aber je
+   nach Kachel-Zuschnitt (portraitiges Referenzbild in einer breiten/kurzen
+   Kachel via background:cover) teils gar nicht sichtbar ist oder mit dem
+   HTML-Titel kollidieren würde. Für ein einheitliches Bild wie bei
+   kc/pf/bf: kräftigerer Gradient blendet den Bildtext ab, der HTML-Titel
+   übernimmt (gleicher Stil wie die anderen 3 Spiele). */
 .cover-cd{
   background:
-    linear-gradient(to top, rgba(10,8,20,0.55), rgba(10,8,20,0.05) 45%, transparent),
+    linear-gradient(to top, rgba(10,8,20,0.92), rgba(10,8,20,0.35) 42%, rgba(10,8,20,0.1) 62%, transparent),
     url('assets/cover-cd.png') center/cover;
 }
-/* cover-cd.png hat den Titel-Schriftzug bereits fest eingebrannt (anders als
-   kc/pf/bf) — der HTML-Titel-Overlay würde doppelt wirken, daher ausgeblendet. */
-.cover-cd .glyph, .cover-cd .cover-title{ display:none; }
+.cover-cd .glyph{ display:none; }
 
 .setup-screen.cd{ background:radial-gradient(120% 260px at 50% 0, rgba(168,36,48,0.18), transparent 70%); }
 
@@ -1067,15 +1071,15 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
    bewusst von der App-Palette abweicht — dieselbe Konvention wie
    bei Card Darts' eigenem Dartboard-Look.
 =========================================================== */
+/* Gleiche Überlegung wie bei cover-cd (siehe Kommentar dort): kräftigerer
+   Gradient blendet den eingebrannten Bildtext ab, HTML-Titel übernimmt
+   einheitlich wie bei kc/pf/bf. */
 .cover-cp{
   background:
-    linear-gradient(to top, rgba(8,8,16,0.55), rgba(8,8,16,0.05) 45%, transparent),
+    linear-gradient(to top, rgba(8,8,16,0.92), rgba(8,8,16,0.35) 42%, rgba(8,8,16,0.1) 62%, transparent),
     url('assets/cover-cp.png') center/cover;
 }
-/* cover-cp.png hat den "CARD PONG"-Schriftzug bereits fest eingebrannt —
-   der HTML-Titel-Overlay würde doppelt wirken, daher ausgeblendet
-   (analog zu cover-cd, siehe Kommentar dort). */
-.cover-cp .glyph, .cover-cp .cover-title{ display:none; }
+.cover-cp .glyph{ display:none; }
 
 .cp-screen{
   --cp-red:#FF3B4D; --cp-red-dark:#A81829; --cp-blue:#35A7FF; --cp-blue-dark:#145B91;
