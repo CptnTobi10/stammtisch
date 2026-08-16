@@ -763,7 +763,6 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
 .buscard.red{ background:linear-gradient(160deg,#FF6B7A,var(--wine)); }
 .buscard.black{ background:linear-gradient(160deg,#3a2b52,#1a1030); border:1px solid var(--line); }
 .buscard-bus{ width:80px; height:auto; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.4)); }
-.avatar{ display:inline-flex; align-items:center; justify-content:center; border-radius:50%; font-family:'Bebas Neue',sans-serif; color:#fff; object-fit:cover; border:2px solid var(--gold-dim); flex-shrink:0; vertical-align:middle; box-shadow:0 2px 5px rgba(0,0,0,0.35); }
 .btn-answer-red{ background:linear-gradient(135deg,#FF6B7A,var(--wine)); color:#fff; box-shadow:0 4px 12px rgba(255,77,94,0.35); }
 .btn-answer-black{ background:linear-gradient(135deg,#3a2b52,#241835); color:var(--cream); border:1px solid var(--line); }
 .pyc.next{ box-shadow:0 0 0 2px var(--gold), 0 0 14px rgba(255,182,39,0.6); animation:pulse 1.3s ease infinite; }
@@ -1018,8 +1017,7 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
 
 .cd-victory{ text-align:center; padding:20px; }
 .cd-victory .win{ font-family:'Bebas Neue',sans-serif; font-size:20px; color:var(--ash); letter-spacing:0.1em; }
-.cd-victory .avatar{ width:88px; height:88px; font-size:34px; margin:12px auto; box-shadow:0 0 0 3px var(--gold), 0 0 26px rgba(255,182,39,0.55); }
-.cd-victory .nm{ font-family:'Bebas Neue',sans-serif; font-size:32px; color:var(--gold); }
+.cd-victory .nm{ font-family:'Bebas Neue',sans-serif; font-size:32px; color:var(--gold); margin-top:10px; }
 .cd-victory .sc{ font-size:14px; color:var(--ash); margin-bottom:14px; }
 .cd-statline{ font-size:12px; color:var(--ash); margin-bottom:16px; }
 
@@ -1551,31 +1549,9 @@ function addRosterName(){
 }
 
 /* ---------------------------------------------------------
-   STAMMRUNDE — feste 8-Spieler-Voreinstellung mit Avataren.
-   AVATARS wird mit Bildpfaden gefüllt, sobald die Avatar-Grafiken
-   erzeugt sind; bis dahin zeigt avatarHTML einen farbigen Kreis
-   mit Initiale.
+   STAMMRUNDE — feste 8-Spieler-Voreinstellung.
 --------------------------------------------------------- */
 const PRESET_PLAYERS = ['Leroy','Adi','Leo','Max','Samu','Tobi','Bocki','Bruno'];
-const AVATARS = {
-  Leroy:'assets/av-leroy.png', Adi:'assets/av-adi.png', Leo:'assets/av-leo.png',
-  Max:'assets/av-max.png', Samu:'assets/av-samu.png', Tobi:'assets/av-tobi.png',
-  Bocki:'assets/av-bocki.png', Bruno:'assets/av-bruno.png'
-};
-let avatarsReady = true;
-function avatarColor(name){ let h=0; for(const c of String(name)) h=(h*31+c.charCodeAt(0))%360; return h; }
-function avatarFallbackHTML(name, size){
-  const h = avatarColor(name);
-  return `<span class="avatar" style="width:${size}px;height:${size}px;background:hsl(${h},55%,45%);font-size:${Math.round(size*0.5)}px;">${esc((String(name)[0]||'?').toUpperCase())}</span>`;
-}
-function avatarHTML(name, size){
-  size = size||30;
-  if(avatarsReady && AVATARS[name]){
-    const fallback = jsAttr(avatarFallbackHTML(name, size));
-    return `<img class="avatar" src="${AVATARS[name]}" style="width:${size}px;height:${size}px;" alt="" onerror="this.outerHTML='${fallback}'">`;
-  }
-  return avatarFallbackHTML(name, size);
-}
 function loadPreset(){
   PRESET_PLAYERS.forEach(n=>{
     if(!savedPlayers.includes(n)) savedPlayers.push(n);
@@ -1843,7 +1819,7 @@ function renderRoster(){
     const active = roster.includes(n);
     return `
       <div class="chip ${active?'active':''}">
-        <span onclick="toggleRoster('${jsAttr(n)}')" style="display:flex;align-items:center;gap:6px;">${avatarHTML(n,26)}${active?'✓':''} ${esc(n)}</span>
+        <span onclick="toggleRoster('${jsAttr(n)}')" style="display:flex;align-items:center;gap:6px;">${active?'✓':''} ${esc(n)}</span>
         <span class="x" onclick="removeSavedPlayer('${jsAttr(n)}')">✕</span>
       </div>`;
   }).join('');
@@ -2827,7 +2803,7 @@ function busTableHTML(){
     }).join('');
     return `
       <div class="busbench ${isCurrent?'active':''}">
-        <div class="busbench-name" style="display:flex;align-items:center;gap:8px;">${avatarHTML(p,26)}${isCurrent?'▶':''} ${esc(p)}</div>
+        <div class="busbench-name" style="display:flex;align-items:center;gap:8px;">${isCurrent?'▶':''} ${esc(p)}</div>
         <div class="busbench-slots">${slotsHTML}</div>
       </div>`;
   }).join('');
@@ -3627,7 +3603,6 @@ function cdStripHTML(g){
       const p = g.players.find(x=>x.name===nm);
       const active = i===g.activePlayerIndex;
       return `<div class="cd-pcard ${active?'active':''}">
-        ${avatarHTML(nm, 36)}
         <div class="cd-pname">${esc(nm)}</div>
         <div class="cd-pscore">${p.totalScore}</div>
       </div>`;
@@ -3667,7 +3642,7 @@ function cdModalHTML(g){
     title = 'PUNKTESTAND';
     const ranked = [...g.players].sort((a,b)=>b.totalScore-a.totalScore);
     body = `<div class="cd-ranklist">
-      ${ranked.map((p,i)=>`<div class="cd-rankrow"><div class="pos">${i+1}.</div>${avatarHTML(p.name,26)}<div class="nm">${esc(p.name)}</div><div class="sc">${p.totalScore}</div></div>`).join('')}
+      ${ranked.map((p,i)=>`<div class="cd-rankrow"><div class="pos">${i+1}.</div><div class="nm">${esc(p.name)}</div><div class="sc">${p.totalScore}</div></div>`).join('')}
     </div>`;
   } else {
     title = 'VERLAUF DIESER RUNDE';
@@ -3778,7 +3753,7 @@ function renderDartsRoundSummary(g){
     <div class="cd-summary">
       <div class="h">${CD_COPY.roundComplete}</div>
       <div class="cd-ranklist">
-        ${ranked.map((p,i)=>`<div class="cd-rankrow"><div class="pos">${i+1}.</div>${avatarHTML(p.name,26)}<div class="nm">${esc(p.name)}</div><div class="sc">${p.totalScore}</div></div>`).join('')}
+        ${ranked.map((p,i)=>`<div class="cd-rankrow"><div class="pos">${i+1}.</div><div class="nm">${esc(p.name)}</div><div class="sc">${p.totalScore}</div></div>`).join('')}
       </div>
       <button class="btn btn-primary" style="margin-top:20px;" onclick="cdNextRound()">Nächste Runde ▶</button>
     </div>
@@ -3801,7 +3776,7 @@ function renderDartsSuddenDeath(g){
     const valueHTML = h.status==='faceUp'
       ? `<b>${h.card.rank}${h.card.suit}</b> ${h.result==='hit' ? '+'+h.points : CD_COPY.miss}`
       : '🎯';
-    return `<div class="cd-sdrow ${out?'out':''}">${avatarHTML(nm,26)}<div class="nm" style="flex:1;text-align:left;">${esc(nm)}</div><div>${valueHTML}</div></div>`;
+    return `<div class="cd-sdrow ${out?'out':''}"><div class="nm" style="flex:1;text-align:left;">${esc(nm)}</div><div>${valueHTML}</div></div>`;
   }).join('') : '';
   const btnLabel = !sd.resolved ? 'Karten aufdecken' : (g.winner ? `Zum Sieger 🏆` : 'Nächste Karte ▶');
   app.innerHTML = `
@@ -3844,7 +3819,6 @@ function renderDartsVictory(g){
     <div class="cd-victory">
       ${confettiHTML()}
       <div class="win">${CD_COPY.winner}</div>
-      ${avatarHTML(winner.name, 88)}
       <div class="nm">${esc(winner.name)}</div>
       <div class="sc">${winner.totalScore} POINTS</div>
       <div class="cd-statline">${winner.hits} Treffer · ${winner.doubles}× Double · ${winner.triples}× Triple</div>
