@@ -421,7 +421,7 @@ test('setup screen, live gameplay, round summary, sudden death and victory all r
     ['Leroy','Adi','Leo','Max','Samu'].forEach(n=>roster.push(n));
   `);
   const setupHTML = run(`renderDartsSetup(); document.getElementById('app').innerHTML`);
-  assert.ok(setupHTML.includes('CARD DARTS'), 'setup screen must render the game title');
+  assert.ok(setupHTML.includes('DARTS WITH CARDS'), 'setup screen must render the game title');
   assert.ok(!setupHTML.includes('undefined'), 'setup screen must not leak "undefined" into markup');
 
   // Classic, 5 players, standard length -> drive the WHOLE match through the

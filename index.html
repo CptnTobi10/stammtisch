@@ -837,12 +837,12 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
 =========================================================== */
 .cover-cd{
   background:
-    radial-gradient(circle at 50% 42%, rgba(45,166,90,0.20) 0%, transparent 30%),
-    radial-gradient(circle at 50% 42%, rgba(168,36,48,0.28) 0%, transparent 20%),
-    linear-gradient(to top, rgba(10,8,20,0.92), rgba(10,8,20,0.2) 55%, transparent),
-    radial-gradient(circle at 50% 42%, #333 0%, #161616 58%, #060606 100%);
+    linear-gradient(to top, rgba(10,8,20,0.55), rgba(10,8,20,0.05) 45%, transparent),
+    url('assets/cover-cd.png') center/cover;
 }
-.cover-cd .glyph{ opacity:0.16; }
+/* cover-cd.png hat den Titel-Schriftzug bereits fest eingebrannt (anders als
+   kc/pf/bf) — der HTML-Titel-Overlay würde doppelt wirken, daher ausgeblendet. */
+.cover-cd .glyph, .cover-cd .cover-title{ display:none; }
 
 .setup-screen.cd{ background:radial-gradient(120% 260px at 50% 0, rgba(168,36,48,0.18), transparent 70%); }
 
@@ -1039,21 +1039,26 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
 =========================================================== */
 .cover-cp{
   background:
-    radial-gradient(circle at 30% 40%, rgba(255,59,77,0.34) 0%, transparent 42%),
-    radial-gradient(circle at 72% 55%, rgba(53,167,255,0.30) 0%, transparent 46%),
-    linear-gradient(to top, rgba(8,8,16,0.92), rgba(8,8,16,0.15) 55%, transparent),
-    #0B0F1A;
+    linear-gradient(to top, rgba(8,8,16,0.55), rgba(8,8,16,0.05) 45%, transparent),
+    url('assets/cover-cp.png') center/cover;
 }
-.cover-cp .glyph{ opacity:0.18; }
+/* cover-cp.png hat den "CARD PONG"-Schriftzug bereits fest eingebrannt —
+   der HTML-Titel-Overlay würde doppelt wirken, daher ausgeblendet
+   (analog zu cover-cd, siehe Kommentar dort). */
+.cover-cp .glyph, .cover-cp .cover-title{ display:none; }
 
 .cp-screen{
   --cp-red:#FF3B4D; --cp-red-dark:#A81829; --cp-blue:#35A7FF; --cp-blue-dark:#145B91;
   --cp-gold:#FFC857; --cp-purple:#A855F7; --cp-cyan:#51E5FF; --cp-success:#58E38A;
-  position:relative; min-height:100dvh; display:flex; flex-direction:column;
+  /* height:100% (statt 100dvh) passt sich exakt an die Content-Box von
+     #app an, die bereits eigenes Padding (Safe-Area etc.) abzieht — so
+     entsteht kein zusätzlicher, durch das Padding verursachter Scroll-Rest. */
+  position:relative; height:100%; min-height:100%; max-height:100%; overflow:hidden;
+  display:flex; flex-direction:column;
   background:
-    radial-gradient(130% 220px at 50% 0, rgba(255,59,77,0.14), transparent 60%),
-    radial-gradient(130% 220px at 50% 100%, rgba(53,167,255,0.14), transparent 60%),
-    #0B0F1A;
+    radial-gradient(120% 34dvh at 50% 0%, rgba(53,167,255,0.20), transparent 68%),
+    radial-gradient(120% 34dvh at 50% 100%, rgba(255,59,77,0.20), transparent 68%),
+    linear-gradient(180deg,#080B14,#05060C 50%,#0A060A);
 }
 .setup-screen.cp{ background:radial-gradient(120% 260px at 50% 0, rgba(255,59,77,0.16), transparent 50%), radial-gradient(120% 260px at 50% 100%, rgba(53,167,255,0.16), transparent 50%); }
 .cp-tagline{ font-family:'Bebas Neue',sans-serif; letter-spacing:0.14em; font-size:13px; color:var(--cp-gold, #FFC857); text-align:center; }
@@ -1069,71 +1074,144 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
 }
 .cp-chip.red{ background:rgba(255,59,77,0.16); border-color:var(--cp-red); color:#FFD3D8; }
 .cp-chip.blue{ background:rgba(53,167,255,0.16); border-color:var(--cp-blue); color:#CFEBFF; }
-.cp-teamlabel{ font-family:'Bebas Neue',sans-serif; letter-spacing:0.05em; font-size:12px; margin-top:10px; }
-.cp-teamlabel.red{ color:var(--cp-red); } .cp-teamlabel.blue{ color:var(--cp-blue); }
 
-/* --- in-game top bar --- */
-.cp-topinfo{ display:flex; align-items:center; gap:8px; padding:2px 16px; }
+/* --- in-game top bar (compact, reuses .topbar/.helpbtn/.backbtn) --- */
+.cp-screen .topbar{ padding:clamp(6px,1.6dvh,14px) 14px clamp(2px,0.8dvh,6px); flex:0 0 auto; position:relative; z-index:2; }
 .cp-turnpill{
-  flex:1; text-align:center; font-family:'Bebas Neue',sans-serif; font-size:14px; letter-spacing:0.05em;
+  flex:1; text-align:center; font-family:'Bebas Neue',sans-serif; font-size:clamp(12px,3.2vw,15px); letter-spacing:0.06em;
   padding:6px 10px; border-radius:20px; background:var(--panel); border:1px solid var(--line); color:var(--ash);
 }
-.cp-turnpill.red{ background:rgba(255,59,77,0.18); border-color:var(--cp-red); color:#FFD3D8; }
-.cp-turnpill.blue{ background:rgba(53,167,255,0.18); border-color:var(--cp-blue); color:#CFEBFF; }
+.cp-turnpill.red{ background:rgba(255,59,77,0.18); border-color:var(--cp-red); color:#FFD3D8; box-shadow:0 0 12px rgba(255,59,77,0.25); }
+.cp-turnpill.blue{ background:rgba(53,167,255,0.18); border-color:var(--cp-blue); color:#CFEBFF; box-shadow:0 0 12px rgba(53,167,255,0.25); }
 
-/* --- team banner (Action Pong) --- */
-.cp-banner{
-  display:flex; align-items:center; gap:10px; padding:8px 16px; margin:2px 0;
+/* --- playfield: team zone / center zone / team zone, no-scroll flex stack --- */
+.cp-field{
+  position:relative; z-index:2; flex:1 1 auto; min-height:0;
+  display:flex; flex-direction:column; align-items:stretch;
+  padding:0 10px clamp(6px,1dvh,10px);
 }
-.cp-banner .swatch{ width:10px; height:26px; border-radius:4px; flex-shrink:0; }
-.cp-banner.red .swatch{ background:var(--cp-red); box-shadow:0 0 10px rgba(255,59,77,0.6); }
-.cp-banner.blue .swatch{ background:var(--cp-blue); box-shadow:0 0 10px rgba(53,167,255,0.6); }
-.cp-banner .nm{ font-family:'Bebas Neue',sans-serif; font-size:16px; letter-spacing:0.03em; flex:1; }
-.cp-banner .left{ font-size:11.5px; color:var(--ash); }
-.cp-banner .icons{ display:flex; gap:6px; align-items:center; }
-.cp-jokericon{ font-size:15px; opacity:0.25; filter:grayscale(1); }
+.cp-teamzone{
+  flex:1 1 0; min-height:0; display:flex; flex-direction:column; align-items:center;
+  justify-content:center; gap:clamp(2px,0.6dvh,6px);
+}
+.cp-teamlabel{
+  font-family:'Bebas Neue',sans-serif; letter-spacing:0.08em; font-size:clamp(12px,3.6vw,17px);
+  text-align:center; flex:0 0 auto;
+}
+.cp-teamlabel.blue{ color:var(--cp-blue); text-shadow:0 0 10px rgba(53,167,255,0.55); }
+.cp-teamlabel.red{ color:var(--cp-red); text-shadow:0 0 10px rgba(255,59,77,0.55); }
+
+/* --- team banner (Action Pong) — compact, no separate box --- */
+.cp-banner{
+  display:flex; align-items:center; gap:8px; flex:0 0 auto; width:100%; max-width:420px;
+  padding:2px 6px;
+}
+.cp-banner .swatch{ width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.cp-banner.red .swatch{ background:var(--cp-red); box-shadow:0 0 8px rgba(255,59,77,0.7); }
+.cp-banner.blue .swatch{ background:var(--cp-blue); box-shadow:0 0 8px rgba(53,167,255,0.7); }
+.cp-banner .nm{
+  font-family:'Bebas Neue',sans-serif; font-size:clamp(12px,3.6vw,17px); letter-spacing:0.06em; flex:1;
+  text-align:center;
+}
+.cp-banner.red .nm{ color:var(--cp-red); text-shadow:0 0 10px rgba(255,59,77,0.55); }
+.cp-banner.blue .nm{ color:var(--cp-blue); text-shadow:0 0 10px rgba(53,167,255,0.55); }
+.cp-banner .left{ font-size:10.5px; color:var(--ash); flex-shrink:0; }
+.cp-banner .icons{ display:flex; gap:5px; align-items:center; flex-shrink:0; }
+.cp-jokericon{ font-size:13px; opacity:0.25; filter:grayscale(1); }
 .cp-jokericon.on{ opacity:1; filter:none; text-shadow:0 0 8px var(--cp-cyan, #51E5FF); animation:cpPulse 1.4s ease-in-out infinite; }
-.cp-streakicon{ font-size:11px; color:var(--ash); font-weight:700; }
+.cp-streakicon{ font-size:10px; color:var(--ash); font-weight:700; }
 .cp-streakicon.on{ color:#FF9E3D; }
 @keyframes cpPulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.18); } }
 
-/* --- pyramids --- */
-.cp-pyramid{ display:flex; flex-direction:column; align-items:center; gap:4px; padding:2px 8px; }
-.cp-pyramid.mirror{ flex-direction:column-reverse; }
-.cp-prow{ display:flex; gap:4px; justify-content:center; }
-.cp-cup{
-  width:26px; height:34px; border-radius:5px 5px 8px 8px; display:flex; flex-direction:column;
-  align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; line-height:1;
-  background:linear-gradient(180deg,#fff,#EDEDED); color:#1A1A1A; border:1.5px solid rgba(0,0,0,0.15);
-  box-shadow:0 2px 4px rgba(0,0,0,0.35); transition:transform .18s ease, opacity .18s ease;
+/* --- pyramids — large, glowing, hochwertig wirkende Karten --- */
+.cp-pyramid{
+  flex:1 1 auto; min-height:0; width:100%;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:clamp(3px,0.9dvh,7px);
 }
-.cp-cup .r{ font-size:12px; } .cp-cup .s{ font-size:9px; margin-top:-1px; }
+.cp-pyramid.mirror{ flex-direction:column-reverse; }
+.cp-prow{ display:flex; gap:clamp(3px,1.4vw,7px); justify-content:center; }
+.cp-cup{
+  width:clamp(38px,10vw,66px); aspect-ratio:0.72; border-radius:10px; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; line-height:1;
+  background:linear-gradient(160deg,#ffffff,#e8e8ee 55%,#d6d6de); color:#171717;
+  border:1.5px solid rgba(255,255,255,0.5);
+  box-shadow:0 3px 8px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.85), inset 0 -3px 5px rgba(0,0,0,0.08);
+  transition:transform .18s ease, opacity .18s ease;
+}
+.cp-cup .r{ font-size:clamp(13px,3.6vw,22px); font-weight:400; } .cp-cup .s{ font-size:clamp(9px,2.4vw,15px); margin-top:-2px; }
 .cp-cup.red-suit{ color:#C21F2E; } .cp-cup.black-suit{ color:#151515; }
-.cp-cup.team-red{ box-shadow:0 0 0 1.5px var(--cp-red), 0 2px 6px rgba(255,59,77,0.45); }
-.cp-cup.team-blue{ box-shadow:0 0 0 1.5px var(--cp-blue), 0 2px 6px rgba(53,167,255,0.45); }
+.cp-cup.team-red{ box-shadow:0 0 0 2px var(--cp-red), 0 0 12px rgba(255,59,77,0.55), 0 3px 8px rgba(0,0,0,0.5); }
+.cp-cup.team-blue{ box-shadow:0 0 0 2px var(--cp-blue), 0 0 12px rgba(53,167,255,0.55), 0 3px 8px rgba(0,0,0,0.5); }
 .cp-cup.removed{ opacity:0; transform:scale(0.3) translateY(-8px); pointer-events:none; }
 .cp-cup.selectable{ cursor:pointer; animation:cpTargetPulse 1s ease-in-out infinite; }
-@keyframes cpTargetPulse{ 0%,100%{ box-shadow:0 0 0 1.5px var(--cp-purple,#A855F7),0 0 6px rgba(168,85,247,0.5);} 50%{ box-shadow:0 0 0 3px var(--cp-purple,#A855F7),0 0 16px rgba(168,85,247,0.85);} }
+@keyframes cpTargetPulse{ 0%,100%{ box-shadow:0 0 0 2px var(--cp-purple,#A855F7),0 0 6px rgba(168,85,247,0.5);} 50%{ box-shadow:0 0 0 3.5px var(--cp-purple,#A855F7),0 0 18px rgba(168,85,247,0.9);} }
+/* Action-Modus hat 10 Ziele/4 Reihen statt 6/3 — spürbar kompakter, damit
+   trotz mehr Reihen alles ohne Scrollen passt (reine Größen-Anpassung). */
+.cp-pyramid.compact{ gap:clamp(2px,0.6dvh,5px); }
+.cp-pyramid.compact .cp-prow{ gap:clamp(2px,1vw,5px); }
+.cp-pyramid.compact .cp-cup{ width:clamp(28px,7.4vw,46px); border-radius:8px; }
+.cp-pyramid.compact .cp-cup .r{ font-size:clamp(10px,2.8vw,16px); }
+.cp-pyramid.compact .cp-cup .s{ font-size:clamp(7px,1.8vw,11px); }
 
 /* --- center deck / draw zone --- */
-.cp-centerzone{ display:flex; flex-direction:column; align-items:center; gap:6px; padding:6px 16px; flex:1; justify-content:center; }
-.cp-decks{ display:flex; align-items:center; gap:16px; }
+.cp-centerzone{
+  position:relative; z-index:2; flex:0 0 auto; display:flex; flex-direction:column; align-items:center;
+  gap:clamp(6px,1.1dvh,12px); padding:clamp(3px,0.8dvh,8px) 12px;
+}
+.cp-decks{ display:flex; align-items:center; justify-content:center; gap:clamp(10px,4vw,22px); }
 .cp-stack{
-  width:46px; height:64px; border-radius:7px; background:linear-gradient(145deg,#2A1749,#171126);
+  width:clamp(30px,7.4vw,42px); aspect-ratio:0.72; border-radius:6px; background:linear-gradient(145deg,#2A1749,#171126);
   border:1.5px solid var(--line); display:flex; align-items:center; justify-content:center;
-  font-size:18px; color:var(--ash); position:relative;
+  font-size:clamp(13px,3.6vw,17px); color:var(--ash); position:relative; opacity:0.75;
 }
-.cp-stack .cnt{ position:absolute; bottom:-16px; font-size:10px; color:var(--ash); white-space:nowrap; }
-.cp-drawnwrap{ width:64px; height:88px; perspective:600px; }
+.cp-stack .cnt{ position:absolute; bottom:-15px; font-size:9.5px; color:var(--ash); white-space:nowrap; }
+.cp-drawnwrap{ width:clamp(74px,20vw,116px); aspect-ratio:0.72; perspective:600px; }
 .cp-drawncard{
-  width:100%; height:100%; border-radius:9px; background:linear-gradient(180deg,#fff,#EDEDED);
+  width:100%; height:100%; border-radius:12px; background:linear-gradient(160deg,#ffffff,#e8e8ee 55%,#d6d6de);
   display:flex; flex-direction:column; align-items:center; justify-content:center;
-  font-family:'Bebas Neue',sans-serif; box-shadow:0 6px 18px rgba(0,0,0,0.5); animation:flipin .22s ease;
+  font-family:'Bebas Neue',sans-serif; box-shadow:0 8px 22px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.85);
+  animation:flipin .22s ease; border:1.5px solid rgba(255,255,255,0.5);
 }
-.cp-drawncard .r{ font-size:26px; } .cp-drawncard .s{ font-size:19px; margin-top:2px; }
-.cp-drawncard.joker{ background:linear-gradient(160deg,#2A1749,#0B0F1A); color:var(--cp-cyan,#51E5FF); font-size:11px; letter-spacing:0.06em; text-align:center; }
-.cp-drawncard.placeholder{ background:transparent; box-shadow:none; }
-.cp-drawbtn{ width:100%; max-width:220px; }
+.cp-drawncard .r{ font-size:clamp(24px,7vw,38px); } .cp-drawncard .s{ font-size:clamp(17px,5vw,27px); margin-top:2px; }
+.cp-drawncard.joker{ background:linear-gradient(160deg,#2A1749,#0B0F1A); color:var(--cp-cyan,#51E5FF); font-size:clamp(9px,2.6vw,12px); letter-spacing:0.06em; text-align:center; border-color:var(--cp-cyan,#51E5FF); }
+/* Leerer Stapel-Platzhalter zeigt das CARDPONG-Branding (statt leerer Fläche),
+   analog zur Referenz: dunkle Kartenrückseite mit "CARD / PONG"-Schriftzug. */
+.cp-drawncard.placeholder{
+  background:linear-gradient(165deg,#1C2C58,#0B1430 60%,#080B1E);
+  box-shadow:0 10px 26px rgba(0,0,0,0.6), inset 0 0 0 1.5px rgba(255,255,255,0.14);
+  border-color:rgba(255,255,255,0.22); position:relative; overflow:hidden; animation:none;
+}
+.cp-drawncard.placeholder::before{
+  content:"CARD\A PONG"; white-space:pre-line; position:absolute; inset:0;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  font-size:clamp(11px,3vw,17px); line-height:1.05; letter-spacing:0.03em; text-align:center;
+  color:#fff; text-shadow:0 2px 6px rgba(0,0,0,0.5);
+}
+.cp-drawncard.placeholder::after{
+  content:"🥤"; position:absolute; right:10%; bottom:8%; font-size:clamp(10px,2.6vw,15px); opacity:0.9;
+}
+.cp-drawbtn{
+  width:100%; max-width:260px; font-family:'Bebas Neue',sans-serif; letter-spacing:0.06em;
+  font-size:clamp(15px,4.4vw,19px); padding:clamp(10px,1.8dvh,14px) 20px; border-radius:16px;
+  background:linear-gradient(180deg,#1E63AE,#123C6E); border:2px solid var(--cp-blue,#35A7FF); color:#fff;
+  box-shadow:0 0 20px rgba(53,167,255,0.55), 0 4px 12px rgba(0,0,0,0.45);
+}
+.cp-drawbtn:disabled{ opacity:0.55; box-shadow:none; }
+
+/* --- decorative, non-interactive cups at the screen edges --- */
+.cp-decocup{
+  position:absolute; width:16vw; max-width:92px; aspect-ratio:0.75;
+  clip-path:polygon(16% 0%, 84% 0%, 100% 100%, 0% 100%);
+  pointer-events:none; z-index:0; opacity:0.5;
+  box-shadow:inset 0 10px 18px rgba(255,255,255,0.08);
+}
+.cp-decocup.blue{ background:linear-gradient(165deg, rgba(53,167,255,0.55), rgba(53,167,255,0.04) 75%); }
+.cp-decocup.red{ background:linear-gradient(165deg, rgba(255,59,77,0.5), rgba(255,59,77,0.04) 75%); }
+.cp-decocup.tl{ top:-4%; left:-7%; transform:rotate(-10deg); }
+.cp-decocup.tr{ top:-4%; right:-7%; transform:rotate(10deg) scaleX(-1); }
+.cp-decocup.bl{ bottom:-4%; left:-7%; transform:rotate(10deg); }
+.cp-decocup.br{ bottom:-4%; right:-7%; transform:rotate(-10deg) scaleX(-1); }
+@media (max-width:400px), (max-height:700px){ .cp-decocup{ display:none; } }
 
 /* --- event popup / drink toast --- */
 .cp-popupwrap{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:5; }
@@ -1164,7 +1242,7 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
 @keyframes cpToast{ 0%{opacity:0; transform:translate(-50%,8px);} 12%{opacity:1; transform:translate(-50%,0);} 82%{opacity:1;} 100%{opacity:0;} }
 
 /* --- victory / result --- */
-.cp-victory{ text-align:center; padding:22px; }
+.cp-victory{ text-align:center; padding:22px; margin:auto; width:100%; box-sizing:border-box; max-height:100%; overflow-y:auto; }
 .cp-victory .win{ font-family:'Bebas Neue',sans-serif; font-size:20px; color:var(--ash); letter-spacing:0.14em; }
 .cp-victory .team{ font-family:'Bebas Neue',sans-serif; font-size:36px; margin:8px 0 4px; }
 .cp-victory .team.red{ color:var(--cp-red,#FF3B4D); text-shadow:0 0 26px rgba(255,59,77,0.55); }
@@ -1174,11 +1252,22 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
 .cp-statgrid .st .v{ font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--cream); }
 .cp-statgrid .st .l{ font-size:10px; color:var(--ash); letter-spacing:0.04em; }
 
+/* Querformat: Teams/Stapel nebeneinander statt gestapelt, damit die Höhe
+   (die in Landscape knapp ist) nicht durch drei vertikale Zonen aufgebraucht wird. */
+@media (orientation:landscape) and (max-height:520px){
+  .cp-field{ flex-direction:row; align-items:stretch; gap:6px; }
+  .cp-teamzone{ flex-direction:row-reverse; }
+  .cp-teamzone.red{ flex-direction:row; }
+  .cp-teamlabel{ writing-mode:vertical-rl; text-orientation:mixed; font-size:clamp(11px,2.6vh,14px); }
+  .cp-teamzone.blue .cp-teamlabel{ transform:rotate(180deg); }
+  .cp-pyramid{ flex-direction:row !important; }
+  .cp-pyramid .cp-prow{ flex-direction:column; }
+  .cp-centerzone{ flex-direction:column; justify-content:center; }
+  .cp-decocup{ display:none; }
+}
 @media (max-width:360px){
-  .cp-cup{ width:22px; height:29px; }
-  .cp-cup .r{ font-size:10px; } .cp-cup .s{ font-size:8px; }
-  .cp-stack{ width:40px; height:56px; }
-  .cp-drawnwrap{ width:54px; height:74px; }
+  .cp-cup{ width:clamp(32px,9vw,54px); }
+  .cp-pyramid.compact .cp-cup{ width:clamp(24px,6.6vw,38px); }
 }
 
 /* --- home / mode selection (added alongside the block above) --- */
@@ -1629,7 +1718,7 @@ const HELP_TEXT = {
     ]
   },
   carddarts: {
-    title:'Card Darts — so geht\'s',
+    title:'Darts with Cards — so geht\'s',
     steps:[
       'Das Board ist aus Karten gebaut: Zentrum = 3 Punkte, mittlerer Ring = 2 Punkte, äußerer Ring = 1 Punkt.',
       'Jeder Spieler hat 3 verdeckte Karten. Reihum aufdecken — die Suchfarbe zählt nicht, nur der Wert (Rang) entscheidet.',
@@ -1802,7 +1891,7 @@ const GAMES = [
   {key:'kc', title:'KINGS CUP',    desc:'Ring of Fire · jede Karte eine Regel', glyph:'🂡', cls:'cover-kc', screen:'kingscup-setup'},
   {key:'pf', title:'PFERDERENNEN', desc:'Setz auf eine Farbe und fiebere mit',  glyph:'🐎', cls:'cover-pf', screen:'pferd-setup'},
   {key:'bf', title:'BUSFAHRER',    desc:'Raten · Pyramide · Endspiel',           glyph:'🚌', cls:'cover-bf', screen:'bus-setup'},
-  {key:'cd', title:'CARD DARTS',   desc:'Karten statt Pfeile · triff das Board', glyph:'🎯', cls:'cover-cd', screen:'darts-setup'},
+  {key:'cd', title:'DARTS WITH CARDS', desc:'Karten statt Pfeile · triff das Board', glyph:'🎯', cls:'cover-cd', screen:'darts-setup'},
   {key:'cp', title:'CARDPONG',     desc:'Draw. Hit. Drink. · Beer Pong mit Karten', glyph:'🍺', cls:'cover-cp', screen:'cardpong-setup'},
 ];
 function openGame(screen){ reset(screen); }
@@ -3422,7 +3511,7 @@ function renderDartsSetup(){
       <div class="spacer"></div>
       ${helpBtnHTML('carddarts')}
     </div>
-    <div class="setup-hero"><div class="gtitle" style="color:#FF7A87;">CARD DARTS</div><div class="rulesub">Karten statt Pfeile</div></div>
+    <div class="setup-hero"><div class="gtitle" style="color:#FF7A87;">DARTS WITH CARDS</div><div class="rulesub">Karten statt Pfeile</div></div>
     <div class="section">
       <div class="setcard">
         <div class="setrow tapp ${!enough?'warn':''}" onclick="openRoster('darts-setup')">
@@ -3449,7 +3538,7 @@ function renderDartsSetup(){
           <div class="rv">Ansehen <span class="chev">›</span></div>
         </div>
       </div>
-      ${!enough ? `<div class="warnbox">Card Darts braucht mindestens 2 Spieler. Aktuell: ${n}. Tippe oben auf Spieler.</div>`
+      ${!enough ? `<div class="warnbox">Darts with Cards braucht mindestens 2 Spieler. Aktuell: ${n}. Tippe oben auf Spieler.</div>`
         : overCap ? `<div class="warnbox">Es spielen die ersten 8 von ${n} mit (Board-Limit).</div>` : ''}
       ${cfg ? `<p class="centerinfo" style="text-align:left;">Board: ${cfg.total} Karten (1 Zentrum · ${cfg.middle} Mitte · ${cfg.outer} Außen) · ${rounds} Runde${rounds===1?'':'n'}. ${state.cdMode==='action' ? 'Action: Treffer verschwinden, das Board rückt sofort nach. Ass = TRIPLE, König = DOUBLE.' : 'Classic: Treffer bleiben liegen, sind aber für den Rest der Runde blockiert.'}</p>` : ''}
     </div>
@@ -4136,7 +4225,15 @@ function cpPyramidHTML(g, side, mirror, opts){
   let i = 0;
   rowSizes.forEach(size=>{ rows.push(team.targets.slice(i, i+size)); i += size; });
   const rowsHTML = rows.map(row=>`<div class="cp-prow">${row.map(t=>cpCupHTML(t, side, opts)).join('')}</div>`).join('');
-  return `<div class="cp-pyramid ${mirror?'mirror':''}">${rowsHTML}</div>`;
+  const compact = g.mode==='action' ? ' compact' : '';
+  return `<div class="cp-pyramid${compact} ${mirror?'mirror':''}">${rowsHTML}</div>`;
+}
+// Rein dekorative, nicht-interaktive Becher an den Bildschirmrändern
+// (siehe .cp-decocup) — pointer-events:none, verdecken nie Karten, werden
+// auf kleinen Displays per @media ausgeblendet.
+function cpDecoCupsHTML(){
+  return `<div class="cp-decocup blue tl"></div><div class="cp-decocup blue tr"></div>
+    <div class="cp-decocup red bl"></div><div class="cp-decocup red br"></div>`;
 }
 function cpCupHTML(t, side, opts){
   const colorClass = t.card.color==='red' ? 'red-suit' : 'black-suit';
@@ -4184,19 +4281,26 @@ function renderCardpong(){
 function renderCardpongQuick(g){
   app.innerHTML = `
    <div class="cp-screen">
+    ${cpDecoCupsHTML()}
     <div class="topbar">
       <div class="backbtn" onclick="askLeave('home')">‹</div>
       <div class="cp-turnpill">QUICK PONG</div>
       ${helpBtnHTML('cardpong')}
     </div>
-    <div class="cp-teamlabel blue" style="text-align:center;">${esc(cpTeamDisplayName(g,'blue'))}</div>
-    ${cpPyramidHTML(g,'blue',true)}
-    <div class="cp-centerzone">
-      ${cpDeckZoneHTML(g.drawDeck.length, g.discard.length, g.drawnCard)}
-      <button class="btn btn-primary cp-drawbtn" ${g.locked?'disabled':''} onclick="cpTapDrawQuick()">🍺 DRAW</button>
+    <div class="cp-field">
+      <div class="cp-teamzone blue">
+        <div class="cp-teamlabel blue">${esc(cpTeamDisplayName(g,'blue'))}</div>
+        ${cpPyramidHTML(g,'blue',true)}
+      </div>
+      <div class="cp-centerzone">
+        ${cpDeckZoneHTML(g.drawDeck.length, g.discard.length, g.drawnCard)}
+        <button class="btn btn-primary cp-drawbtn" ${g.locked?'disabled':''} onclick="cpTapDrawQuick()">🥤 DRAW</button>
+      </div>
+      <div class="cp-teamzone red">
+        ${cpPyramidHTML(g,'red',false)}
+        <div class="cp-teamlabel red">${esc(cpTeamDisplayName(g,'red'))}</div>
+      </div>
     </div>
-    ${cpPyramidHTML(g,'red',false)}
-    <div class="cp-teamlabel red" style="text-align:center;">${esc(cpTeamDisplayName(g,'red'))}</div>
     ${cpPopupHTML(g)}
     ${cpDrinkToastHTML(g)}
    </div>
@@ -4250,19 +4354,26 @@ function renderCardpongAction(g){
   const activeTeam = g.teams[active];
   app.innerHTML = `
    <div class="cp-screen">
+    ${cpDecoCupsHTML()}
     <div class="topbar">
       <div class="backbtn" onclick="askLeave('home')">‹</div>
       <div class="cp-turnpill ${active}">${g.pendingAirball ? CP_COPY.chooseCupAirball : esc(activeTeam.name)+' AM ZUG'}</div>
       ${helpBtnHTML('cardpong')}
     </div>
-    ${cpBannerHTML(g,'blue')}
-    ${cpPyramidHTML(g,'blue',true,opts)}
-    <div class="cp-centerzone">
-      ${cpDeckZoneHTML(activeTeam.deck.length, activeTeam.discard.length, g.drawnCard)}
-      <button class="btn btn-primary cp-drawbtn" ${(g.locked||g.pendingAirball)?'disabled':''} onclick="cpTapDrawAction()">🍺 DRAW</button>
+    <div class="cp-field">
+      <div class="cp-teamzone blue">
+        ${cpBannerHTML(g,'blue')}
+        ${cpPyramidHTML(g,'blue',true,opts)}
+      </div>
+      <div class="cp-centerzone">
+        ${cpDeckZoneHTML(activeTeam.deck.length, activeTeam.discard.length, g.drawnCard)}
+        <button class="btn btn-primary cp-drawbtn" ${(g.locked||g.pendingAirball)?'disabled':''} onclick="cpTapDrawAction()">🥤 DRAW</button>
+      </div>
+      <div class="cp-teamzone red">
+        ${cpPyramidHTML(g,'red',false,opts)}
+        ${cpBannerHTML(g,'red')}
+      </div>
     </div>
-    ${cpPyramidHTML(g,'red',false,opts)}
-    ${cpBannerHTML(g,'red')}
     ${cpPopupHTML(g)}
     ${cpDrinkToastHTML(g)}
    </div>
