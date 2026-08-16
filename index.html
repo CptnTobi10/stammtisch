@@ -1,0 +1,2715 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<title>Stammtisch</title>
+
+<!-- PWA: macht die Seite auf dem Handy installierbar & vollbildfähig -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1A0E2E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Stammtisch">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap');
+
+:root{
+  --ink:#1A0E2E;
+  --panel:#2A1749;
+  --panel-2:#37205E;
+  --gold:#FFB627;
+  --gold-dim:#C98A1D;
+  --wine:#FF4D5E;
+  --cream:#FFF6E9;
+  --ash:#B8A6D9;
+  --line:#4A2E73;
+  --party:#FF2E93;
+  --party-dim:#C21F6E;
+  --teal:#2DE8D0;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;height:100%;overflow:hidden;overscroll-behavior:none;}
+body{
+  background:
+    radial-gradient(circle at 15% 8%, rgba(255,46,147,0.35) 0%, transparent 38%),
+    radial-gradient(circle at 88% 12%, rgba(255,182,39,0.28) 0%, transparent 40%),
+    radial-gradient(circle at 25% 92%, rgba(45,232,208,0.22) 0%, transparent 42%),
+    radial-gradient(circle at 90% 85%, rgba(178,60,255,0.28) 0%, transparent 45%),
+    var(--ink);
+  height:100dvh;
+  font-family:'Inter',sans-serif;
+  color:var(--cream);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+#app{
+  width:100%;
+  max-width:460px;
+  height:100dvh;
+  max-height:100dvh;
+  background:linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.15) 100%);
+  position:relative;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+  padding-top:calc(env(safe-area-inset-top) + 8px);
+  padding-bottom:24px;
+}
+/* The app fills the screen edge-to-edge and the page itself never scrolls or
+   bounces. #app is the only scrollable box, and only as a safety net for
+   content that genuinely can't fit (e.g. a big player roster) — most screens
+   fit fully within the viewport with nothing to scroll at all. */
+.display{font-family:'Bebas Neue',sans-serif; letter-spacing:0.03em;}
+.mono{font-family:'JetBrains Mono',monospace;}
+
+/* Top bar */
+.topbar{
+  display:flex; align-items:center; gap:12px;
+  padding:18px 20px 10px 20px;
+}
+.backbtn{
+  width:38px; height:38px; border-radius:50%;
+  background:var(--panel); border:1px solid var(--line);
+  color:var(--cream); display:flex; align-items:center; justify-content:center;
+  font-size:18px; cursor:pointer; flex-shrink:0;
+}
+.backbtn:active{background:var(--panel-2);}
+.helpbtn{
+  width:34px; height:34px; border-radius:50%; margin-left:auto; flex-shrink:0;
+  background:var(--panel); border:1px solid var(--gold-dim);
+  color:var(--gold); display:flex; align-items:center; justify-content:center;
+  font-family:'Bebas Neue',sans-serif; font-size:17px; cursor:pointer;
+}
+.helpbtn:active{background:var(--panel-2);}
+.topbar h1{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:26px; letter-spacing:0.04em; margin:0; color:var(--cream);
+}
+.topbar .sub{font-size:11px; color:var(--ash); margin-top:-2px;}
+
+.helpwrap{
+  position:fixed; inset:0; z-index:150;
+  background:rgba(10,8,5,0.72);
+  display:flex; align-items:center; justify-content:center;
+  padding:24px;
+}
+.helpcard{
+  background:linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+  border:1px solid var(--gold-dim); border-radius:18px;
+  padding:20px; max-width:380px; width:100%; max-height:82vh; overflow-y:auto;
+  box-shadow:0 24px 60px rgba(0,0,0,0.6);
+  animation:flipin .25s ease;
+}
+.kcrules{ display:flex; flex-direction:column; gap:6px; margin-bottom:14px; }
+.kcrule{ display:flex; gap:10px; align-items:flex-start; }
+.kcr-rank{ flex-shrink:0; width:30px; height:30px; border-radius:8px; background:var(--ink); border:1px solid var(--gold-dim); color:var(--gold); font-family:'Bebas Neue',sans-serif; font-size:16px; display:flex; align-items:center; justify-content:center; }
+.kcr-txt{ font-size:12.5px; line-height:1.4; color:var(--cream); }
+.kcr-txt b{ color:var(--gold); }
+.helpheader{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.helplist{ margin:0 0 16px 0; padding-left:20px; display:flex; flex-direction:column; gap:10px; }
+.helplist li{ font-size:13.5px; line-height:1.5; color:var(--cream); }
+
+/* Home */
+.hero{
+  padding:34px 24px 10px 24px; text-align:center;
+  position:relative;
+}
+.hero::before{
+  content:"";
+  position:absolute; top:-20px; left:50%; transform:translateX(-50%);
+  width:320px; height:220px;
+  background:radial-gradient(ellipse, rgba(255,46,147,0.3) 0%, rgba(255,182,39,0.22) 40%, rgba(45,232,208,0.12) 65%, transparent 80%);
+  pointer-events:none; z-index:0;
+}
+.hero .cupwrap{width:76px;margin:0 auto 14px auto; position:relative; z-index:1;}
+.hero h1{
+  font-size:clamp(32px, 10.2vw, 50px); margin:0; line-height:0.95;
+  background:linear-gradient(120deg, var(--cream) 0%, var(--gold) 55%, var(--party) 110%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  white-space:nowrap; position:relative; z-index:1;
+}
+.hero p{color:var(--ash); font-size:13px; margin:10px 0 0 0; letter-spacing:0.02em; position:relative; z-index:1;}
+.hero .sparkle{
+  position:absolute; font-size:16px; opacity:0.7; z-index:1; pointer-events:none;
+  animation:sparkletwinkle 2.4s ease-in-out infinite;
+}
+@keyframes sparkletwinkle{ 0%,100%{opacity:0.25; transform:scale(0.85);} 50%{opacity:0.85; transform:scale(1.1);} }
+
+.gamelist{padding:18px 20px; display:flex; flex-direction:column; gap:14px;}
+.rosterbar{
+  display:flex; align-items:center; gap:10px; cursor:pointer;
+  background:var(--panel); border:1px solid var(--line); border-radius:14px;
+  padding:12px 14px; margin-bottom:2px;
+}
+.rosterbar-names{ flex:1; font-size:13px; color:var(--cream); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.rosterbar-edit{ font-size:12px; color:var(--gold); flex-shrink:0; }
+.gamecard{
+  background:linear-gradient(155deg, var(--panel) 0%, var(--panel-2) 100%);
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:18px;
+  display:flex; align-items:center; gap:16px;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+  transition:transform .15s cubic-bezier(.34,1.56,.64,1);
+}
+.gamecard:active{transform:scale(0.97) rotate(-0.4deg);}
+.gamecard .icon{
+  width:52px; height:52px; border-radius:14px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:26px; flex-shrink:0;
+  background:rgba(217,164,65,0.1); border:1px solid rgba(217,164,65,0.25);
+}
+.gamecard.pf .icon{ background:rgba(51,217,193,0.12); border-color:rgba(51,217,193,0.3); }
+.gamecard.bf .icon{ background:rgba(255,62,127,0.12); border-color:rgba(255,62,127,0.32); }
+.gamecard .txt h3{margin:0 0 3px 0; font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:0.03em;}
+.gamecard .txt p{margin:0; font-size:12.5px; color:var(--ash); line-height:1.4;}
+.gamecard .arrow{margin-left:auto; color:var(--gold); font-size:18px; flex-shrink:0;}
+.gamecard.soon{opacity:0.45; cursor:default;}
+.gamecard.soon:active{transform:none;}
+.tag{
+  position:absolute; top:10px; right:10px;
+  font-size:9px; letter-spacing:0.08em; text-transform:uppercase;
+  background:var(--party); color:var(--cream); padding:3px 8px; border-radius:20px;
+  transform:rotate(4deg);
+  box-shadow:0 3px 8px rgba(255,62,127,0.35);
+}
+
+.footnote{
+  text-align:center; color:var(--ash); font-size:11px; padding:20px 30px 0 30px; line-height:1.6;
+}
+
+/* Buttons */
+.btn{
+  border:none; border-radius:14px; padding:15px 20px;
+  font-family:'Inter',sans-serif; font-weight:700; font-size:15px;
+  cursor:pointer; width:100%;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  transition:transform .12s cubic-bezier(.34,1.56,.64,1);
+}
+.btn:active{transform:scale(0.96) rotate(-0.5deg);}
+.btn-primary{background:linear-gradient(135deg, #FFD166, var(--gold)); color:#2E1500; box-shadow:0 4px 14px rgba(255,182,39,0.35);}
+.btn-ghost{background:var(--panel); color:var(--cream); border:1px solid var(--line);}
+.btn-wine{background:linear-gradient(135deg, #FF7A87, var(--wine)); color:#3A0008; box-shadow:0 4px 14px rgba(255,77,94,0.35);}
+.btn-sm{padding:10px 14px; font-size:13px; border-radius:10px; width:auto;}
+.btn:disabled{opacity:0.35; cursor:default;}
+
+.section{padding:0 20px;}
+.card-box{
+  background:linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+  border:1px solid var(--line); border-radius:16px;
+  padding:16px; margin-bottom:14px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.04), 0 8px 20px rgba(0,0,0,0.25);
+}
+.label{font-size:11px; text-transform:uppercase; letter-spacing:0.08em; color:var(--ash); margin-bottom:8px;}
+
+input[type=text], input[type=number]{
+  width:100%; background:var(--ink); border:1px solid var(--line); border-radius:10px;
+  padding:12px 14px; color:var(--cream); font-family:'Inter',sans-serif; font-size:14px;
+}
+input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
+
+.chiprow{display:flex; flex-wrap:wrap; gap:8px;}
+.chip{
+  background:var(--panel-2); border:1px solid var(--line); color:var(--cream);
+  padding:7px 13px; border-radius:20px; font-size:13px; display:flex; align-items:center; gap:6px;
+  cursor:pointer;
+}
+.chip.active{background:rgba(217,164,65,0.15); border-color:var(--gold); color:var(--gold);}
+.chip .x{color:var(--ash); cursor:pointer; font-weight:700;}
+.chip-sm{ padding:6px 10px; font-size:15px; }
+
+/* Pferderennen bet rows (setup + always-visible overview) */
+.betrows{ display:flex; flex-direction:column; gap:12px; }
+.betrow-setup{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  background:var(--panel-2); border:1px solid var(--line); border-radius:12px; padding:10px;
+}
+.betrow-name{ font-weight:700; font-size:13.5px; min-width:60px; }
+.stepper{
+  display:flex; align-items:center; gap:8px; margin-left:auto;
+  background:var(--ink); border:1px solid var(--line); border-radius:10px; padding:4px 8px;
+}
+.stepper.dim{ opacity:0.35; }
+.stepper button{
+  width:24px; height:24px; border-radius:6px; border:none; background:var(--panel);
+  color:var(--cream); font-size:15px; cursor:pointer; font-weight:700;
+}
+.stepper span{ font-family:'JetBrains Mono',monospace; min-width:18px; text-align:center; font-size:13px; }
+
+.betoverview{ display:flex; flex-direction:column; gap:10px; }
+.betgroup-head{ font-family:'Bebas Neue',sans-serif; font-size:15px; letter-spacing:0.02em; margin-bottom:4px; }
+.betgroup-head.red{ color:var(--wine); }
+.betgroup-head.black{ color:var(--cream); }
+.betrow{ display:flex; justify-content:space-between; font-size:13px; padding:3px 0; color:var(--cream); }
+
+/* Playing card visual */
+.playcard{
+  width:150px; height:210px; border-radius:16px;
+  background:linear-gradient(160deg,#FBF3E3,var(--cream));
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  margin:0 auto; box-shadow:0 12px 30px rgba(0,0,0,0.45), inset 0 0 0 2px rgba(255,182,39,0.45), inset 0 0 0 4px rgba(0,0,0,0.05);
+  position:relative;
+}
+.playcard .rank{font-family:'Bebas Neue',sans-serif; font-size:56px; line-height:1;}
+.playcard .suit{font-size:38px; margin-top:6px;}
+.playcard .corner{position:absolute; top:10px; left:12px; font-family:'Bebas Neue',sans-serif; font-size:16px; text-align:left; line-height:1;}
+.playcard .corner.br{top:auto; bottom:10px; right:12px; left:auto; text-align:right; transform:rotate(180deg);}
+.red{color:var(--wine);}
+.black{color:#241835;}
+
+.card-back{
+  width:150px; height:210px; border-radius:16px; margin:0 auto; cursor:pointer;
+  background:
+    repeating-linear-gradient(45deg, #1F1238 0px, #1F1238 6px, #170A29 6px, #170A29 12px);
+  border:3px solid var(--gold-dim);
+  display:flex; align-items:center; justify-content:center;
+  box-shadow:0 12px 30px rgba(0,0,0,0.45);
+}
+.card-back .glyph{font-size:40px; color:var(--gold); opacity:0.85;}
+
+/* Ring of Fire layout */
+.ringwrap{
+  position:relative; width:280px; height:280px; margin:4px auto 0 auto;
+}
+.ringglow{
+  position:absolute; inset:0; border-radius:50%; pointer-events:none;
+  background:radial-gradient(circle at 50% 50%, rgba(217,164,65,0.28) 0%, rgba(255,62,127,0.08) 45%, rgba(217,164,65,0.05) 60%, transparent 72%);
+  animation:glowpulse 3.2s ease-in-out infinite;
+}
+@keyframes glowpulse{ 0%,100%{opacity:0.55; transform:scale(0.97);} 50%{opacity:1; transform:scale(1.03);} }
+.ringslots{ position:absolute; inset:0; }
+.ringslot{
+  position:absolute; border-radius:3px;
+  background:repeating-linear-gradient(45deg,#1F1238 0 4px,#170A29 4px 8px);
+  border:1.4px solid var(--gold-dim);
+  cursor:pointer;
+  box-shadow:0 2px 5px rgba(0,0,0,0.35);
+  transition:transform .12s ease;
+}
+.ringslot:active{ filter:brightness(1.4); }
+.ringslot.picked{ filter:brightness(1.85); border-color:var(--gold); box-shadow:0 0 16px 4px rgba(255,182,39,0.95); z-index:5; }
+.ringslot.safe{ border-color:var(--gold); box-shadow:0 0 7px rgba(217,164,65,0.85), 0 2px 5px rgba(0,0,0,0.35); }
+.ringcup{
+  position:absolute; left:50%; top:50%; width:96px;
+  transform:translate(-50%,-50%); z-index:2;
+}
+.ringcup svg{ width:100%; display:block; filter:drop-shadow(0 6px 10px rgba(0,0,0,0.5)); }
+.ringhint{
+  text-align:center; font-size:11.5px; color:var(--ash); margin-top:12px;
+  padding:0 22px; line-height:1.5;
+}
+.effectrow{ display:flex; flex-wrap:wrap; gap:10px; }
+.effectchip{
+  display:flex; align-items:center; gap:8px;
+  background:var(--panel-2); border:1px solid var(--line); border-radius:10px;
+  padding:6px 10px 6px 6px;
+}
+.effectcard{
+  width:30px; height:40px; border-radius:5px; background:var(--cream);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  font-family:'Bebas Neue',sans-serif; font-size:13px; line-height:1.1; flex-shrink:0;
+}
+.effecttxt{ font-size:12px; line-height:1.4; }
+
+/* Cross-game big-card reveal burst */
+.burstwrap{
+  position:fixed; inset:0; z-index:200;
+  display:flex; align-items:center; justify-content:center;
+  pointer-events:none;
+}
+.burstbackdrop{
+  position:absolute; inset:0; background:rgba(10,8,5,0.6);
+  animation:burstfade 0.95s ease forwards;
+}
+@keyframes burstfade{ 0%{opacity:0;} 14%{opacity:1;} 74%{opacity:1;} 100%{opacity:0;} }
+.burstcard{
+  position:relative; z-index:1;
+  width:190px; height:266px; border-radius:18px;
+  background:linear-gradient(160deg,#FBF3E3,var(--cream));
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  box-shadow:0 20px 50px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(0,0,0,0.06);
+  animation:cardburst 0.95s cubic-bezier(.22,.85,.25,1) forwards;
+}
+.burstcard .rank{font-family:'Bebas Neue',sans-serif; font-size:64px; line-height:1;}
+.burstcard .suit{font-size:46px; margin-top:8px;}
+.burstcard .corner{position:absolute; top:14px; left:16px; font-family:'Bebas Neue',sans-serif; font-size:20px; text-align:left; line-height:1.05;}
+.burstcard .corner.br{top:auto; bottom:14px; right:16px; left:auto; text-align:right; transform:rotate(180deg);}
+@keyframes cardburst{
+  0%{ transform:scale(0.3); opacity:0; }
+  16%{ transform:scale(1.07); opacity:1; }
+  26%{ transform:scale(1); opacity:1; }
+  76%{ transform:scale(1); opacity:1; }
+  100%{ transform:scale(0.28); opacity:0; }
+}
+
+/* Cup */
+.cupmeter{display:flex; flex-direction:column; align-items:center; gap:6px;}
+.cupwrap svg{width:100%; height:auto; display:block;}
+
+.kingdots{display:flex; gap:8px; justify-content:center; margin-top:10px;}
+.kdot{width:12px;height:12px;border-radius:50%; background:var(--panel-2); border:1px solid var(--line); transition:background .2s, border-color .2s;}
+.kdot.on{background:var(--gold); border-color:var(--gold);}
+.kdot.active{outline:2px solid rgba(217,164,65,0.5); outline-offset:2px;}
+
+.ruletext{
+  text-align:center; font-size:17px; font-weight:600; line-height:1.5; padding:10px 6px 4px 6px;
+}
+.rulesub{text-align:center; font-size:12.5px; color:var(--ash); padding-bottom:6px;}
+
+.deckcount{text-align:center; color:var(--ash); font-size:12px; margin-top:4px;}
+/* Kings-Cup-Ambiente: dunkler Spieltisch mit warmer Glut in der Mitte */
+.kc-stage::before{
+  content:''; position:absolute; left:50%; top:50%; width:60%; height:60%;
+  transform:translate(-50%,-50%); border-radius:50%; z-index:0; pointer-events:none;
+  background:radial-gradient(circle, rgba(255,170,50,0.32) 0%, rgba(150,60,15,0.18) 42%, rgba(8,5,16,0.72) 74%, transparent 100%);
+}
+.kc-stage .ringcup{ filter:drop-shadow(0 0 22px rgba(255,182,39,0.55)); }
+/* Kings-Cup-Ambiente-Hintergrund (Rahmen, Blätter, Strahlen, Podest) */
+.kc-screen{ position:relative; min-height:100dvh; }
+.kc-screen::before{ content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
+  background:#160a24 url('assets/kc-bg.jpg') center top/cover no-repeat; }
+.kc-screen > *{ position:relative; z-index:1; }
+
+/* Timer */
+.timerbox{
+  display:flex; align-items:center; justify-content:center; gap:14px;
+  background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:16px;
+  transition:background .3s, border-color .3s;
+}
+.timerbox .time{font-family:'JetBrains Mono',monospace; font-size:30px; color:var(--gold); font-weight:700; transition:color .3s;}
+.timerbox.pressure-mid{ border-color:rgba(217,164,65,0.5); background:linear-gradient(180deg, rgba(217,164,65,0.08), var(--panel)); }
+.timerbox.pressure-mid .time{ color:#E8B85C; }
+.timerbox.pressure-high{ border-color:rgba(166,64,63,0.55); background:linear-gradient(180deg, rgba(166,64,63,0.14), var(--panel)); animation:pulse 1.4s ease infinite; }
+.timerbox.pressure-high .time{ color:#E28584; }
+
+/* Race track */
+.hurdlebar{ display:flex; gap:6px; padding-left:42px; margin-bottom:10px; }
+.hurdle{
+  flex:1; max-width:26px; height:30px; border-radius:4px;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Bebas Neue',sans-serif; font-size:14px;
+}
+.hurdle.hidden{
+  background:repeating-linear-gradient(45deg,#1F1238 0 4px,#170A29 4px 8px);
+  border:1.2px solid var(--gold-dim);
+}
+.hurdle.shown{ background:var(--cream); animation:flipin .35s ease; }
+.hurdle.shown.red{ color:var(--wine); }
+.hurdle.shown.black{ color:#241835; }
+
+.track{display:flex; flex-direction:column; gap:12px; margin-top:2px;}
+.lane{display:flex; align-items:center; gap:8px;}
+.lane .horse-tag{
+  width:34px; height:34px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+  font-size:17px; flex-shrink:0; font-weight:700;
+}
+.lane .laneline{
+  flex:1; position:relative; height:34px; border-radius:8px; overflow:hidden;
+  border:1px solid var(--line);
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 20px),
+    linear-gradient(180deg, #2B2114, #211A0F);
+}
+.lane .runner{
+  position:absolute; top:3px; height:28px; width:28px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; font-size:17px;
+  transition:left .5s cubic-bezier(.2,.9,.3,1.2);
+  box-shadow:0 3px 8px rgba(0,0,0,0.55);
+  z-index:2;
+}
+.lane .dust{
+  position:absolute; top:6px; height:22px; width:36px; border-radius:50%;
+  filter:blur(7px); opacity:0.45; transform:translateX(-60%);
+  transition:left .5s cubic-bezier(.2,.9,.3,1.2);
+  z-index:1;
+}
+.lane .finish{
+  position:absolute; right:0; top:0; bottom:0; width:6px;
+  background:repeating-conic-gradient(#EDE6DA 0% 25%, #170A29 0% 50%) 0 0/7px 7px;
+  box-shadow:0 0 8px rgba(255,62,127,0.5);
+  z-index:1;
+}
+.suit-red{background:var(--wine); color:#fff;}
+.suit-black{background:#241835; color:var(--cream); border:1px solid #5A3D7A;}
+
+.tracklog{
+  margin-top:12px; max-height:90px; overflow-y:auto; font-size:12px; color:var(--ash);
+  background:var(--ink); border-radius:10px; padding:8px 10px; border:1px solid var(--line);
+}
+.tracklog div{padding:2px 0;}
+
+.winnerbox{ text-align:center; border-color:var(--gold); margin-top:14px; position:relative; overflow:hidden; }
+.winnerribbon{
+  font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--gold);
+  background:rgba(217,164,65,0.12); border:1px solid rgba(217,164,65,0.3);
+  display:inline-block; padding:4px 12px; border-radius:20px; margin-bottom:10px;
+}
+.winnerhorse{ font-size:48px; margin-bottom:2px; filter:drop-shadow(0 6px 10px rgba(0,0,0,0.5)); }
+
+.confetti-wrap{ position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:1; }
+.confetti-piece{
+  position:absolute; top:-14px; width:7px; height:13px; border-radius:2px; opacity:0.95;
+  animation-name:confettiFall; animation-timing-function:cubic-bezier(.35,.55,.65,1); animation-fill-mode:forwards;
+}
+@keyframes confettiFall{
+  0%{ transform:translateY(0) translateX(0) rotate(0deg); opacity:1; }
+  100%{ transform:translateY(260px) translateX(var(--drift)) rotate(540deg); opacity:0; }
+}
+.winpop{ position:relative; z-index:2; animation:winpopKF 0.55s cubic-bezier(.2,1.4,.4,1); }
+@keyframes winpopKF{
+  0%{ transform:scale(0.4) rotate(-8deg); opacity:0; }
+  60%{ transform:scale(1.12) rotate(2deg); opacity:1; }
+  100%{ transform:scale(1) rotate(0deg); opacity:1; }
+}
+
+/* Players list */
+.playerrow{
+  display:flex; align-items:center; gap:10px; background:var(--panel-2); border:1px solid var(--line);
+  border-radius:12px; padding:10px 12px; margin-bottom:8px;
+}
+.playerrow .pname{flex:1; font-weight:600;}
+.playerrow .pmeta{font-size:11px; color:var(--ash);}
+.playerrow .remove{color:var(--ash); cursor:pointer; font-size:16px; padding:2px 6px;}
+
+.turnbanner{
+  text-align:center; background:linear-gradient(180deg, rgba(217,164,65,0.14), rgba(217,164,65,0.04));
+  border:1px solid rgba(217,164,65,0.3); border-radius:14px; padding:10px; margin-bottom:14px;
+}
+.turnbanner .who{font-family:'Bebas Neue',sans-serif; font-size:24px; letter-spacing:0.03em; color:var(--gold);}
+.turnbanner .what{font-size:12px; color:var(--ash);}
+
+.qtext{text-align:center; font-size:15px; font-weight:700; margin-bottom:14px;}
+.optrow{display:flex; gap:10px;}
+.optrow .btn{flex:1;}
+
+.resultbadge{
+  text-align:center; font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:0.03em; padding:8px;
+  border-radius:10px; margin:10px 0;
+}
+.res-right{background:rgba(217,164,65,0.12); color:var(--gold); border:1px solid rgba(217,164,65,0.3);}
+.res-wrong{background:rgba(166,64,63,0.16); color:#E28584; border:1px solid rgba(166,64,63,0.4);}
+
+.pyramid{display:flex; flex-direction:column-reverse; align-items:center; gap:8px; margin:12px 0;}
+.pyrow{display:flex; gap:8px;}
+.pyc{
+  width:52px; height:74px; border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  font-family:'Bebas Neue',sans-serif; cursor:pointer; position:relative;
+}
+.pyc.hidden{background:url('assets/card-back.png') center/cover; border:2px solid var(--gold-dim);}
+.pyc.shown{background:var(--cream); border:2px solid transparent;}
+.pyc .lvl{position:absolute; top:-8px; right:-6px; background:var(--party); color:#fff; font-size:9px; font-family:'Inter'; font-weight:700; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(255,62,127,0.4);}
+
+.handgrid{display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:10px;}
+.handc{
+  width:40px; height:56px; border-radius:6px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  font-family:'Bebas Neue',sans-serif; font-size:16px; background:var(--cream); position:relative;
+}
+.handc.used{opacity:0.25;}
+.handc.lastcard{ box-shadow:0 0 0 2px var(--gold), 0 0 10px rgba(255,182,39,0.5); }
+.handc.facedown{
+  background:repeating-linear-gradient(45deg,#1F1238 0 3px,#170A29 3px 6px);
+  border:1.2px solid var(--gold-dim);
+}
+
+.seatgrid{ display:flex; flex-direction:column; gap:10px; }
+.seat{
+  background:var(--ink); border:1px solid var(--line); border-radius:12px;
+  padding:10px; display:flex; flex-direction:column; align-items:center; gap:2px;
+  transition:border-color .2s, background .2s;
+}
+.seat-active{ border-color:var(--gold); background:linear-gradient(180deg, rgba(217,164,65,0.1), var(--ink)); }
+.seat-name{ font-size:12.5px; font-weight:700; color:var(--cream); margin-bottom:2px; }
+.seat-active .seat-name{ color:var(--gold); }
+
+.smalltable{width:100%; font-size:13px; border-collapse:collapse;}
+.smalltable td{padding:7px 4px; border-bottom:1px solid var(--line);}
+.smalltable td:last-child{text-align:right; color:var(--gold); font-weight:700;}
+
+.divider-cup{
+  display:flex; align-items:center; gap:10px; color:var(--gold-dim); margin:18px 0; padding:0 20px;
+}
+.divider-cup::before, .divider-cup::after{content:""; flex:1; height:1px; background:var(--line);}
+
+.centerinfo{text-align:center; color:var(--ash); font-size:13px; padding:10px 0;}
+.warnbox{
+  background:rgba(166,64,63,0.14); border:1px solid rgba(166,64,63,0.4);
+  color:#E28584; font-size:12.5px; line-height:1.5; padding:10px 14px;
+  border-radius:12px; margin-bottom:14px; text-align:center;
+}
+
+@keyframes flipin{ from{transform:rotateY(90deg); opacity:0;} to{transform:rotateY(0deg); opacity:1;} }
+.flip{animation:flipin .35s ease;}
+@keyframes pulse{0%,100%{opacity:1} 50%{opacity:0.5}}
+.pulse{animation:pulse 1.4s ease infinite;}
+
+/* Splash-Style: Kacheln schweben beim Öffnen sanft gestaffelt ein */
+@keyframes riseIn{ from{opacity:0; transform:translateY(16px) scale(0.98);} to{opacity:1; transform:translateY(0) scale(1);} }
+.gamelist .gamecard{ animation:riseIn .42s cubic-bezier(.22,.85,.25,1) both; }
+.gamelist .gamecard:nth-child(1){ animation-delay:.02s; }
+.gamelist .gamecard:nth-child(2){ animation-delay:.08s; }
+.gamelist .gamecard:nth-child(3){ animation-delay:.14s; }
+.gamelist .gamecard:nth-child(4){ animation-delay:.20s; }
+@media (prefers-reduced-motion:reduce){ .gamelist .gamecard{ animation:none; } }
+
+/* ===========================================================
+   SPLASH-STYLE HOME + PER-GAME SETUP
+=========================================================== */
+.spacer{ flex:1; }
+
+/* Home top bar */
+.homebar{ display:flex; align-items:center; gap:10px; padding:16px 20px 6px 20px; }
+.homebar .wordmark{
+  font-family:'Bebas Neue',sans-serif; font-size:30px; letter-spacing:0.04em;
+  background:linear-gradient(120deg, var(--cream), var(--gold) 60%, var(--party));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.iconbtn{
+  width:42px; height:42px; border-radius:50%; position:relative;
+  background:var(--panel); border:1px solid var(--line);
+  display:flex; align-items:center; justify-content:center; font-size:18px;
+  color:var(--cream); cursor:pointer; flex-shrink:0;
+}
+.iconbtn:active{ background:var(--panel-2); }
+.iconbtn .badge{
+  position:absolute; top:-5px; right:-5px; min-width:19px; height:19px; padding:0 4px;
+  background:var(--party); color:#fff; border-radius:10px; font-size:11px; font-weight:700;
+  display:flex; align-items:center; justify-content:center; border:2px solid var(--ink);
+}
+
+/* CSS cover art */
+.cover{
+  position:relative; border-radius:22px; overflow:hidden;
+  display:flex; flex-direction:column; justify-content:flex-end;
+  cursor:pointer; isolation:isolate;
+  box-shadow:0 12px 30px rgba(0,0,0,0.42), inset 0 1px 0 rgba(255,255,255,0.06);
+  transition:transform .14s cubic-bezier(.34,1.56,.64,1);
+}
+.cover:active{ transform:scale(0.98); }
+.cover.locked{ cursor:default; }
+.cover.locked:active{ transform:none; }
+.cover .glyph{
+  position:absolute; right:-8px; top:-14px; font-size:120px; line-height:1;
+  opacity:0.22; transform:rotate(-8deg); z-index:0; pointer-events:none;
+  filter:drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+}
+.cover .cover-body{ position:relative; z-index:1; padding:16px; }
+.cover .cover-title{
+  font-family:'Bebas Neue',sans-serif; font-size:30px; line-height:0.95; letter-spacing:0.02em; color:#fff;
+  text-shadow:0 2px 0 rgba(0,0,0,0.35), 0 6px 16px rgba(0,0,0,0.45);
+}
+.cover .cover-desc{ font-size:12.5px; color:rgba(255,255,255,0.85); margin-top:4px; line-height:1.35; }
+.cover-kc{ background:linear-gradient(to top, rgba(10,8,20,0.85), rgba(10,8,20,0.15) 55%, transparent), url('assets/cover-kc.png') center/cover; }
+.cover-pf{ background:linear-gradient(to top, rgba(10,8,20,0.85), rgba(10,8,20,0.15) 55%, transparent), url('assets/cover-pf.png') center/cover; }
+.cover-bf{ background:linear-gradient(to top, rgba(10,8,20,0.85), rgba(10,8,20,0.15) 55%, transparent), url('assets/cover-bf.png') center/cover; }
+.cover-kc .glyph, .cover-pf .glyph, .cover-bf .glyph{ display:none; }
+.cover-soon{ background:linear-gradient(150deg,#241835,#1A0E2E); border:1px dashed var(--line); }
+
+/* Hero carousel */
+.hero-carousel{ padding:8px 20px 0 20px; }
+.hero-cover{ height:238px; animation:riseIn .45s cubic-bezier(.22,.85,.25,1) both; }
+.hero-cover .cover-title{ font-size:46px; }
+.hero-play{
+  margin-top:12px; display:inline-flex; align-items:center; gap:8px; border:none; cursor:pointer;
+  background:linear-gradient(135deg,#FF7A87,var(--wine)); color:#fff; font-weight:700; font-size:15px;
+  padding:12px 24px; border-radius:30px; box-shadow:0 6px 18px rgba(255,77,94,0.42);
+}
+.hero-dots{ display:flex; gap:7px; justify-content:center; margin-top:12px; }
+.hero-dots .hd{ width:7px; height:7px; border-radius:50%; background:var(--line); cursor:pointer; transition:width .2s, background .2s; }
+.hero-dots .hd.on{ background:var(--gold); width:20px; border-radius:4px; }
+
+/* Cover grid */
+.shelf-head{
+  padding:20px 20px 0 20px; font-family:'Bebas Neue',sans-serif; font-size:20px;
+  letter-spacing:0.03em; color:var(--cream);
+}
+.covergrid{ padding:10px 20px 0 20px; display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.covergrid .cover{ height:148px; }
+
+/* Per-game setup screens */
+.setup-screen{ position:relative; min-height:100dvh; display:flex; flex-direction:column; }
+.setup-screen.kc{ background:radial-gradient(120% 260px at 50% 0, rgba(255,182,39,0.26), transparent 70%); }
+.setup-screen.pf{ background:radial-gradient(120% 260px at 50% 0, rgba(45,232,208,0.24), transparent 70%); }
+.setup-screen.bf{ background:radial-gradient(120% 260px at 50% 0, rgba(255,46,147,0.28), transparent 70%); }
+.setup-hero{ text-align:center; padding:8px 20px 8px; }
+.setup-hero .gtitle{
+  font-family:'Bebas Neue',sans-serif; font-size:42px; line-height:0.95; letter-spacing:0.02em; color:#fff;
+  text-shadow:0 2px 0 rgba(0,0,0,0.3), 0 8px 20px rgba(0,0,0,0.45);
+}
+.setcard{ background:var(--panel); border:1px solid var(--line); border-radius:18px; overflow:hidden; margin-bottom:14px; }
+.setrow{ display:flex; align-items:center; gap:12px; padding:15px 16px; border-bottom:1px solid var(--line); }
+.setrow:last-child{ border-bottom:none; }
+.setrow .ic{ font-size:20px; width:26px; text-align:center; flex-shrink:0; }
+.setrow .rl{ flex:1; font-size:15px; font-weight:600; color:var(--cream); }
+.setrow .rv{ font-size:14px; color:var(--ash); display:flex; align-items:center; gap:8px; }
+.setrow .rv .chev{ color:var(--ash); font-size:17px; }
+.setrow.warn{ background:linear-gradient(180deg, rgba(255,182,39,0.14), transparent); }
+.setrow.tapp{ cursor:pointer; }
+.setrow.tapp:active{ background:var(--panel-2); }
+
+/* iOS-style toggle */
+.toggle{ width:50px; height:30px; border-radius:20px; background:var(--line); position:relative; transition:background .2s; flex-shrink:0; cursor:pointer; }
+.toggle.on{ background:#34C759; }
+.toggle .knob{ position:absolute; top:3px; left:3px; width:24px; height:24px; border-radius:50%; background:#fff; transition:left .2s; box-shadow:0 1px 3px rgba(0,0,0,0.4); }
+.toggle.on .knob{ left:23px; }
+
+/* Segmented control */
+.segmented{ display:flex; gap:6px; background:var(--ink); border:1px solid var(--line); border-radius:12px; padding:4px; }
+.segmented .seg{ flex:1; text-align:center; padding:9px 6px; border-radius:9px; font-size:13px; color:var(--ash); cursor:pointer; }
+.segmented .seg.on{ background:var(--gold); color:#2E1500; font-weight:700; }
+
+/* Floating primary action */
+.floatbar{
+  position:sticky; bottom:0; margin-top:auto;
+  padding:14px 20px calc(16px + env(safe-area-inset-bottom)) 20px;
+  background:linear-gradient(180deg, transparent, rgba(10,8,20,0.55) 40%);
+}
+.floatbar .btn{ box-shadow:0 8px 24px rgba(0,0,0,0.45); }
+
+/* Pferderennen — klares Spielbrett mit sichtbaren Feldern */
+.raceboard{ display:grid; gap:6px 4px; align-items:center; }
+.rb-tag{
+  height:34px; border-radius:9px; display:flex; align-items:center; justify-content:center;
+  font-size:18px; font-weight:700; box-shadow:0 3px 0 rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+/* Rennbahn im Holzrahmen mit echtem Rasen */
+.raceboard-wrap{
+  position:relative; padding:14px 12px; border-radius:20px;
+  background:linear-gradient(160deg,#7a5230,#4a3016);
+  box-shadow:inset 0 0 0 3px var(--gold-dim), inset 0 0 0 6px rgba(0,0,0,0.22), 0 12px 26px rgba(0,0,0,0.45);
+}
+/* (Schrägperspektive entfernt, Brett bleibt flach mit Rasen + Holzrahmen) */
+.rb-cell{
+  height:36px; border-radius:6px; position:relative;
+  background:url('assets/turf.png') center/cover;
+  border:1px solid rgba(0,0,0,0.4);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.06), inset 0 3px 8px rgba(0,0,0,0.32);
+  display:flex; align-items:center; justify-content:center;
+}
+.rb-cell.passed{ background:linear-gradient(rgba(84,60,28,0.82),rgba(56,40,18,0.82)), url('assets/turf.png') center/cover; border-color:var(--gold-dim); }
+.rb-cell.here{
+  background:linear-gradient(rgba(255,182,39,0.30),rgba(255,182,39,0.08)), url('assets/turf.png') center/cover;
+  border-color:var(--gold); box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12), 0 0 16px rgba(255,182,39,0.55);
+}
+.rb-cell.here::before{
+  content:''; position:absolute; left:8px; bottom:6px; width:18px; height:8px; border-radius:50%;
+  background:rgba(255,240,200,0.4); filter:blur(4px); z-index:1; animation:puff .5s ease-in-out infinite;
+}
+@keyframes puff{ 0%,100%{ opacity:0.12; transform:scale(0.8) translateX(0); } 50%{ opacity:0.4; transform:scale(1.15) translateX(-4px); } }
+.rb-cell.bump{ animation:cellbump .34s cubic-bezier(.3,1.5,.5,1); }
+@keyframes cellbump{ 0%{ transform:translateY(0); } 32%{ transform:translateY(-8px) scale(1.08); } 100%{ transform:translateY(0); } }
+.rb-gate{ width:70%; height:2px; border-radius:2px; background:repeating-linear-gradient(90deg,#EDE6DA 0 3px, transparent 3px 6px); opacity:0.55; }
+.rb-token{ height:34px; width:auto; display:block; position:relative; z-index:2; filter:drop-shadow(0 5px 4px rgba(0,0,0,0.55)); animation:horsebob .5s ease-in-out infinite; }
+@keyframes horsebob{ 0%,100%{ transform:translateY(0) rotate(-2deg); } 50%{ transform:translateY(-5px) rotate(2deg); } }
+.rb-hcard{ height:32px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:15px; font-family:'Bebas Neue',sans-serif; }
+.rb-hcard.start{ font-size:15px; opacity:0.6; }
+.rb-hcard.down{ background:repeating-linear-gradient(45deg,#1F1238 0 4px,#170A29 4px 8px); border:1px solid var(--gold-dim); color:var(--gold-dim); font-size:13px; box-shadow:inset 0 2px 4px rgba(0,0,0,0.4); }
+.rb-hcard.up{ background:linear-gradient(160deg,#FBF3E3,var(--cream)); box-shadow:0 2px 5px rgba(0,0,0,0.35); }
+.rb-hcard.up.red{ color:var(--wine); } .rb-hcard.up.black{ color:#241835; }
+.rb-finishhead{ display:flex; align-items:center; justify-content:center; font-size:15px; }
+.rb-finishcol{ height:36px; border-radius:6px; background:repeating-conic-gradient(#EDE6DA 0 25%, #170A29 0 50%) 0 0/7px 7px; box-shadow:0 0 8px rgba(255,62,127,0.5); display:flex; align-items:center; justify-content:center; overflow:visible; }
+.rb-finishcol.won{ box-shadow:0 0 16px rgba(255,182,39,0.7); }
+.rb-finishcol .rb-token{ height:32px; }
+
+/* Live-Kommentator */
+.commentbox{
+  display:flex; align-items:center; gap:12px; margin-top:14px; padding:13px 14px;
+  background:linear-gradient(180deg, var(--panel-2), var(--panel));
+  border:1px solid var(--gold-dim); border-radius:16px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.06), 0 8px 20px rgba(0,0,0,0.3);
+}
+.commentbox .mic{ font-size:24px; flex-shrink:0; animation:micpulse 1s ease-in-out infinite; }
+@keyframes micpulse{ 0%,100%{ transform:scale(1) rotate(-4deg); } 50%{ transform:scale(1.16) rotate(4deg); } }
+.commentbox .ctext{ font-size:14.5px; font-weight:600; line-height:1.35; color:var(--cream); animation:flipin .28s ease; }
+.rb-num{ height:18px; display:flex; align-items:center; justify-content:center; font-size:11px; color:var(--ash); font-family:'JetBrains Mono',monospace; }
+
+/* Stimmen-Auswahl */
+.voiceselect{ width:100%; background:var(--ink); border:1px solid var(--line); border-radius:10px; padding:11px 12px; color:var(--cream); font-family:'Inter',sans-serif; font-size:14px; }
+
+/* Ergebnis-Popup (erscheint erst am Rennende, poppt über das Spielfeld) */
+.resultpop{ position:fixed; inset:0; z-index:160; background:rgba(10,8,20,0.78); display:flex; align-items:center; justify-content:center; padding:20px; overflow:auto; }
+.resultpop-inner{ width:100%; max-width:400px; animation:winpopKF .5s cubic-bezier(.2,1.4,.4,1); }
+.resultpop-inner .winnerbox{ margin-top:0; }
+.wintrophy{ height:100px; width:auto; display:block; margin:6px auto 2px; filter:drop-shadow(0 8px 12px rgba(0,0,0,0.5)); }
+.wincrown{ height:82px; width:auto; display:block; margin:0 auto 6px; filter:drop-shadow(0 6px 10px rgba(0,0,0,0.5)); animation:winpopKF .5s cubic-bezier(.2,1.4,.4,1); }
+
+/* Stadion-Hintergrund hinter der Rennbahn */
+.race-screen{ position:relative; }
+.race-screen::before{ content:''; position:absolute; inset:0; background:url('assets/pf-track-bg.png') center/cover; opacity:0.16; z-index:0; pointer-events:none; }
+.race-screen > *{ position:relative; z-index:1; }
+
+/* Startampel-Einblendung beim Rennstart */
+.startflash{ position:fixed; inset:0; z-index:170; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; pointer-events:none; background:rgba(10,8,20,0.4); animation:burstfade 1.6s ease forwards; }
+.startflash img{ height:130px; width:auto; filter:drop-shadow(0 8px 14px rgba(0,0,0,0.6)); animation:winpopKF .5s cubic-bezier(.2,1.4,.4,1); }
+.startflash-txt{ font-family:'Bebas Neue',sans-serif; font-size:44px; letter-spacing:0.05em; color:var(--gold); text-shadow:0 3px 12px rgba(0,0,0,0.7); }
+
+/* Busfahrer — näher an den Mockups */
+.busbench{ display:flex; align-items:center; gap:10px; background:var(--ink); border:1px solid var(--line); border-radius:12px; padding:8px 10px; margin-bottom:8px; }
+.busbench.active{ border-color:var(--gold); background:linear-gradient(180deg, rgba(217,164,65,0.12), var(--ink)); }
+.busbench-name{ flex:1; font-size:13.5px; font-weight:700; color:var(--cream); }
+.busbench.active .busbench-name{ color:var(--gold); }
+.busbench-slots{ display:flex; gap:6px; flex-shrink:0; }
+.benchcard{ width:30px; height:42px; border-radius:6px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; font-size:15px; background:linear-gradient(160deg,#FBF3E3,var(--cream)); box-shadow:0 2px 4px rgba(0,0,0,0.3); }
+.benchcard.facedown{ background:url('assets/card-back.png') center/cover; border:1px solid var(--gold-dim); }
+.buscardrow{ display:flex; gap:16px; justify-content:center; margin-bottom:16px; }
+.buscard{ width:88px; height:120px; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:46px; box-shadow:0 12px 26px rgba(0,0,0,0.45), inset 0 2px 0 rgba(255,255,255,0.15); animation:riseIn .4s ease both; }
+.buscard.red{ background:linear-gradient(160deg,#FF6B7A,var(--wine)); }
+.buscard.black{ background:linear-gradient(160deg,#3a2b52,#1a1030); border:1px solid var(--line); }
+.buscard-bus{ width:80px; height:auto; filter:drop-shadow(0 4px 6px rgba(0,0,0,0.4)); }
+.avatar{ display:inline-flex; align-items:center; justify-content:center; border-radius:50%; font-family:'Bebas Neue',sans-serif; color:#fff; object-fit:cover; border:2px solid var(--gold-dim); flex-shrink:0; vertical-align:middle; box-shadow:0 2px 5px rgba(0,0,0,0.35); }
+.btn-answer-red{ background:linear-gradient(135deg,#FF6B7A,var(--wine)); color:#fff; box-shadow:0 4px 12px rgba(255,77,94,0.35); }
+.btn-answer-black{ background:linear-gradient(135deg,#3a2b52,#241835); color:var(--cream); border:1px solid var(--line); }
+.pyc.next{ box-shadow:0 0 0 2px var(--gold), 0 0 14px rgba(255,182,39,0.6); animation:pulse 1.3s ease infinite; }
+.pycbus{ font-size:20px; opacity:0.55; }
+
+/* Querformat: volles Spielfeld, große Pferde */
+@media (orientation:landscape) and (max-height:540px){
+  .race-screen .topbar{ padding:4px 12px 2px; }
+  .race-screen .topbar h1{ font-size:16px; }
+  .race-screen .topbar .sub{ font-size:9px; }
+  .race-screen .section{ padding:0 16px; }
+  .race-screen .raceboard-wrap{ padding:8px 10px; margin-bottom:8px; }
+  .race-screen .rb-cell, .race-screen .rb-tag, .race-screen .rb-finishcol{ height:46px; }
+  .race-screen .rb-token{ height:46px; }
+  .race-screen .rb-num{ height:15px; font-size:10px; }
+  .race-screen .commentbox{ margin-top:8px; padding:8px 12px; }
+  .race-screen .commentbox .mic{ font-size:20px; }
+  .race-screen .commentbox .ctext{ font-size:13px; }
+}
+
+@media (orientation:landscape) and (max-height:540px){
+  .hero-cover{ height:150px; }
+  .hero-cover .cover-title{ font-size:30px; }
+  .covergrid{ grid-template-columns:repeat(4,1fr); }
+  .covergrid .cover{ height:108px; }
+  .setup-hero .gtitle{ font-size:28px; }
+}
+
+/* ===========================================================
+   LANDSCAPE — placed last on purpose so it wins the cascade
+   against the unconditional rules above with equal specificity.
+=========================================================== */
+@media (orientation:landscape) and (max-height:540px){
+  /* Querformat: volle Bildschirmbreite nutzen (statt 460px-Kappung) */
+  #app{ max-width:100%; }
+  .covergrid{ grid-template-columns:repeat(4,1fr); }
+  .hero-carousel, .shelf-head, .covergrid{ max-width:900px; margin-left:auto; margin-right:auto; }
+  .hero{ padding:6px 24px 4px 24px; }
+  .hero .cupwrap, .hero > div:first-child{ display:none; }
+  .hero h1{ font-size:clamp(18px,5vw,26px); }
+  .hero p{ font-size:10.5px; margin-top:2px; }
+  .topbar{ padding:6px 16px 4px 16px; }
+  .topbar h1{ font-size:20px; }
+  .ringwrap{ transform:scale(0.6); margin:-58px auto -58px auto; }
+  .card-box{ padding:10px; margin-bottom:8px; }
+  .rosterbar{ padding:8px 12px; margin-bottom:0; }
+  .footnote{ display:none; }
+  .gamelist{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:8px;
+    padding:8px 16px;
+  }
+  .gamecard{
+    flex-direction:column; text-align:center; padding:10px 8px; gap:6px;
+  }
+  .gamecard .icon{ width:36px; height:36px; font-size:18px; margin:0 auto; }
+  .gamecard .txt h3{ font-size:15px; }
+  .gamecard .txt p{ display:none; }
+  .gamecard .arrow{ display:none; }
+  .gamecard .tag{ font-size:8px; padding:2px 6px; }
+  .seatgrid{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .seat{ padding:6px; }
+  .handc{ width:30px; height:42px; font-size:13px; }
+  .turnbanner{ padding:6px; margin-bottom:8px; }
+  .turnbanner .who{ font-size:18px; }
+  .pyramid{ transform:scale(0.85); margin:-14px 0; }
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ---------------------------------------------------------
+   DATEN & HILFSFUNKTIONEN
+--------------------------------------------------------- */
+const SUITS = [
+  {sym:'♠', color:'black', name:'Pik'},
+  {sym:'♥', color:'red', name:'Herz'},
+  {sym:'♦', color:'red', name:'Karo'},
+  {sym:'♣', color:'black', name:'Kreuz'}
+];
+const RANKS = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+const SKAT_RANKS = ['7','8','9','10','J','Q','K','A'];
+
+// size: 52 (Poker/full deck) or 32 (Skat deck, ranks 7-Ass only).
+// `value` always uses the full 0-12 scale so comparisons (higher/lower)
+// stay meaningful regardless of which deck size is in play.
+function buildDeck(size){
+  size = size || 52;
+  const ranksToUse = size===32 ? SKAT_RANKS : RANKS;
+  const deck=[];
+  SUITS.forEach(s=>{
+    ranksToUse.forEach(r=>{
+      deck.push({rank:r, suit:s.sym, color:s.color, suitName:s.name, value:RANKS.indexOf(r)});
+    });
+  });
+  return deck;
+}
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function fmtTime(sec){
+  const m=Math.floor(sec/60).toString().padStart(2,'0');
+  const s=Math.floor(sec%60).toString().padStart(2,'0');
+  return m+':'+s;
+}
+
+/* ---------------------------------------------------------
+   SICHERHEIT — Namen sicher in HTML und in onclick-Handler
+   einbetten (Sonderzeichen wie < > " ' zerschießen sonst die
+   Anzeige oder brechen den Handler).
+--------------------------------------------------------- */
+function esc(s){
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+// sicher als Argument innerhalb von onclick="fn('HIER')"
+function jsAttr(s){
+  return String(s)
+    .replace(/\\/g,'\\\\').replace(/'/g,"\\'")
+    .replace(/&/g,'&amp;').replace(/"/g,'&quot;')
+    .replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ---------------------------------------------------------
+   FEEDBACK — Sound (WebAudio, keine Dateien nötig) + Vibration.
+   Bewusst dezent: kurze Töne, damit es sich "wie eine App" anfühlt,
+   ohne am Tisch zu nerven. Per Umschalter abstellbar.
+--------------------------------------------------------- */
+let soundOn = true;
+let kcSpeaker = false; // Kings Cup: Regeln der gezogenen Karte vorlesen
+let audioCtx = null;
+function ensureAudio(){
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended') audioCtx.resume();
+  }catch(e){ audioCtx = null; }
+}
+function tone(freq, start, dur, type, vol){
+  if(!audioCtx) return;
+  const o = audioCtx.createOscillator();
+  const g = audioCtx.createGain();
+  o.type = type||'sine';
+  o.frequency.value = freq;
+  const t0 = audioCtx.currentTime + (start||0);
+  g.gain.setValueAtTime(0, t0);
+  g.gain.linearRampToValueAtTime(vol||0.18, t0+0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(t0); o.stop(t0+dur+0.02);
+}
+function sfx(name){
+  if(!soundOn) return;
+  ensureAudio();
+  if(!audioCtx) return;
+  if(name==='card'){ tone(520,0,0.09,'triangle',0.14); tone(780,0.03,0.08,'triangle',0.10); }
+  else if(name==='win'){ [523,659,784,1047].forEach((f,i)=>tone(f,i*0.09,0.28,'triangle',0.16)); }
+  else if(name==='wrong'){ tone(180,0,0.28,'sawtooth',0.13); tone(120,0.06,0.30,'sawtooth',0.11); }
+  else if(name==='tap'){ tone(440,0,0.05,'sine',0.08); }
+}
+function buzz(pattern){
+  try{ if('vibrate' in navigator) navigator.vibrate(pattern); }catch(e){}
+}
+// Ein Aufruf für "es ist etwas passiert": Sound + passende Vibration.
+function feedback(kind){
+  if(kind==='card'){ sfx('card'); buzz(12); }
+  else if(kind==='win'){ sfx('win'); buzz([0,40,60,40,60,90]); }
+  else if(kind==='wrong'){ sfx('wrong'); buzz([0,60,40,60]); }
+  else if(kind==='tap'){ sfx('tap'); buzz(8); }
+}
+function toggleSound(){ soundOn = !soundOn; if(soundOn){ ensureAudio(); feedback('tap'); } saveStore(); render(); }
+function toggleKcSpeaker(){ kcSpeaker = !kcSpeaker; saveStore(); if(kcSpeaker) pfSpeak('Sprecher an. Ich lese die Regeln vor.'); render(); }
+
+/* ---------------------------------------------------------
+   SPEICHERN — Spielerliste, aktive Runde, Schluck-Bilanz, Rekord
+   und Sound-Einstellung überleben Neuladen und App-Neustart
+   (localStorage). Auf echtem Hosting und lokal voll funktionsfähig;
+   der frühere Verzicht lag nur an der Bau-Sandbox.
+--------------------------------------------------------- */
+const STORE_KEY = 'stammtisch_v1';
+function saveStore(){
+  try{
+    localStorage.setItem(STORE_KEY, JSON.stringify({
+      savedPlayers, roster, busBestTime, sipTally, soundOn, kcSpeaker
+    }));
+  }catch(e){}
+}
+function loadStore(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(!raw) return;
+    const d = JSON.parse(raw);
+    if(Array.isArray(d.savedPlayers)) savedPlayers = d.savedPlayers;
+    if(Array.isArray(d.roster)) roster = d.roster;
+    if(typeof d.busBestTime==='number') busBestTime = d.busBestTime;
+    if(d.sipTally && typeof d.sipTally==='object') sipTally = d.sipTally;
+    if(typeof d.soundOn==='boolean') soundOn = d.soundOn;
+    if(typeof d.kcSpeaker==='boolean') kcSpeaker = d.kcSpeaker;
+  }catch(e){}
+}
+
+/* ---------------------------------------------------------
+   RÜCKGÄNGIG — ein Schritt zurück bei Fehltipp (v.a. Kings-Cup-Ring
+   und Pferderennen). Sichert Spielstand + Schluck-Bilanz vor der
+   Aktion und stellt beides bei Bedarf wieder her.
+--------------------------------------------------------- */
+let undoSnap = null;
+function snapshot(){
+  try{ undoSnap = JSON.parse(JSON.stringify({ state, sipTally })); }
+  catch(e){ undoSnap = null; }
+}
+function clearUndo(){ undoSnap = null; }
+function undo(){
+  if(!undoSnap) return;
+  clearTimers();
+  state = undoSnap.state;
+  sipTally = undoSnap.sipTally;
+  undoSnap = null;
+  state.burst = null;
+  feedback('tap');
+  saveStore();
+  render();
+}
+
+/* ---------------------------------------------------------
+   SPIELERVERWALTUNG — Adressbuch + aktive Runde. Lebt außerhalb
+   von `state`, damit reset() (Zurück zum Start) die Liste innerhalb
+   der Sitzung nicht mitlöscht. Wird per localStorage dauerhaft
+   gespeichert (siehe oben).
+--------------------------------------------------------- */
+let savedPlayers = [];   // das komplette Adressbuch dieser Sitzung
+let roster = [];         // die aktuell aktive Runde ("wer spielt heute mit")
+let busBestTime = null;  // schnellste Busfahrt dieser Session (über mehrere Runden hinweg)
+
+// Schluck-Bilanz übers ganze Session hinweg — nur für Spiele mit klar
+// zuordenbaren Mengen (Pferderennen, Busfahrer). Kings Cup bleibt außen vor:
+// die meisten Regeln dort sind sozial/beschreibend statt zahlenbasiert und
+// ließen sich nicht verlässlich automatisch mitzählen.
+let sipTally = {};
+function tallyAdd(name, field, amount){
+  if(!name || !amount) return;
+  if(!sipTally[name]) sipTally[name] = {drunk:0, given:0};
+  sipTally[name][field] += amount;
+  saveStore();
+}
+function resetTally(){ sipTally = {}; saveStore(); }
+
+function addSavedPlayer(name){
+  if(!name) return;
+  if(!savedPlayers.includes(name)){ savedPlayers.push(name); }
+  saveStore();
+}
+function removeSavedPlayer(name){
+  savedPlayers = savedPlayers.filter(n=>n!==name);
+  roster = roster.filter(n=>n!==name);
+  saveStore();
+  render();
+}
+function toggleRoster(name){
+  const idx = roster.indexOf(name);
+  if(idx===-1) roster.push(name); else roster.splice(idx,1);
+  feedback('tap');
+  saveStore();
+  render();
+}
+function addRosterName(){
+  const n = (state.rosterNewName||'').trim();
+  if(!n) return;
+  addSavedPlayer(n);
+  if(!roster.includes(n)) roster.push(n);
+  state.rosterNewName='';
+  feedback('tap');
+  saveStore();
+  render();
+}
+
+/* ---------------------------------------------------------
+   STAMMRUNDE — feste 8-Spieler-Voreinstellung mit Avataren.
+   AVATARS wird mit Bildpfaden gefüllt, sobald die Avatar-Grafiken
+   erzeugt sind; bis dahin zeigt avatarHTML einen farbigen Kreis
+   mit Initiale.
+--------------------------------------------------------- */
+const PRESET_PLAYERS = ['Leroy','Adi','Leo','Max','Samu','Tobi','Bocki','Bruno'];
+const AVATARS = {
+  Leroy:'assets/av-leroy.png', Adi:'assets/av-adi.png', Leo:'assets/av-leo.png',
+  Max:'assets/av-max.png', Samu:'assets/av-samu.png', Tobi:'assets/av-tobi.png',
+  Bocki:'assets/av-bocki.png', Bruno:'assets/av-bruno.png'
+};
+let avatarsReady = true;
+function avatarColor(name){ let h=0; for(const c of String(name)) h=(h*31+c.charCodeAt(0))%360; return h; }
+function avatarFallbackHTML(name, size){
+  const h = avatarColor(name);
+  return `<span class="avatar" style="width:${size}px;height:${size}px;background:hsl(${h},55%,45%);font-size:${Math.round(size*0.5)}px;">${esc((String(name)[0]||'?').toUpperCase())}</span>`;
+}
+function avatarHTML(name, size){
+  size = size||30;
+  if(avatarsReady && AVATARS[name]){
+    const fallback = jsAttr(avatarFallbackHTML(name, size));
+    return `<img class="avatar" src="${AVATARS[name]}" style="width:${size}px;height:${size}px;" alt="" onerror="this.outerHTML='${fallback}'">`;
+  }
+  return avatarFallbackHTML(name, size);
+}
+function loadPreset(){
+  PRESET_PLAYERS.forEach(n=>{
+    if(!savedPlayers.includes(n)) savedPlayers.push(n);
+    if(!roster.includes(n)) roster.push(n);
+  });
+  feedback('tap');
+  saveStore();
+  render();
+}
+
+
+const app = document.getElementById('app');
+let state = { screen:'roster' };
+let timers = {}; // active intervals to clear on re-render
+
+function clearTimers(){
+  Object.values(timers).forEach(t=>clearInterval(t));
+  timers = {};
+}
+// reset(): wipes all state and starts a screen completely fresh (used from Home)
+function reset(screen){
+  clearTimers();
+  clearUndo();
+  state = { screen };
+  render();
+}
+// nav(): switches screen but KEEPS all existing state properties
+// (used for transitions within a running game, so in-progress data like
+// decks, hands, bets, or player lists is never accidentally lost)
+function nav(screen){
+  clearTimers();
+  clearUndo();
+  state.screen = screen;
+  render();
+}
+function render(){
+  window.scrollTo(0,0);
+  if(state.screen==='roster') renderRoster();
+  else if(state.screen==='home') renderHome();
+  else if(state.screen==='bilanz') renderBilanz();
+  else if(state.screen==='kingscup-setup') renderKingsCupSetup();
+  else if(state.screen==='kingscup') renderKingsCup();
+  else if(state.screen==='bus-setup') renderBusSetup();
+  else if(state.screen==='pferd-setup') renderPferdSetup();
+  else if(state.screen==='pferd-race') renderPferdRace();
+  else if(state.screen==='bus-phase1') renderBusPhase1();
+  else if(state.screen==='bus-phase2') renderBusPhase2();
+  else if(state.screen==='bus-phase3') renderBusPhase3();
+
+  if(state.helpOpen){
+    app.insertAdjacentHTML('beforeend', helpHTML(state.helpOpen));
+  }
+  if(state.leaveTarget){
+    app.insertAdjacentHTML('beforeend', leaveConfirmHTML());
+  }
+  if(state.busGive){
+    app.insertAdjacentHTML('beforeend', busGiveHTML());
+  }
+  // Cross-game "big card" reveal overlay: whenever a card was just drawn,
+  // show it large in the center for a moment, then let it shrink away to
+  // reveal the normal (smaller) in-place card underneath.
+  if(state.burst){
+    app.insertAdjacentHTML('beforeend', burstHTML(state.burst));
+  }
+}
+
+function burstHTML(card){
+  const colorClass = card.color==='red' ? 'red':'black';
+  return `
+    <div class="burstwrap">
+      <div class="burstbackdrop"></div>
+      <div class="burstcard">
+        <div class="corner ${colorClass}">${card.rank}<br>${card.suit}</div>
+        <div class="rank ${colorClass}">${card.rank}</div>
+        <div class="suit ${colorClass}">${card.suit}</div>
+        <div class="corner br ${colorClass}">${card.rank}<br>${card.suit}</div>
+      </div>
+    </div>`;
+}
+function triggerBurst(card){
+  feedback('card');
+  state.burst = card;
+  clearTimeout(timers.burst);
+  timers.burst = setTimeout(()=>{ state.burst = null; render(); }, 950);
+}
+
+// Kleiner Konfetti-Effekt für Sieger-/Erfolgsmomente (Kings Cup 4. König,
+// Pferderennen-Gewinner, Busfahrer geschafft). Rein dekorativ, spielt sich
+// einmal ab und verschwindet — kein Interaktions-Overhead.
+function confettiHTML(count){
+  count = count || 22;
+  const colors = ['var(--gold)','var(--party)','var(--wine)','var(--cream)','var(--teal)'];
+  let pieces = '';
+  for(let i=0;i<count;i++){
+    const left = Math.round(Math.random()*100);
+    const delay = (Math.random()*0.35).toFixed(2);
+    const dur = (1.4 + Math.random()*1.1).toFixed(2);
+    const color = colors[i%colors.length];
+    const rot = Math.round(Math.random()*360);
+    const drift = Math.round((Math.random()-0.5)*60);
+    pieces += `<div class="confetti-piece" style="left:${left}%; background:${color}; animation-delay:${delay}s; animation-duration:${dur}s; --drift:${drift}px; transform:rotate(${rot}deg);"></div>`;
+  }
+  return `<div class="confetti-wrap">${pieces}</div>`;
+}
+
+/* ---------------------------------------------------------
+   HILFE-MODAL — ein "?"-Button pro Spiel, erklärt die Regeln
+   knapp und einfach für jemanden, der es noch nie gespielt hat.
+--------------------------------------------------------- */
+const HELP_TEXT = {
+  kingscup: {
+    title:'Kings Cup — so geht\'s',
+    steps:[
+      'Ihr legt einen Becher in die Mitte. Reihum tippt jeder auf eine beliebige Karte im Ring.',
+      'Jede Karte hat eine feste Regel (steht immer direkt unter der Karte, z.B. "Ich = du trinkst").',
+      'Bei jedem gezogenen König gießt du einen Schluck deines Getränks in den Mittelbecher.',
+      'Zieht jemand den 4. König, muss er den ganzen Becher austrinken — die Runde ist vorbei.'
+    ]
+  },
+  pferderennen: {
+    title:'Pferderennen — so geht\'s',
+    steps:[
+      'Vier Kartenfarben sind die "Pferde". Jeder Mitspieler kann auf eine Farbe Schlucke setzen.',
+      'Reihum werden Karten gezogen — die passende Farbe rückt ein Feld vor.',
+      'Verdeckte Hürden-Karten über der Bahn: sobald alle vier Pferde daran vorbei sind, deckt sie auf und schickt die passende Farbe ein Feld zurück.',
+      'Das erste Pferd im Ziel gewinnt: wer richtig gesetzt hat, verteilt die doppelte Menge an Schlucken. Wer falsch lag, trinkt seinen Einsatz.'
+    ]
+  },
+  busfahrer: {
+    title:'Busfahrer — so geht\'s',
+    steps:[
+      'Phase 1: Reihum beantworten alle dieselbe Frage (z.B. rot/schwarz), dann alle die nächste (höher/tiefer, innerhalb/außerhalb, Farbe) — so füllen sich die 4 Karten aller Spieler Runde für Runde.',
+      'Phase 2: Aus den restlichen Karten wird eine Pyramide aufgedeckt. Wer eine passende Karte auf der Hand hat, legt sie ab und verteilt Schlucke (Anzahl = Ebene der Pyramide).',
+      'Wer am Ende die meisten Karten übrig hat, wird Busfahrer.',
+      'Phase 3: Der Busfahrer muss die 4 Fragen aus Phase 1 hintereinander richtig beantworten. Bei jedem Fehler: trinken und von vorne.'
+    ]
+  }
+};
+function showHelp(key){ state.helpOpen = key; render(); }
+function closeHelp(){ state.helpOpen = null; render(); }
+function helpHTML(key){
+  const h = HELP_TEXT[key];
+  if(!h) return '';
+  // Kings Cup: alle Kartenregeln zum Nachlesen (im Spiel selbst ausgeblendet)
+  const rulesBlock = (key==='kingscup') ? `
+    <div class="label" style="margin:6px 0 6px;">Alle Kartenregeln</div>
+    <div class="kcrules">
+      ${RANKS.map(r=>{ const x=KC_RULES[r]; return x?`<div class="kcrule"><span class="kcr-rank">${r}</span><span class="kcr-txt"><b>${x.t}</b> ${x.s}</span></div>`:''; }).join('')}
+    </div>` : '';
+  return `
+    <div class="helpwrap" onclick="if(event.target===this) closeHelp()">
+      <div class="helpcard">
+        <div class="helpheader">
+          <div class="display" style="font-size:22px;color:var(--gold);">${h.title}</div>
+          <div class="backbtn" onclick="closeHelp()">✕</div>
+        </div>
+        <ol class="helplist">
+          ${h.steps.map(s=>`<li>${s}</li>`).join('')}
+        </ol>
+        ${rulesBlock}
+        <button class="btn btn-primary" onclick="closeHelp()">Verstanden</button>
+      </div>
+    </div>`;
+}
+function helpBtnHTML(key){
+  return `<div class="helpbtn" onclick="showHelp('${key}')">?</div>`;
+}
+
+/* ---------------------------------------------------------
+   VERLASSEN-BESTÄTIGUNG — eigenes Modal statt window.confirm(),
+   da native Dialoge in eingebetteten Artefakten oft blockiert
+   werden. Wird beim Zurück-Button während eines laufenden
+   Spiels gezeigt, damit niemand den Fortschritt aus Versehen
+   verwirft.
+--------------------------------------------------------- */
+function askLeave(target){ state.leaveTarget = target; render(); }
+function confirmLeaveYes(){
+  const t = state.leaveTarget;
+  state.leaveTarget = null;
+  nav(t);
+}
+function confirmLeaveNo(){ state.leaveTarget = null; render(); }
+function leaveConfirmHTML(){
+  if(!state.leaveTarget) return '';
+  return `
+    <div class="helpwrap" onclick="if(event.target===this) confirmLeaveNo()">
+      <div class="helpcard" style="text-align:center;">
+        <div class="display" style="font-size:22px;color:var(--wine);">Spiel verlassen?</div>
+        <p style="font-size:13px;color:var(--ash);margin:12px 0 18px 0;line-height:1.5;">Der Fortschritt dieser Runde geht verloren.</p>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-ghost" onclick="confirmLeaveNo()">Weiterspielen</button>
+          <button class="btn btn-wine" onclick="confirmLeaveYes()">Verlassen</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+
+/* ---------------------------------------------------------
+   HOME
+--------------------------------------------------------- */
+function cupSVG(percent){
+  const p = Math.max(0, Math.min(1, percent));
+  const top=20, bottom=58, span=bottom-top;   // Becher-Innenraum
+  const fillTop = bottom - span*p;
+  const uid = 'c'+Math.random().toString(36).slice(2,7);
+  return `
+  <svg viewBox="0 0 100 120" class="cupwrap">
+    <defs>
+      <linearGradient id="gold${uid}" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#FFE9A8"/><stop offset="0.5" stop-color="#F5B841"/><stop offset="1" stop-color="#B97A18"/>
+      </linearGradient>
+      <linearGradient id="drink${uid}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#FFD36B"/><stop offset="1" stop-color="#C98A1D"/>
+      </linearGradient>
+      <clipPath id="bowl${uid}"><path d="M22 20 L78 20 L70 56 Q50 64 30 56 Z"/></clipPath>
+    </defs>
+    <rect x="46" y="58" width="8" height="26" fill="url(#gold${uid})"/>
+    <ellipse cx="50" cy="94" rx="26" ry="7" fill="url(#gold${uid})"/>
+    <ellipse cx="50" cy="91" rx="19" ry="4" fill="#8A5A10" opacity="0.4"/>
+    <path d="M22 20 L78 20 L70 56 Q50 64 30 56 Z" fill="url(#gold${uid})"/>
+    <g clip-path="url(#bowl${uid})">
+      <rect x="20" y="${fillTop.toFixed(1)}" width="60" height="${(bottom-fillTop).toFixed(1)}" fill="url(#drink${uid})"/>
+      <ellipse cx="50" cy="${fillTop.toFixed(1)}" rx="27" ry="3.5" fill="#FFE79A" opacity="${p>0?0.95:0}"/>
+    </g>
+    <ellipse cx="50" cy="20" rx="28" ry="5" fill="#2A1749" opacity="0.35"/>
+    <ellipse cx="50" cy="20" rx="28" ry="5" fill="none" stroke="#8A5A10" stroke-width="1.6"/>
+    <ellipse cx="50" cy="40" rx="5" ry="7" fill="#7B2FC0" stroke="#8A5A10" stroke-width="1"/>
+    <circle cx="48.5" cy="37.5" r="1.4" fill="#fff" opacity="0.8"/>
+  </svg>`;
+}
+
+function renderRoster(){
+  state.rosterNewName = state.rosterNewName ?? '';
+
+  const chips = savedPlayers.map(n=>{
+    const active = roster.includes(n);
+    return `
+      <div class="chip ${active?'active':''}">
+        <span onclick="toggleRoster('${jsAttr(n)}')" style="display:flex;align-items:center;gap:6px;">${avatarHTML(n,26)}${active?'✓':''} ${esc(n)}</span>
+        <span class="x" onclick="removeSavedPlayer('${jsAttr(n)}')">✕</span>
+      </div>`;
+  }).join('');
+
+  app.innerHTML = `
+    ${state.rosterReturn ? `<div class="topbar"><div class="backbtn" onclick="nav('${state.rosterReturn}')">‹</div><div class="spacer"></div></div>` : ''}
+    <div class="hero" style="padding-top:${state.rosterReturn?'8px':'26px'};">
+      <div style="width:56px;margin:0 auto;">${cupSVG(0.35)}</div>
+      <h1 class="display" style="font-size:clamp(26px,8vw,38px);">WER SPIELT MIT?</h1>
+      <p>Namen antippen zum Hinzufügen, sie werden dauerhaft gespeichert</p>
+    </div>
+
+    <div class="section">
+      <div class="card-box">
+        <input type="text" placeholder="Neuen Namen eingeben" value="${state.rosterNewName}"
+          oninput="state.rosterNewName=this.value"
+          onkeydown="if(event.key==='Enter') addRosterName()">
+        <div style="height:10px;"></div>
+        <button class="btn btn-ghost" onclick="addRosterName()">+ Hinzufügen</button>
+        <div style="height:8px;"></div>
+        <button class="btn btn-ghost" onclick="loadPreset()">👥 Stammrunde laden (8 Spieler)</button>
+      </div>
+
+      ${chips ? `
+        <div class="card-box">
+          <div class="label">Alle gespeicherten Spieler — antippen zum An/Abwählen</div>
+          <div class="chiprow">${chips}</div>
+        </div>
+      ` : `<p class="centerinfo">Noch keine gespeicherten Namen — leg oben los.</p>`}
+
+      <div class="card-box" style="text-align:center;">
+        <div class="label" style="margin-bottom:2px;">Heutige Runde</div>
+        <div class="display" style="font-size:30px;color:var(--gold);">${roster.length} ${roster.length===1?'Spieler':'Spieler'}</div>
+        ${roster.length>0 ? `<div style="font-size:12.5px;color:var(--ash);margin-top:2px;">${roster.map(esc).join(' · ')}</div>` : ''}
+      </div>
+
+      <button class="btn btn-primary" ${roster.length<1?'disabled':''} onclick="nav('${state.rosterReturn||'home'}')">${state.rosterReturn?'Fertig':'Weiter zur Spielauswahl'}</button>
+      ${roster.length<1 ? `<div class="centerinfo">Mindestens 1 Spieler auswählen</div>` : ''}
+    </div>
+  `;
+}
+
+// Zentrale Spiel-Liste — speist Hero-Carousel und Cover-Kacheln.
+const GAMES = [
+  {key:'kc', title:'KINGS CUP',    desc:'Ring of Fire · jede Karte eine Regel', glyph:'🂡', cls:'cover-kc', screen:'kingscup-setup'},
+  {key:'pf', title:'PFERDERENNEN', desc:'Setz auf eine Farbe und fiebere mit',  glyph:'🐎', cls:'cover-pf', screen:'pferd-setup'},
+  {key:'bf', title:'BUSFAHRER',    desc:'Raten · Pyramide · Endspiel',           glyph:'🚌', cls:'cover-bf', screen:'bus-setup'},
+];
+function openGame(screen){ reset(screen); }
+function openRoster(from){ state.rosterReturn = from; nav('roster'); }
+function heroSet(i){ state.heroIdx = i; render(); }
+
+function renderHome(){
+  const hi = state.heroIdx = ((state.heroIdx||0)%GAMES.length + GAMES.length)%GAMES.length;
+  const g = GAMES[hi];
+  const hasTally = Object.keys(sipTally).length>0;
+
+  app.innerHTML = `
+    <div class="homebar">
+      <div class="wordmark">STAMMTISCH</div>
+      <div class="spacer"></div>
+      <div class="iconbtn" onclick="toggleSound()">${soundOn?'🔊':'🔇'}</div>
+      <div class="iconbtn" onclick="openRoster('home')">👥${roster.length>0?`<span class="badge">${roster.length}</span>`:''}</div>
+    </div>
+
+    <div class="hero-carousel">
+      <div class="cover hero-cover ${g.cls}" onclick="openGame('${g.screen}')">
+        <div class="glyph">${g.glyph}</div>
+        <div class="cover-body">
+          <div class="cover-title">${g.title}</div>
+          <div class="cover-desc">${g.desc}</div>
+          <button class="hero-play" onclick="event.stopPropagation(); openGame('${g.screen}')">▶︎ Spielen</button>
+        </div>
+      </div>
+      <div class="hero-dots">
+        ${GAMES.map((x,i)=>`<div class="hd ${i===hi?'on':''}" onclick="heroSet(${i})"></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="shelf-head">Alle Spiele</div>
+    <div class="covergrid">
+      ${GAMES.map(x=>`
+        <div class="cover ${x.cls}" onclick="openGame('${x.screen}')">
+          <div class="glyph" style="font-size:82px;">${x.glyph}</div>
+          <div class="cover-body"><div class="cover-title" style="font-size:23px;">${x.title}</div></div>
+        </div>
+      `).join('')}
+      <div class="cover cover-soon locked">
+        <div class="glyph" style="font-size:82px; opacity:0.14;">🃏</div>
+        <div class="cover-body"><div class="cover-title" style="font-size:20px; color:var(--ash);">BALD MEHR</div></div>
+      </div>
+    </div>
+
+    ${hasTally ? `
+      <div class="section" style="margin-top:18px;">
+        <div class="rosterbar" onclick="nav('bilanz')">
+          <div class="rosterbar-names">📊 Schluck-Bilanz dieser Session</div>
+          <div class="rosterbar-edit">›</div>
+        </div>
+      </div>` : ''}
+
+    <p class="footnote">Verantwortungsvoll genießen. Alle Spiele gehen auch alkoholfrei, einfach Schlucke durch Punkte ersetzen.</p>
+  `;
+
+  // Hero rotiert sanft von selbst; ein Timer genügt (gegen Mehrfachanlage geschützt).
+  if(!timers.hero){
+    timers.hero = setInterval(()=>{ state.heroIdx = ((state.heroIdx||0)+1)%GAMES.length; render(); }, 4800);
+  }
+}
+
+/* ---------------------------------------------------------
+   PER-GAME SETUP-SCREENS (Splash-Stil: Themenfarbe, Zeilenliste,
+   schwebender Startbutton)
+--------------------------------------------------------- */
+function renderKingsCupSetup(){
+  state.deckSize = state.deckSize || 52;
+  app.innerHTML = `
+   <div class="setup-screen kc">
+    <div class="topbar">
+      <div class="backbtn" onclick="nav('home')">‹</div>
+      <div class="spacer"></div>
+      ${helpBtnHTML('kingscup')}
+    </div>
+    <div class="setup-hero"><div class="gtitle" style="color:var(--gold);">KINGS CUP</div><div class="rulesub">Ring of Fire</div></div>
+    <div class="section">
+      <div class="setcard">
+        <div class="setrow tapp ${roster.length<1?'warn':''}" onclick="openRoster('kingscup-setup')">
+          <div class="ic">👥</div><div class="rl">Spieler</div>
+          <div class="rv">${roster.length<1?'⚠️ ':''}${roster.length} <span class="chev">›</span></div>
+        </div>
+        <div class="setrow" style="flex-direction:column; align-items:stretch; gap:10px;">
+          <div style="display:flex; align-items:center; gap:12px;"><div class="ic">🃏</div><div class="rl">Kartendeck</div></div>
+          <div class="segmented">
+            <div class="seg ${state.deckSize===52?'on':''}" onclick="state.deckSize=52; render();">Poker · 52</div>
+            <div class="seg ${state.deckSize===32?'on':''}" onclick="state.deckSize=32; render();">Skat · 32</div>
+          </div>
+        </div>
+        <div class="setrow tapp" onclick="toggleKcSpeaker()">
+          <div class="ic">🎙️</div><div class="rl">Sprecher</div>
+          <div class="rv"><div class="toggle ${kcSpeaker?'on':''}"><div class="knob"></div></div></div>
+        </div>
+        <div class="setrow tapp" onclick="showHelp('kingscup')">
+          <div class="ic">📺</div><div class="rl">Regeln & So geht's</div>
+          <div class="rv">Ansehen <span class="chev">›</span></div>
+        </div>
+      </div>
+      <p class="centerinfo" style="text-align:left;">Spieler sind optional. Sie helfen nur, König-/Regel-Effekte einer Person zuzuordnen. Der Sprecher liest die Regel jeder gezogenen Karte vor (Sound muss an sein).</p>
+    </div>
+    <div class="floatbar">
+      <button class="btn btn-primary" onclick="kcStart()">🎉 Spiel starten</button>
+    </div>
+   </div>
+  `;
+}
+function kcStart(){
+  const size = state.deckSize||52;
+  clearTimers(); clearUndo();
+  state = { screen:'kingscup', deckSize:size };
+  kcInit(size);
+  render();
+}
+
+function renderBusSetup(){
+  const enough = roster.length>=3;
+  const overCap = roster.length>10;
+  app.innerHTML = `
+   <div class="setup-screen bf">
+    <div class="topbar">
+      <div class="backbtn" onclick="nav('home')">‹</div>
+      <div class="spacer"></div>
+      ${helpBtnHTML('busfahrer')}
+    </div>
+    <div class="setup-hero"><div class="gtitle" style="color:var(--party);">BUSFAHRER</div><div class="rulesub">Raten · Pyramide · Endspiel</div></div>
+    <div class="section">
+      <div class="setcard">
+        <div class="setrow tapp ${!enough?'warn':''}" onclick="openRoster('bus-setup')">
+          <div class="ic">👥</div><div class="rl">Spieler</div>
+          <div class="rv">${!enough?'⚠️ ':''}${roster.length} <span class="chev">›</span></div>
+        </div>
+        <div class="setrow">
+          <div class="ic">🃏</div><div class="rl">Kartendeck</div>
+          <div class="rv">automatisch · ${Math.min(roster.length,10)<=5?'32':'52'} Karten</div>
+        </div>
+        <div class="setrow tapp" onclick="showHelp('busfahrer')">
+          <div class="ic">📺</div><div class="rl">So geht's</div>
+          <div class="rv">Ansehen <span class="chev">›</span></div>
+        </div>
+      </div>
+      ${!enough ? `<div class="warnbox">Busfahrer braucht mindestens 3 Spieler. Aktuell: ${roster.length}. Tippe oben auf Spieler.</div>`
+        : overCap ? `<div class="warnbox">Es spielen die ersten 10 von ${roster.length} mit (Deck-Limit).</div>` : ''}
+    </div>
+    <div class="floatbar">
+      <button class="btn btn-primary" ${enough?'':'disabled'} onclick="busStartFromHome()">🚌 Spiel starten</button>
+    </div>
+   </div>
+  `;
+}
+
+function renderBilanz(){
+  const rows = Object.entries(sipTally)
+    .sort((a,b)=> b[1].drunk - a[1].drunk)
+    .map(([name,t])=>`
+      <div class="playerrow">
+        <div class="pname">${esc(name)}</div>
+        <div style="display:flex; gap:14px; font-size:13px;">
+          <span style="color:#E28584;">🥤 ${t.drunk}</span>
+          <span style="color:var(--gold);">🎁 ${t.given}</span>
+        </div>
+      </div>
+    `).join('');
+
+  app.innerHTML = `
+    <div class="topbar">
+      <div class="backbtn" onclick="nav('home')">‹</div>
+      <div><h1>Schluck-Bilanz</h1><div class="sub">Über alle Spiele dieser Session</div></div>
+    </div>
+    <div class="section">
+      <p class="centerinfo" style="text-align:left;">Zählt Pferderennen-Wetten und Busfahrer (Pyramide + Busfahrt). Kings Cup ist meist zu sozial/unklar in der Menge, um automatisch mitgezählt zu werden.</p>
+      <div class="card-box">
+        <div class="label" style="display:flex; justify-content:space-between;">
+          <span>Spieler</span>
+          <span>🥤 getrunken · 🎁 verteilt</span>
+        </div>
+        ${rows || `<p class="centerinfo">Noch keine Daten — spiel eine Runde Pferderennen oder Busfahrer.</p>`}
+      </div>
+      <button class="btn btn-ghost" onclick="resetTally(); render();">Bilanz zurücksetzen</button>
+    </div>
+  `;
+}
+/* ---------------------------------------------------------
+   KINGS CUP / WASSERFALL
+--------------------------------------------------------- */
+const KC_RULES = {
+  'A': {t:'Wasserfall', s:'Alle trinken gleichzeitig. Aufhören darf nur reihum – erst wenn dein rechter Nachbar stoppt.'},
+  '2': {t:'Du', s:'Wähle eine Person, die trinkt.'},
+  '3': {t:'Ich', s:'Du trinkst selbst.'},
+  '4': {t:'Boden', s:'Alle berühren zuletzt den Boden. Der Letzte trinkt.'},
+  '5': {t:'Kategorien', s:'Nenne ein Thema. Reihum passende Begriffe – wer scheitert, trinkt.'},
+  '6': {t:'Männer trinken', s:'Alle männlichen Mitspieler trinken.'},
+  '7': {t:'Himmel', s:'Alle strecken die Hand nach oben. Der Letzte trinkt.'},
+  '8': {t:'Trinkpartner', s:'Wähle jemanden – er trinkt immer mit dir mit, bis zur nächsten 8.'},
+  '9': {t:'Reim', s:'Gib ein Wort vor. Reihum Reimwörter finden – wer scheitert, trinkt.'},
+  '10': {t:'Fragenmeister', s:'Wer auf deine Fragen antwortet, trinkt – bis zur nächsten 10.'},
+  'J': {t:'Regel', s:'Stelle eine neue Tischregel auf. Wer sie bricht, trinkt.'},
+  'Q': {t:'Daumenmeister', s:'Du bist jetzt Daumenmeister. Lege jederzeit heimlich deinen Daumen auf den Tisch — wer als Letzte(r) merkt und nachzieht, trinkt. Gilt bis zur nächsten Dame.'},
+  'K': {t:'Kings Cup', s:'Gieße einen Schluck deines Getränks in den Becher in der Mitte.'}
+};
+
+// Nur Vorschläge, kein Zwang: Kategorien (5) und Reimwörter (9) müssen nicht
+// verwendet werden — sie helfen nur, wenn gerade nichts einfällt.
+const CATEGORY_SUGGESTIONS = ['Biersorten','Filme','Vornamen','Länder','Automarken','Serien','Cocktails','Berufe','Tiere','Farben','Bands','Süßigkeiten','Promis','Fußballvereine','Superhelden','Städte','Getränke','Comicfiguren'];
+const RHYME_SUGGESTIONS = ['Baum','Hand','Wein','Stein','Nacht','Tür','Bier','Herz','Sonne','Katze','Haus','Wand','Fest','Licht','Blume','Glas','Tanz','Meer'];
+function kcRandomSuggestions(pool){
+  return shuffle(pool).slice(0,3);
+}
+function kcRefreshSuggestions(){
+  if(!state.current) return;
+  const rank = state.current.rank;
+  const pool = rank==='5' ? CATEGORY_SUGGESTIONS : rank==='9' ? RHYME_SUGGESTIONS : null;
+  if(!pool) return;
+  state.kcSuggestions = kcRandomSuggestions(pool);
+  render();
+}
+
+function kcInit(size){
+  state.deckSize = size || state.deckSize || 52;
+  state.ring = shuffle(buildDeck(state.deckSize)); // remaining cards, in circular order
+  state.current = null;
+  state.kings = 0;
+  state.drawnCount = 0;
+  state.gameOver = false;
+  state.wfRunning = false;
+  state.wfSeconds = 0;
+  state.wfBest = state.wfBest || 0;
+  state.kcEffects = { J:null, '8':null, '10':null, 'Q':null, '5':null, '9':null }; // persistent per-player effects
+  state.kcPendingAttrib = null;
+  state.kcSuggestions = null;
+}
+function kcSetDeckSize(size){
+  if(state.drawnCount>0) return; // locked once the round has started
+  kcInit(size);
+  render();
+}
+
+// The ring is rendered from the CURRENT remaining cards only, evenly spaced
+// around the circle — so it always looks like one unbroken, overlapping ring
+// (no visible holes). Any card can be picked freely.
+function kcRingSVG(){
+  const ring = state.ring;
+  const n = ring.length;
+  if(n===0) return '';
+  const cx=140, cy=140, r=114;
+  const circumference = 2*Math.PI*r;
+  const slotW = Math.min(26, Math.max(12, (circumference/n)*1.35));
+  const slotH = slotW*1.42;
+  let slots = '';
+  for(let i=0;i<n;i++){
+    const angle = (i/n)*2*Math.PI - Math.PI/2;
+    const x = cx + r*Math.cos(angle);
+    const y = cy + r*Math.sin(angle);
+    const rot = (angle*180/Math.PI)+90;
+    slots += `<div class="ringslot ${state.kcPickFlash===i?'picked':''}" style="width:${slotW}px;height:${slotH}px;left:${x}px; top:${y}px; transform:translate(-50%,-50%) rotate(${rot}deg);" onclick="kcTapCard(${i})"></div>`;
+  }
+  return slots;
+}
+
+function kcEffectsHTML(){
+  const map = [
+    ['J','📜','Regel', state.kcEffects.J],
+    ['8','🥂','Trinkpartner', state.kcEffects['8']],
+    ['10','👑','Fragenmeister', state.kcEffects['10']],
+    ['Q','👍','Daumenmeister', state.kcEffects['Q']],
+    ['5','🗂️','Kategorie', state.kcEffects['5']],
+    ['9','📝','Reimwort', state.kcEffects['9']],
+  ].filter(e=>e[3]);
+  if(map.length===0) return '';
+  return `
+    <div class="card-box">
+      <div class="label">Aktive Effekte am Tisch</div>
+      <div class="effectrow">
+        ${map.map(([rank,icon,label,eff])=>`
+          <div class="effectchip">
+            <div class="effectcard ${eff.card.color}">${eff.card.rank}<br><span style="font-size:12px;">${eff.card.suit}</span></div>
+            <div class="effecttxt">${icon} <b>${label}</b><br>${esc(eff.player)}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderKingsCup(){
+  if(!state.ring){ kcInit(); }
+
+  const cupPercent = state.kings/4;
+  const dots = [0,1,2,3].map(i=>`<div class="kdot ${i<state.kings?'on':''}"></div>`).join('');
+
+  let cardHTML;
+  if(!state.current){
+    cardHTML = `<div class="centerinfo" style="padding-top:6px;">Wähle eine beliebige Karte aus dem Ring</div>`;
+  } else {
+    const c = state.current;
+    const colorClass = c.color==='red' ? 'red':'black';
+    cardHTML = `
+      <div class="playcard flip">
+        <div class="corner ${colorClass}">${c.rank}<br>${c.suit}</div>
+        <div class="rank ${colorClass}">${c.rank}</div>
+        <div class="suit ${colorClass}">${c.suit}</div>
+        <div class="corner br ${colorClass}">${c.rank}<br>${c.suit}</div>
+      </div>`;
+  }
+
+  const rule = state.current ? KC_RULES[state.current.rank] : null;
+
+  const suggestBlock = state.kcSuggestions ? `
+    <div class="card-box" style="text-align:center;">
+      <div class="label">Vorschläge (optional, keine Pflicht)</div>
+      <div class="chiprow" style="justify-content:center;">
+        ${state.kcSuggestions.map(s=>`<div class="chip">${s}</div>`).join('')}
+      </div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="kcRefreshSuggestions()">🔄 Andere Vorschläge</button>
+    </div>
+  ` : '';
+
+  const attribBlock = state.kcPendingAttrib ? `
+    <div class="card-box" style="text-align:center;">
+      <div class="label">Wer hat diese Karte gezogen?</div>
+      <div class="chiprow" style="justify-content:center;">
+        ${roster.map(n=>`<div class="chip" onclick="kcAttribute('${jsAttr(n)}')">${esc(n)}</div>`).join('')}
+      </div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:8px;" onclick="kcSkipAttribute()">Ohne Zuordnung</button>
+    </div>
+  ` : '';
+
+  const isAce = state.current && state.current.rank === 'A';
+  const wfBlock = isAce ? `
+    <div class="timerbox" style="margin-top:14px;">
+      <div>
+        <div class="time mono">${fmtTime(state.wfSeconds)}</div>
+        <div style="font-size:11px;color:var(--ash);text-align:center;">Wasserfall-Zeit</div>
+      </div>
+      <button class="btn ${state.wfRunning?'btn-wine':'btn-primary'} btn-sm" onclick="kcToggleWF()">
+        ${state.wfRunning ? 'Stopp' : 'Start'}
+      </button>
+    </div>
+    ${state.wfBest>0 ? `<div class="centerinfo">🏆 Rekord dieser Runde: ${fmtTime(state.wfBest)}</div>` : ''}
+  ` : '';
+
+  const gameOverBlock = state.gameOver ? `
+    <div class="card-box" style="text-align:center; border-color:var(--gold); position:relative; overflow:hidden;">
+      ${confettiHTML()}
+      <img class="wintrophy" src="assets/pf-trophy.png" alt="">
+      <div class="display winpop" style="font-size:26px;color:var(--gold);">4. KÖNIG!</div>
+      <p style="font-size:13px;color:var(--ash);margin:6px 0 14px 0;">Der Becher ist voll. Wer ihn gezogen hat, trinkt ihn jetzt aus. Runde beendet.</p>
+      <button class="btn btn-primary" onclick="kcInit(); render();">Neue Runde</button>
+    </div>
+  ` : '';
+
+  app.innerHTML = `
+   <div class="kc-screen">
+    <div class="topbar">
+      <div class="backbtn" onclick="askLeave('home')">‹</div>
+      <div>
+        <h1>Kings Cup</h1>
+        <div class="sub">Ring of Fire · frei wählen</div>
+      </div>
+      ${helpBtnHTML('kingscup')}
+    </div>
+
+    <div class="section">
+      <div class="kingdots" style="margin-bottom:10px;">${dots}</div>
+      <div class="ringwrap kc-stage">
+        <div class="ringglow"></div>
+        <div class="ringslots">${kcRingSVG()}</div>
+        <div class="ringcup">${cupSVG(cupPercent)}</div>
+      </div>
+    </div>
+
+    <div class="section">
+      ${cardHTML}
+      ${undoSnap ? `<button class="btn btn-ghost btn-sm" style="margin:12px auto 0;" onclick="undo()">↶ Zug zurück</button>` : ''}
+    </div>
+
+    ${rule ? `
+      <div class="section">
+        <div class="ruletext">${rule.t}</div>
+        <div class="rulesub">${rule.s}</div>
+      </div>
+    ` : ''}
+
+    ${suggestBlock ? `<div class="section">${suggestBlock}</div>` : ''}
+
+    ${attribBlock ? `<div class="section">${attribBlock}</div>` : ''}
+
+    ${wfBlock ? `<div class="section">${wfBlock}</div>` : ''}
+
+    ${gameOverBlock ? `<div class="section">${gameOverBlock}</div>` : ''}
+
+    <div class="section">
+      ${kcEffectsHTML()}
+    </div>
+   </div>
+  `;
+}
+
+function kcAttribute(name){
+  const rank = state.kcPendingAttrib;
+  if(!rank) return;
+  state.kcEffects[rank] = { player:name, card: state.current };
+  state.kcPendingAttrib = null;
+  render();
+}
+function kcSkipAttribute(){
+  state.kcPendingAttrib = null;
+  render();
+}
+
+function kcTapCard(i){
+  // kurzer Aufleucht-Effekt an der getippten Karte, dann ziehen
+  if(state.gameOver || state.kcPickFlash!=null) return;
+  state.kcPickFlash = i;
+  feedback('tap');
+  render();
+  clearTimeout(timers.kcpick);
+  timers.kcpick = setTimeout(()=>{ state.kcPickFlash = null; kcPick(i); }, 200);
+}
+function kcPick(i){
+  if(state.gameOver) return;
+  const ring = state.ring;
+  const n = ring.length;
+  if(i<0 || i>=n) return;
+
+  snapshot();
+  state.wfRunning=false;
+  state.wfSeconds=0;
+
+  // splice() removes the picked card AND shifts the remaining cards
+  // together in the same step — the ring visually closes back up.
+  const [card] = ring.splice(i,1);
+  state.current = card;
+  state.drawnCount++;
+  if(card.rank==='K'){
+    state.kings++;
+    if(state.kings>=4){ state.gameOver=true; feedback('win'); }
+  }
+  if(ring.length===0){ state.gameOver=true; }
+
+  state.kcPendingAttrib = (['J','8','10','Q','5','9'].includes(card.rank) && roster.length>0) ? card.rank : null;
+
+  if(card.rank==='5') state.kcSuggestions = kcRandomSuggestions(CATEGORY_SUGGESTIONS);
+  else if(card.rank==='9') state.kcSuggestions = kcRandomSuggestions(RHYME_SUGGESTIONS);
+  else state.kcSuggestions = null;
+
+  triggerBurst(card);
+  // Sprecher liest die Regel der gezogenen Karte vor (falls aktiviert)
+  if(kcSpeaker){ const r = KC_RULES[card.rank]; if(r) pfSpeak(r.t + '. ' + r.s); }
+  render();
+}
+function kcToggleWF(){
+  state.wfRunning = !state.wfRunning;
+  if(state.wfRunning){
+    timers.wf = setInterval(()=>{
+      state.wfSeconds++;
+      // update only the timer without full rerender flicker
+      const el = document.querySelector('.timerbox .time');
+      if(el) el.textContent = fmtTime(state.wfSeconds);
+    },1000);
+  } else {
+    clearInterval(timers.wf);
+    if(state.wfSeconds > state.wfBest) state.wfBest = state.wfSeconds;
+  }
+  render();
+}
+
+/* ---------------------------------------------------------
+   PFERDERENNEN
+--------------------------------------------------------- */
+// Reihenfolge der Pferde von oben nach unten: Karo, Herz, Pik, Kreuz
+// (entspricht der aufsteigenden Wertigkeit der Farben).
+const PF_SUITS = ['♦','♥','♠','♣'].map(sym=>SUITS.find(s=>s.sym===sym));
+// Pferd-Sticker je Farbe (Symbol auf der Satteldecke)
+const PF_HORSE_IMG = {'♦':'pf-horse-karo.png','♥':'pf-horse-herz.png','♠':'pf-horse-pik.png','♣':'pf-horse-kreuz.png'};
+
+// Live-Kommentator: reagiert auf Renn-Ereignisse wie ein Sport-Reporter.
+// {n} wird durch den Pferdenamen ersetzt. Mehrere Varianten je Ereignis,
+// damit es nicht nach Vorlesen klingt.
+const PF_POOLS = {
+  start:[
+    'Die Hufe scharren, die Nerven flattern, und looos geht\'s!',
+    'Anschnallen, meine Damen und Herren, gleich brennt die Bahn!',
+    'Vier Pferde, ein Ziel, null Vernunft, auf geht\'s!',
+    'Die Gäule sind heiß gelaufen, ab die Post!',
+    'Willkommen zum großen Rennen, die Boxen sind offen!',
+    'Es geht rund, meine Herrschaften, das Feld setzt sich in Bewegung!',
+    'Ruhe im Stall, gleich fliegt der Hafer!',
+    'Die Startglocke schrillt, und schon staubt die Bahn!',
+    'Manege frei für vier durchgeknallte Vierbeiner!',
+    'Der Startschuss fällt, jetzt zählt jeder Huf!',
+    'Guten Abend und herzlich willkommen, es kann nur einen geben!',
+    'Die Menge tobt schon jetzt, und die Pferde galoppieren los!'
+  ],
+  adv:[
+    '{n} gibt Gas, als stünde der Stall in Flammen!',
+    'Da marschiert {n}, ordentlich Dampf im Kessel!',
+    '{n} legt los wie die freiwillige Feuerwehr!',
+    'Oha, {n} hat irgendwo den Turbo gefunden!',
+    '{n} galoppiert, als gäb\'s am Ziel Hafer für alle!',
+    'Schwung nach vorn, {n} meint es heute bitterernst!',
+    '{n} trabt an, das sieht schon richtig hungrig aus!',
+    'Frischer Wind für {n}, da geht was!',
+    '{n} zieht das Tempo an, die Konkurrenz guckt dumm aus der Wäsche!',
+    'Kräftiger Antritt von {n}, alle Achtung!',
+    '{n} macht Meter, der Boden bebt!',
+    'Und {n} drückt aufs Gas, kein Halten mehr!',
+    '{n} pflügt durch die Bahn wie ein Rasenmäher!',
+    'Da kommt Leben ins Feld, {n} greift an!',
+    '{n} setzt zum Sprint an, die Mähne im Wind!',
+    'Ordentlich Schwung bei {n}, das macht Laune!',
+    '{n} tritt kräftig in die Pedale, äh, Hufe!',
+    'Sieh mal einer an, {n} kommt richtig in Fahrt!'
+  ],
+  lead:[
+    '{n} schnappt sich die Führung, ganz schön frech!',
+    'Und vorbeigezogen, {n} ist jetzt der Boss auf der Bahn!',
+    '{n} drängelt sich nach vorn, wo bleiben die Manieren!',
+    'Neuer Chef im Rennen, und der heißt {n}!',
+    '{n} übernimmt das Kommando, Hut ab!',
+    'Zack, {n} an der Spitze, das ging fix!',
+    '{n} schiebt sich vorbei, die anderen staunen nur!',
+    'Führungswechsel! {n} sagt jetzt, wo\'s langgeht!',
+    '{n} reißt die Führung an sich, kompromisslos!',
+    'Aus dem Nichts nach vorn, {n} führt!',
+    '{n} enteilt dem Feld, das riecht nach mehr!',
+    'Die Spitze gehört jetzt {n}, souverän!'
+  ],
+  near:[
+    '{n} riecht den Hafer, das Ziel ruft ganz laut!',
+    'Nur noch ein Hufschlag, {n} steht kurz vorm Coup!',
+    '{n} auf der Zielgeraden, die Tribüne dreht durch!',
+    'Gleich fällt die Entscheidung, {n} macht Ernst!',
+    'Ein Feld noch, {n} zittert dem Sieg entgegen!',
+    '{n} sieht die Ziellinie und gibt jetzt alles!',
+    'Es wird eng, aber {n} hat die Nase vorn!',
+    '{n} kurz vorm Ziel, jetzt bloß nicht stolpern!',
+    'Die Menge hält den Atem an, {n} fast am Ziel!',
+    '{n} spurtet auf die Linie zu, der Wahnsinn!',
+    'Endspurt! {n} riecht den Triumph!',
+    'Gänsehaut pur, {n} greift nach dem Sieg!'
+  ],
+  win:[
+    '{n} holt den Sieg, Wahnsinn, die Tribüne kocht!',
+    'Und durch! {n} gewinnt und dreht schon die Ehrenrunde!',
+    'Ziel! {n} triumphiert, heute gibt\'s Hafer aufs Haus!',
+    'Das war\'s, Freunde, {n} macht das Rennen, sensationell!',
+    'Sieg für {n}! Die Wettscheine fliegen durch die Luft!',
+    '{n} über die Linie, was für ein Finale!',
+    'Gewonnen! {n} lässt die Konkurrenz im Staub zurück!',
+    '{n} siegt, und der Stall feiert bis in die Puppen!',
+    'Zieleinlauf! {n} krönt sich zum Champion!',
+    'Unglaublich, {n} reißt es am Ende noch raus!',
+    '{n} macht den Deckel drauf, glasklarer Sieg!',
+    'Volltreffer für {n}, die ganze Halle steht Kopf!',
+    '{n} holt sich den Pokal, verdient bis auf den letzten Huf!',
+    'Und {n} gewinnt, jetzt fließt der Hafer in Strömen!'
+  ],
+  back:[
+    'Autsch! Die Hürde grätscht {n} ein Feld zurück!',
+    '{n} stolpert über die eigenen Hufe, ab nach hinten!',
+    'Erwischt! {n} muss ein Feld Federn lassen!',
+    'Oh nein, {n} legt da eine kleine Bruchlandung hin!',
+    'Die Hürde zeigt {n} die kalte Schulter, ein Feld retour!',
+    'Da war die Hürde im Weg, {n} rutscht zurück!',
+    'Voll auf die Hürde, {n} verliert Boden!',
+    'Missgeschick bei {n}, die Hürde schickt sie zurück!'
+  ]
+};
+// Zieht einen Spruch OHNE Wiederholung, bis der Topf einer Kategorie leer ist
+// (dann wird neu gemischt). state.pfBag merkt sich das pro Runde.
+function pfPickLine(cat, n){
+  const pool = PF_POOLS[cat] || [];
+  if(!state.pfBag) state.pfBag = {};
+  let bag = state.pfBag[cat];
+  if(!bag || !bag.length){ bag = shuffle(pool.map((_,i)=>i)); }
+  const idx = bag.pop();
+  state.pfBag[cat] = bag;
+  return (pool[idx]||'').replace(/\{n\}/g, n);
+}
+
+// Männliche deutsche Reporter-Stimme aussuchen. Web Speech kennt kein
+// Geschlecht, daher über bekannte männliche Stimmnamen + Ausschluss der
+// bekannten weiblichen. Stimmen laden teils asynchron -> onvoiceschanged.
+// Reporter-Stimme: bewusst KEINE Auswahl in der App. Genutzt wird immer die
+// deutsche Stimme, die auf dem iPhone unter Einstellungen › Bedienungshilfen ›
+// Gesprochene Inhalte als Standard eingestellt ist (z.B. Yannick).
+function pfSpeak(line){
+  if(!soundOn) return;
+  try{
+    if(!('speechSynthesis' in window)) return;
+    const u = new SpeechSynthesisUtterance(line);
+    u.lang = 'de-DE';  // nimmt die System-Standardstimme für Deutsch
+    u.rate = 0.95;     // ruhig, nicht hektisch
+    u.pitch = 1;
+    u.volume = 1;
+    window.speechSynthesis.cancel(); // laufende Ansage abbrechen, damit es live bleibt
+    window.speechSynthesis.speak(u);
+  }catch(e){}
+}
+// Eindeutiger Führender (bei Gleichstand null, damit kein falscher Führungswechsel gemeldet wird)
+function pfLeaderHorse(){
+  let best=null, tie=false;
+  state.horses.forEach(h=>{
+    if(!best || h.pos>best.pos){ best=h; tie=false; }
+    else if(h.pos===best.pos){ tie=true; }
+  });
+  return tie ? null : best;
+}
+
+function renderPferdSetup(){
+  state.trackLen = state.trackLen || 6;
+  state.pfBets = state.pfBets || {};
+  roster.forEach(n=>{ if(!state.pfBets[n]) state.pfBets[n] = {horse:null, amount:2}; });
+
+  const betRows = roster.map(n=>{
+    const b = state.pfBets[n];
+    return `
+      <div class="betrow-setup">
+        <div class="betrow-name">${esc(n)}</div>
+        <div class="chiprow" style="gap:6px;">
+          ${PF_SUITS.map(s=>`<div class="chip chip-sm ${b.horse===s.sym?'active':''}" style="color:${s.color==='red'?'var(--wine)':'var(--cream)'}" onclick="pfSetHorse('${jsAttr(n)}','${s.sym}')">${s.sym}</div>`).join('')}
+        </div>
+        <div class="stepper ${b.horse?'':'dim'}">
+          <button onclick="pfAdjustAmount('${jsAttr(n)}',-1)">−</button>
+          <span>${b.amount}</span>
+          <button onclick="pfAdjustAmount('${jsAttr(n)}',1)">+</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  app.innerHTML = `
+   <div class="setup-screen pf">
+    <div class="topbar">
+      <div class="backbtn" onclick="nav('home')">‹</div>
+      <div class="spacer"></div>
+      ${helpBtnHTML('pferderennen')}
+    </div>
+    <div class="setup-hero"><div class="gtitle" style="color:var(--teal);">PFERDERENNEN</div><div class="rulesub">Wetten platzieren</div></div>
+
+    <div class="section">
+      <div class="setcard">
+        <div class="setrow tapp ${roster.length<1?'warn':''}" onclick="openRoster('pferd-setup')">
+          <div class="ic">👥</div><div class="rl">Spieler</div>
+          <div class="rv">${roster.length<1?'⚠️ ':''}${roster.length} <span class="chev">›</span></div>
+        </div>
+        <div class="setrow" style="flex-direction:column; align-items:stretch; gap:10px;">
+          <div style="display:flex; align-items:center; gap:12px;"><div class="ic">🏁</div><div class="rl">Renndistanz</div></div>
+          <div class="segmented">
+            <div class="seg ${state.trackLen===6?'on':''}" onclick="pfSetLen(6)">Kurz · 6</div>
+            <div class="seg ${state.trackLen===9?'on':''}" onclick="pfSetLen(9)">Lang · 9</div>
+          </div>
+        </div>
+        <div class="setrow tapp" onclick="showHelp('pferderennen')">
+          <div class="ic">📺</div><div class="rl">So geht's</div>
+          <div class="rv">Ansehen <span class="chev">›</span></div>
+        </div>
+      </div>
+
+      ${roster.length>0 ? `
+        <div class="label" style="padding:0 4px 8px;">Wer setzt auf welche Farbe?</div>
+        <div class="card-box"><div class="betrows">${betRows}</div></div>
+      ` : `<div class="warnbox">Noch keine Mitspieler gewählt. Tippe oben auf Spieler. Du kannst auch ohne Wetten starten.</div>`}
+    </div>
+
+    <div class="floatbar">
+      <button class="btn btn-primary" onclick="pfStartRace()">🏁 Rennen starten</button>
+    </div>
+   </div>
+  `;
+}
+function pfSetLen(n){ state.trackLen=n; render(); }
+function pfSetHorse(name, horse){
+  const b = state.pfBets[name];
+  b.horse = (b.horse===horse) ? null : horse; // tap the same suit again to clear
+  render();
+}
+function pfAdjustAmount(name, delta){
+  const b = state.pfBets[name];
+  b.amount = Math.max(1, Math.min(20, b.amount+delta));
+  render();
+}
+function pfNewRace(){
+  // Keep track length and each player's sip amount, just clear the horse picks
+  Object.values(state.pfBets).forEach(b=>{ b.horse=null; });
+  nav('pferd-setup');
+}
+
+function pfStartRace(){
+  state.horses = PF_SUITS.map(s=>({...s, pos:0}));
+  // Verdeckte Hürden je Feld (setzen das passende Pferd zurück)
+  state.trackCards = Array.from({length:state.trackLen}, ()=>({ suit: SUITS[Math.floor(Math.random()*4)].sym, revealed:false }));
+  state.pfDeck = shuffle(buildDeck()); // real cards, drawn one by one and shown symbolically
+  state.raceOver = false;
+  state.winner = null;
+  state.autoplay = false;
+  state.pfLeader = null;
+  state.pfMoved = null;
+  state.pfBag = {};
+  state.pfComment = pfPickLine('start', '');
+  nav('pferd-race');
+  pfSpeak(state.pfComment);
+}
+
+function renderPferdRace(){
+  const tl = state.trackLen;
+  const finW = state.raceOver ? 42 : 16;
+  const gridCols = `32px repeat(${tl+1}, minmax(0,1fr)) ${finW}px`;
+
+  // Kopfzeile: Hürdenkarten über den Feldern (Start-Ampel links, Ziel rechts)
+  let head = `<div></div>`;
+  for(let i=0;i<=tl;i++){
+    if(i===0){ head += `<div class="rb-hcard start">🚦</div>`; }
+    else {
+      const tc = state.trackCards ? state.trackCards[i-1] : null;
+      if(tc && tc.revealed){ const s=SUITS.find(x=>x.sym===tc.suit); head += `<div class="rb-hcard up ${s.color} flip">${tc.suit}</div>`; }
+      else { head += `<div class="rb-hcard down">?</div>`; }
+    }
+  }
+  head += `<div class="rb-finishhead">🏁</div>`;
+
+  const rows = state.horses.map(h=>{
+    const colorClass = h.color==='red'?'suit-red':'suit-black';
+    const moved = h.sym===state.pfMoved;
+    const horseImg = PF_HORSE_IMG[h.sym] || 'pf-horse.png';
+    const isWinner = state.raceOver && state.winner && h.sym===state.winner.sym;
+    let cells = `<div class="rb-tag ${colorClass}">${h.sym}</div>`;
+    for(let i=0;i<=tl;i++){
+      const here = (h.pos===i) && !isWinner, passed = i<h.pos;
+      cells += `<div class="rb-cell ${passed?'passed':''} ${here?'here':''} ${here&&moved?'bump':''}">${here?`<img class="rb-token" src="assets/${horseImg}" alt="">`:(i===0?'<span class="rb-gate"></span>':'')}</div>`;
+    }
+    // Sieger macht den letzten Schritt ÜBER die Ziellinie (steht in der Ziel-Spalte)
+    cells += `<div class="rb-finishcol ${isWinner?'won':''}">${isWinner?`<img class="rb-token" src="assets/${horseImg}" alt="">`:''}</div>`;
+    return `<div style="display:contents;">${cells}</div>`;
+  }).join('');
+
+  const dispLeader = state.horses.reduce((a,b)=> b.pos>a.pos ? b : a, state.horses[0]);
+  const remain = Math.max(0, tl - dispLeader.pos);
+  const sub = state.raceOver ? 'Zieleinlauf'
+    : `${dispLeader.name} vorn · noch ${remain} ${remain===1?'Feld':'Felder'}`;
+
+  const fsBtn = (typeof document!=='undefined' && document.fullscreenEnabled)
+    ? `<div class="iconbtn" style="width:34px;height:34px;font-size:15px;border-color:var(--gold-dim);color:var(--gold);" onclick="toggleFullscreen()">⛶</div>` : '';
+
+  app.innerHTML = `
+   <div class="race-screen">
+    <div class="topbar">
+      <div class="backbtn" onclick="askLeave('pferd-setup')">‹</div>
+      <div><h1>Pferderennen</h1><div class="sub">${sub}</div></div>
+      <div class="spacer"></div>
+      ${fsBtn}
+      ${helpBtnHTML('pferderennen')}
+    </div>
+
+    <div class="section">
+      <div class="raceboard-wrap">
+        <div class="raceboard" style="grid-template-columns:${gridCols};">
+          <div style="display:contents;">${head}</div>
+          ${rows}
+        </div>
+      </div>
+
+      <div class="commentbox">
+        <div class="mic">🎙️</div>
+        <div class="ctext">${esc(state.pfComment || 'Die Pferde stehen bereit. Zieh die erste Karte!')}</div>
+      </div>
+
+      ${!state.raceOver ? `
+        <div style="display:flex; gap:10px; margin-top:14px;">
+          <button class="btn btn-primary" onclick="pfDrawCard()">🎴 Karte ziehen</button>
+          <button class="btn btn-ghost btn-sm" onclick="pfToggleAuto()">${state.autoplay? '⏸ Stopp' : '▶︎ Auto'}</button>
+        </div>
+        ${undoSnap && !state.autoplay ? `<button class="btn btn-ghost btn-sm" style="margin-top:10px;" onclick="undo()">↶ Zug zurück</button>` : ''}
+      ` : ''}
+    </div>
+
+    ${state.raceOver ? `<div class="resultpop"><div class="resultpop-inner">${renderPferdResult()}</div></div>` : ''}
+   </div>
+  `;
+}
+function toggleFullscreen(){
+  try{
+    const el = document.documentElement;
+    if(!document.fullscreenElement){ (el.requestFullscreen||el.webkitRequestFullscreen||function(){}).call(el); }
+    else { (document.exitFullscreen||document.webkitExitFullscreen||function(){}).call(document); }
+  }catch(e){}
+}
+
+function pfDrawCard(){
+  if(state.raceOver) return;
+  if(!state.autoplay) snapshot();
+  if(!state.pfDeck || state.pfDeck.length===0){ state.pfDeck = shuffle(buildDeck()); }
+  const drawnCard = state.pfDeck.pop();
+  const suit = SUITS.find(s=>s.sym===drawnCard.suit);
+  triggerBurst(drawnCard); // symbolic reveal — builds trust that the draw is "real"
+  const horse = state.horses.find(h=>h.sym===suit.sym);
+  horse.pos++;
+  state.pfMoved = horse.sym;
+
+  // Hürden: sobald ALLE Pferde ein Feld passiert haben, deckt sich die
+  // verdeckte Karte auf und schickt das passende Pferd ein Feld zurück.
+  const minPos = Math.min(...state.horses.map(x=>x.pos));
+  const sentBack = [];
+  (state.trackCards||[]).forEach((tc,idx)=>{
+    if(!tc.revealed && minPos > idx){
+      tc.revealed = true;
+      const backHorse = state.horses.find(x=>x.sym===tc.suit);
+      if(backHorse.pos>0) sentBack.push(backHorse.name);
+      backHorse.pos = Math.max(0, backHorse.pos-1);
+    }
+  });
+
+  const winner = state.horses.find(h=>h.pos>=state.trackLen);
+  if(winner){
+    state.raceOver = true;
+    state.winner = winner;
+    state.autoplay = false;
+    clearInterval(timers.race);
+    feedback('win');
+    Object.entries(state.pfBets||{}).forEach(([name,b])=>{
+      if(!b.horse) return;
+      if(b.horse===winner.sym) tallyAdd(name,'given', b.amount*2);
+      else tallyAdd(name,'drunk', b.amount);
+    });
+  }
+
+  // Kommentator reagiert auf das Ereignis
+  let line, flavor=false;
+  if(winner){ line = pfPickLine('win', winner.name); }
+  else if(sentBack.length){ line = pfPickLine('back', sentBack[0]); }
+  else {
+    const lead = pfLeaderHorse();
+    if(lead && state.pfLeader && lead.sym!==state.pfLeader){ line = pfPickLine('lead', lead.name); }
+    else if(lead && lead.pos>=state.trackLen-1){ line = pfPickLine('near', lead.name); }
+    else { line = pfPickLine('adv', horse.name); flavor=true; }
+    if(lead) state.pfLeader = lead.sym;
+  }
+  state.pfComment = line;
+  // Im Auto-Modus nur die wichtigen Momente sprechen, sonst wird es Gebrabbel
+  if(!state.autoplay || !flavor) pfSpeak(line);
+  render();
+}
+function pfToggleAuto(){
+  state.autoplay = !state.autoplay;
+  if(state.autoplay){
+    timers.race = setInterval(()=>{ if(!state.raceOver) pfDrawCard(); else clearInterval(timers.race); }, 1500);
+  } else {
+    clearInterval(timers.race);
+  }
+  render();
+}
+function renderPferdResult(){
+  const winSuit = state.winner.sym;
+  const s = SUITS.find(x=>x.sym===winSuit);
+  const entries = Object.entries(state.pfBets||{}).filter(([n,b])=>b.horse);
+  const winners = entries.filter(([n,b])=>b.horse===winSuit);
+  const losers = entries.filter(([n,b])=>b.horse!==winSuit);
+
+  const winRows = winners.map(([n,b])=>`
+    <div class="betrow"><span>🏆 ${esc(n)}</span><span style="color:var(--gold);">verteilt ${b.amount*2}</span></div>
+  `).join('');
+  const loseRows = losers.map(([n,b])=>{
+    const ls = SUITS.find(x=>x.sym===b.horse);
+    return `<div class="betrow"><span>${esc(n)} <span style="color:var(--ash);">— ${ls.sym}</span></span><span style="color:#E28584;">trinkt ${b.amount}</span></div>`;
+  }).join('');
+
+  return `
+    <div class="card-box winnerbox">
+      ${confettiHTML()}
+      <div class="winnerribbon">🏁 Zieleinlauf</div>
+      <img class="wintrophy winpop" src="assets/pf-trophy.png" alt="Pokal">
+      <div class="winnerhorse ${s.color==='red'?'red':'black'}" style="font-size:34px;">🐎 ${s.sym}</div>
+      <div class="display winpop" style="font-size:26px;color:var(--gold);">${s.sym} ${state.winner.name.toUpperCase()} GEWINNT</div>
+      ${entries.length>0 ? `
+        <div style="text-align:left; margin-top:14px;">
+          ${winRows ? `<div class="label" style="margin-top:4px;">Dürfen verteilen</div>${winRows}` : ''}
+          ${loseRows ? `<div class="label" style="margin-top:12px;">Müssen trinken</div>${loseRows}` : ''}
+        </div>
+      ` : `<p class="centerinfo">Keine Wetten platziert.</p>`}
+      <button class="btn btn-primary" style="margin-top:14px;" onclick="pfNewRace()">Neues Rennen</button>
+    </div>
+  `;
+}
+
+/* ---------------------------------------------------------
+   BUSFAHRER
+--------------------------------------------------------- */
+const BUS_Q = [
+  {key:'rb', text:'Rot oder Schwarz?', opts:[['🔴 Rot','red'],['⚫ Schwarz','black']]},
+  {key:'hl', text:'Höher oder tiefer?', opts:[['↑ Höher','higher'],['↓ Tiefer','lower']]},
+  {key:'io', text:'Innerhalb oder außerhalb?', opts:[['Innerhalb','inside'],['Außerhalb','outside']]},
+  {key:'suit', text:'Welche Farbe?', opts:SUITS.map(s=>[s.sym+' '+s.name, s.sym])}
+];
+
+// Busfahrer uses the global roster directly — no separate setup screen.
+// Called from the Home tile (only enabled once roster.length >= 3).
+function busStartFromHome(){
+  if(roster.length<3) return;
+  clearTimers();
+  const players = roster.slice(0,10); // capped: a single deck can't safely support more hands + pyramid
+  // Deck-Groesse nach Spielerzahl: bis 5 Spieler das kleine 32er-Deck (nur
+  // Raenge 7-Ass -> mehr gleiche Werte -> mehr Treffer in der Pyramide -> mehr
+  // Schlucke). Ab 6 Spielern das 52er, damit Haende + Pyramide sicher reingehen.
+  const deckSize = players.length <= 5 ? 32 : 52;
+  state = { screen:'bus-phase1' };
+  state.busPlayers = players;
+  state.busDeckSize = deckSize;
+  state.busDeck = shuffle(buildDeck(deckSize));
+  state.busHands = {};
+  state.busUsed = {};
+  players.forEach(p=>{ state.busHands[p]=[]; state.busUsed[p]=[]; });
+  // Runden-basiert: erst beantworten ALLE Spieler Frage 1 (Runde 0), dann
+  // alle Frage 2 (Runde 1), usw. — nicht mehr eine Person durch alle 4 Fragen.
+  state.busRound = 0;
+  state.busPlayerIdx = 0;
+  state.busResult = null;
+  render();
+}
+
+function busTableHTML(){
+  return state.busPlayers.map((p,idx)=>{
+    const isCurrent = idx===state.busPlayerIdx;
+    const hand = state.busHands[p];
+    const slotsHTML = [0,1,2,3].map(i=>{
+      const c = hand[i];
+      if(c){
+        const justRevealed = isCurrent && i===hand.length-1;
+        return `<div class="benchcard ${justRevealed?'flip':''}"><span class="${c.color}">${c.rank}</span><span class="${c.color}" style="font-size:10px;">${c.suit}</span></div>`;
+      }
+      return `<div class="benchcard facedown"></div>`;
+    }).join('');
+    return `
+      <div class="busbench ${isCurrent?'active':''}">
+        <div class="busbench-name" style="display:flex;align-items:center;gap:8px;">${avatarHTML(p,26)}${isCurrent?'▶':''} ${esc(p)}</div>
+        <div class="busbench-slots">${slotsHTML}</div>
+      </div>`;
+  }).join('');
+}
+
+function renderBusPhase1(){
+  if(state.busRound >= 4){
+    // alle Runden durch -> weiter zur Pyramide
+    return busGoPhase2();
+  }
+  const player = state.busPlayers[state.busPlayerIdx];
+  const q = BUS_Q[state.busRound];
+  const hand = state.busHands[player] || [];
+  const prevCardsHTML = hand.length ? `
+    <div class="label" style="margin-top:6px;">Deine bisherigen Karten</div>
+    <div class="handgrid" style="justify-content:center; margin-bottom:12px;">
+      ${hand.map((c,i)=>`<div class="handc ${i===hand.length-1?'lastcard':''}"><span class="${c.color}">${c.rank}</span><span class="${c.color}" style="font-size:11px;">${c.suit}</span></div>`).join('')}
+    </div>` : '';
+
+  const resultHTML = state.busResult ? `
+    <div class="playcard flip" style="width:110px;height:150px;">
+      <div class="rank ${state.busResult.card.color}" style="font-size:38px;">${state.busResult.card.rank}</div>
+      <div class="suit ${state.busResult.card.color}" style="font-size:26px;">${state.busResult.card.suit}</div>
+    </div>
+    <div class="resultbadge ${state.busResult.correct?'res-right':'res-wrong'}">
+      ${state.busResult.correct ? '✔ Richtig!' : '✘ Falsch — trinken!'}
+    </div>
+    <button class="btn btn-primary" onclick="busNextTurn()">Weiter</button>
+  ` : `
+    ${prevCardsHTML}
+    ${q.key==='rb' ? `<div class="buscardrow"><div class="buscard red"><img class="buscard-bus" src="assets/pf-bus.png" alt=""></div><div class="buscard black"><img class="buscard-bus" src="assets/pf-bus.png" alt=""></div></div>` : ''}
+    <div class="qtext">${q.text}</div>
+    <div class="optrow">
+      ${q.opts.map(([label,val])=>{
+        const cls = val==='red' ? 'btn-answer-red' : val==='black' ? 'btn-answer-black' : 'btn-ghost';
+        return `<button class="btn ${cls}" onclick="busAnswer('${val}')">${label}</button>`;
+      }).join('')}
+    </div>
+  `;
+
+  app.innerHTML = `
+    <div class="topbar">
+      <div class="backbtn" onclick="askLeave('home')">‹</div>
+      <div><h1>Busfahrer</h1><div class="sub">Runde ${state.busRound+1} von 4</div></div>
+      ${helpBtnHTML('busfahrer')}
+    </div>
+    <div class="section">
+      <div class="turnbanner">
+        <div class="who">${esc(player)}</div>
+        <div class="what">${q.text} · Spieler ${state.busPlayerIdx+1}/${state.busPlayers.length} in dieser Runde</div>
+      </div>
+      <div class="card-box" style="text-align:center;">
+        ${resultHTML}
+      </div>
+      <div class="card-box">
+        <div class="label">Am Tisch</div>
+        <div class="seatgrid">${busTableHTML()}</div>
+      </div>
+    </div>
+  `;
+}
+
+function busAnswer(val){
+  const player = state.busPlayers[state.busPlayerIdx];
+  const hand = state.busHands[player];
+  const card = state.busDeck.pop();
+  let correct = false;
+  const q = BUS_Q[state.busRound];
+
+  if(q.key==='rb'){ correct = card.color===val; }
+  if(q.key==='hl'){
+    const prev = hand[state.busRound-1]; // diese Person eigene Karte aus der Vorrunde
+    if(val==='higher') correct = card.value > prev.value;
+    else correct = card.value < prev.value;
+  }
+  if(q.key==='io'){
+    const c1=hand[0].value, c2=hand[1].value;
+    const lo=Math.min(c1,c2), hi=Math.max(c1,c2);
+    if(val==='inside') correct = card.value>lo && card.value<hi;
+    else correct = card.value<lo || card.value>hi;
+  }
+  if(q.key==='suit'){ correct = card.suit===val; }
+
+  hand.push(card);
+  state.busUsed[player].push(false);
+  state.busResult = {card, correct};
+  triggerBurst(card);
+  if(!correct) feedback('wrong');
+  render();
+}
+function busNextTurn(){
+  state.busResult = null;
+  state.busPlayerIdx++;
+  if(state.busPlayerIdx >= state.busPlayers.length){
+    state.busPlayerIdx = 0;
+    state.busRound++;
+  }
+  render();
+}
+function busGoPhase2(){
+  // build pyramid 4-3-2-1 (levels 1..4 bottom to top) from remaining deck
+  const rows = [4,3,2,1];
+  state.busPyramid = [];
+  rows.forEach((count,rowIdx)=>{
+    const level = rowIdx+1; // row0(4 cards)=level1 ... row3(1 card)=level4
+    const row=[];
+    for(let i=0;i<count;i++){ row.push({card: state.busDeck.pop(), level, revealed:false}); }
+    state.busPyramid.push(row);
+  });
+  state.busRevealStep = 0; // flat index across all cards bottom to top
+  state.busFlat = state.busPyramid.flat(); // bottom row first
+  state.busActionLog = [];
+  state.busFreshReveal = false;
+  nav('bus-phase2');
+}
+
+function renderBusPhase2(){
+  const totalCards = state.busFlat.length;
+  const done = state.busRevealStep >= totalCards;
+
+  // Only the card revealed by the most recent "aufdecken" click should play
+  // the flip-in animation; consume the flag immediately so that later
+  // re-renders (e.g. from busPlayCard clicks) don't replay it on old cards.
+  const freshIdx = state.busFreshReveal ? state.busRevealStep - 1 : -1;
+  state.busFreshReveal = false;
+
+  const pyramidHTML = state.busPyramid.slice().reverse().map(row=>`
+    <div class="pyrow">
+      ${row.map(c=>{
+        const flatIdx = state.busFlat.indexOf(c);
+        const isRevealed = flatIdx < state.busRevealStep;
+        const justRevealed = flatIdx === freshIdx;
+        const isNext = flatIdx === state.busRevealStep;
+        return `<div class="pyc ${isRevealed?'shown':'hidden'} ${justRevealed?'flip':''} ${isNext?'next':''}">
+          ${isRevealed ? `<span class="${c.card.color}">${c.card.rank}</span><span class="${c.card.color}" style="font-size:14px;">${c.card.suit}</span>` : ''}
+          <div class="lvl">${c.level}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  `).join('');
+
+  const lastRevealed = state.busRevealStep>0 ? state.busFlat[state.busRevealStep-1] : null;
+  const nextToReveal = !done ? state.busFlat[state.busRevealStep] : null;
+
+  // Ablegen bezieht sich auf die zuletzt AUFGEDECKTE Karte (nicht die naechste).
+  const matchesHTML = lastRevealed ? state.busPlayers.map(p=>{
+    const hand = state.busHands[p];
+    const used = state.busUsed[p];
+    const matchIdx = hand.findIndex((c,i)=> !used[i] && c.rank===lastRevealed.card.rank);
+    if(matchIdx===-1) return '';
+    return `<button class="btn btn-ghost btn-sm" style="margin:4px;" onclick="busPlayCard('${jsAttr(p)}',${matchIdx},${lastRevealed.level},'${jsAttr(lastRevealed.card.rank)}')">
+      ${esc(p)} legt ${lastRevealed.card.rank} ab → verteilt ${lastRevealed.level} Schlucke
+    </button>`;
+  }).join('') : '';
+
+  const remainingHTML = state.busPlayers.map(p=>{
+    const hand = state.busHands[p], used = state.busUsed[p];
+    const left = used.filter(u=>!u).length;
+    const cardsHTML = hand.map((c,i)=>`
+      <div class="handc ${used[i]?'used':''}">
+        <span class="${c.color}">${c.rank}</span><span class="${c.color}" style="font-size:11px;">${c.suit}</span>
+      </div>
+    `).join('');
+    return `
+      <div class="seat">
+        <div class="seat-name">${esc(p)} <span style="color:var(--ash); font-weight:400;">· ${left} übrig</span></div>
+        <div class="handgrid" style="margin:0;">${cardsHTML}</div>
+      </div>
+    `;
+  }).join('');
+
+  app.innerHTML = `
+    <div class="topbar">
+      <div class="backbtn" onclick="askLeave('home')">‹</div>
+      <div><h1>Busfahrer</h1><div class="sub">Phase 2 · Pyramide</div></div>
+      ${helpBtnHTML('busfahrer')}
+    </div>
+    <div class="section">
+      <div class="card-box">
+        <div class="pyramid">${pyramidHTML}</div>
+      </div>
+
+      ${!done ? `
+        ${matchesHTML ? `<div class="card-box" style="margin-bottom:12px;">
+          <div class="label">Wer hat eine ${lastRevealed.card.rank} und legt ab? (${lastRevealed.level} Schlucke verteilen)</div>
+          ${matchesHTML}
+        </div>` : (lastRevealed ? `<div class="centerinfo" style="margin-bottom:12px;">Niemand hat noch eine ${lastRevealed.card.rank} übrig.</div>` : '')}
+        <button class="btn btn-primary" onclick="busRevealNext()">${state.busRevealStep===0?'Erste Karte aufdecken':'Nächste Karte aufdecken'} · Ebene ${nextToReveal.level}</button>
+      ` : `
+        <div class="card-box" style="text-align:center;border-color:var(--wine);">
+          <div class="display" style="font-size:22px;color:var(--gold);">Pyramide komplett!</div>
+          <p style="font-size:13px;color:var(--ash);">Wer die meisten Karten übrig hat, wird Busfahrer.</p>
+          <button class="btn btn-wine" onclick="busDetermineDriver()">Busfahrer ermitteln</button>
+        </div>
+      `}
+
+      <div class="card-box" style="margin-top:14px;">
+        <div class="label">Am Tisch</div>
+        <div class="seatgrid">${remainingHTML}</div>
+      </div>
+    </div>
+  `;
+}
+function busRevealNext(){
+  state.busRevealStep++;
+  state.busFreshReveal = true;
+  const revealedCard = state.busFlat[state.busRevealStep-1].card;
+  triggerBurst(revealedCard);
+  render();
+}
+function busPlayCard(player, cardIdx, level, rank){
+  state.busUsed[player][cardIdx] = true;
+  // Schluck-Verteilung: der Ableger verteilt 'level' Schlucke an andere.
+  // Erst nach der Zuordnung wird gezählt (wer trinkt / wer verteilt).
+  state.busGive = { player, remaining: level||0, total: level||0, rank: rank||'' };
+  feedback('card');
+  render();
+}
+function busGiveTo(recipient){
+  if(!state.busGive) return;
+  tallyAdd(recipient, 'drunk', 1);
+  tallyAdd(state.busGive.player, 'given', 1);
+  state.busGive.remaining--;
+  feedback('tap');
+  if(state.busGive.remaining<=0) state.busGive = null;
+  render();
+}
+function busGiveClose(){ state.busGive = null; render(); }
+function busGiveHTML(){
+  if(!state.busGive) return '';
+  const g = state.busGive;
+  const others = state.busPlayers.filter(p=>p!==g.player);
+  return `
+    <div class="helpwrap" onclick="if(event.target===this) busGiveClose()">
+      <div class="helpcard" style="text-align:center;">
+        <div class="display" style="font-size:24px;color:var(--gold);">${esc(g.player)} verteilt</div>
+        <p style="font-size:13px;color:var(--ash);margin:8px 0 4px;">Karte ${esc(g.rank)} abgelegt. Noch <b style="color:var(--cream);font-size:16px;">${g.remaining}</b> von ${g.total} Schluck${g.total===1?'':'e'} verteilen.</p>
+        <p style="font-size:12px;color:var(--ash);margin:0 0 12px;">Tippe an, wer trinkt:</p>
+        <div class="chiprow" style="justify-content:center;">
+          ${others.map(p=>`<div class="chip" onclick="busGiveTo('${jsAttr(p)}')">${esc(p)} 🥤</div>`).join('')}
+        </div>
+        <button class="btn btn-ghost btn-sm" style="margin-top:14px;" onclick="busGiveClose()">Fertig</button>
+      </div>
+    </div>`;
+}
+function busDetermineDriver(){
+  let maxLeft = -1;
+  let candidates = [];
+  state.busPlayers.forEach(p=>{
+    const leftIdxs = state.busUsed[p].map((u,i)=>u?-1:i).filter(i=>i!==-1);
+    const left = leftIdxs.length;
+    if(left>maxLeft){ maxLeft=left; candidates=[p]; }
+    else if(left===maxLeft){ candidates.push(p); }
+  });
+  if(candidates.length>1){
+    // tie-break: lowest sum of remaining card values
+    let best=null, bestSum=Infinity;
+    candidates.forEach(p=>{
+      const sum = state.busHands[p].reduce((acc,c,i)=> state.busUsed[p][i] ? acc : acc+c.value, 0);
+      if(sum<bestSum){ bestSum=sum; best=p; }
+    });
+    state.busDriver = best;
+  } else {
+    state.busDriver = candidates[0];
+  }
+  state.busP3QIdx = 0;
+  state.busP3Cards = [];
+  state.busP3Result = null;
+  state.busP3Mistakes = 0;
+  state.busP3Start = Date.now();
+  state.busP3Elapsed = 0;
+  state.busP3Done = false;
+  nav('bus-phase3');
+}
+
+function renderBusPhase3(){
+  if(!timers.p3 && !state.busP3Done){
+    timers.p3 = setInterval(()=>{
+      state.busP3Elapsed = (Date.now()-state.busP3Start)/1000;
+      const el = document.querySelector('.p3timer');
+      if(el) el.textContent = fmtTime(state.busP3Elapsed);
+    },200);
+  }
+
+  // Guard: only build the question/result markup while the drive is still
+  // in progress. Once busP3Done is true, busP3QIdx may point past the last
+  // question (index 4), so BUS_Q[state.busP3QIdx] would be undefined.
+  let resultHTML = '';
+  if(!state.busP3Done){
+    const q = BUS_Q[state.busP3QIdx];
+    resultHTML = state.busP3Result ? `
+      <div class="playcard flip" style="width:110px;height:150px;">
+        <div class="rank ${state.busP3Result.card.color}" style="font-size:38px;">${state.busP3Result.card.rank}</div>
+        <div class="suit ${state.busP3Result.card.color}" style="font-size:26px;">${state.busP3Result.card.suit}</div>
+      </div>
+      <div class="resultbadge ${state.busP3Result.correct?'res-right':'res-wrong'}">
+        ${state.busP3Result.correct ? '✔ Richtig!' : '✘ Falsch — trinken &amp; zurück zu Frage 1'}
+      </div>
+      <button class="btn btn-primary" onclick="bus3Next()">Weiter</button>
+    ` : `
+      ${(state.busP3Cards && state.busP3Cards.length) ? `
+        <div class="label" style="margin-top:6px;">Bisher gezogen (letzte hervorgehoben)</div>
+        <div class="handgrid" style="justify-content:center; margin-bottom:12px;">
+          ${state.busP3Cards.map((c,i)=>`<div class="handc ${i===state.busP3Cards.length-1?'lastcard':''}"><span class="${c.color}">${c.rank}</span><span class="${c.color}" style="font-size:11px;">${c.suit}</span></div>`).join('')}
+        </div>` : ''}
+      ${q.key==='rb' ? `<div class="buscardrow"><div class="buscard red"><img class="buscard-bus" src="assets/pf-bus.png" alt=""></div><div class="buscard black"><img class="buscard-bus" src="assets/pf-bus.png" alt=""></div></div>` : ''}
+      <div class="qtext">${q.text}</div>
+      <div class="optrow">
+        ${q.opts.map(([label,val])=>{
+          const cls = val==='red' ? 'btn-answer-red' : val==='black' ? 'btn-answer-black' : 'btn-ghost';
+          return `<button class="btn ${cls}" onclick="bus3Answer('${val}')">${label}</button>`;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  const pressureClass = state.busP3Mistakes>=6 ? 'pressure-high' : state.busP3Mistakes>=3 ? 'pressure-mid' : '';
+  const qProgress = !state.busP3Done ? [0,1,2,3].map(i=>`<div class="kdot ${i<state.busP3QIdx?'on':''} ${i===state.busP3QIdx?'active':''}"></div>`).join('') : '';
+
+  app.innerHTML = `
+    <div class="topbar">
+      <div class="backbtn" onclick="askLeave('home')">‹</div>
+      <div><h1>Busfahrer</h1><div class="sub">Phase 3 · Die Busfahrt</div></div>
+      ${helpBtnHTML('busfahrer')}
+    </div>
+    <div class="section">
+      <div class="turnbanner" style="border-color:var(--wine); background:linear-gradient(180deg, rgba(166,64,63,0.16), rgba(166,64,63,0.04));">
+        <div class="who" style="color:#E28584;">🚌 ${esc(state.busDriver)}</div>
+        <div class="what">Muss alle 4 Fragen am Stück richtig beantworten</div>
+        ${qProgress ? `<div class="kingdots" style="margin-top:8px;">${qProgress}</div>` : ''}
+      </div>
+
+      <div class="timerbox ${pressureClass}" style="margin-bottom:14px;">
+        <div>
+          <div class="time mono p3timer">${fmtTime(state.busP3Elapsed)}</div>
+          <div style="font-size:11px;color:var(--ash);text-align:center;">Fahrtzeit</div>
+        </div>
+        <div style="text-align:center;">
+          <div class="time mono" style="font-size:22px;">${state.busP3Mistakes}</div>
+          <div style="font-size:11px;color:var(--ash);">Fehlversuche</div>
+        </div>
+      </div>
+
+      ${state.busP3Done ? `
+        <div class="card-box" style="text-align:center;border-color:var(--gold); position:relative; overflow:hidden;">
+          ${confettiHTML()}
+          <div class="display winpop" style="font-size:28px;color:var(--gold);">GESCHAFFT!</div>
+          <p style="font-size:13px;color:var(--ash);">${esc(state.busDriver)} hat die Busfahrt in <b style="color:var(--cream);">${fmtTime(state.busP3Elapsed)}</b> mit ${state.busP3Mistakes} Fehlversuchen beendet.</p>
+          ${state.busIsNewRecord ? `<div class="centerinfo" style="color:var(--party);">🏆 Neuer Rekord dieser Session!</div>` : (busBestTime!==null ? `<div class="centerinfo">Session-Rekord: ${fmtTime(busBestTime)}</div>` : '')}
+          <button class="btn btn-primary" onclick="askLeave('home')">Neue Runde</button>
+        </div>
+      ` : `<div class="card-box" style="text-align:center;">${resultHTML}</div>`}
+    </div>
+  `;
+}
+function bus3Answer(val){
+  if(state.busDeck.length===0){ state.busDeck = shuffle(buildDeck(state.busDeckSize||52)); }
+  const card = state.busDeck.pop();
+  state.busP3Cards.push(card);
+  let correct=false;
+  const q = BUS_Q[state.busP3QIdx];
+  if(q.key==='rb'){ correct = card.color===val; }
+  if(q.key==='hl'){
+    const prev = state.busP3Cards[state.busP3Cards.length-2];
+    correct = val==='higher' ? card.value>prev.value : card.value<prev.value;
+  }
+  if(q.key==='io'){
+    const c1=state.busP3Cards[0].value, c2=state.busP3Cards[1].value;
+    const lo=Math.min(c1,c2), hi=Math.max(c1,c2);
+    correct = val==='inside' ? (card.value>lo && card.value<hi) : (card.value<lo || card.value>hi);
+  }
+  if(q.key==='suit'){ correct = card.suit===val; }
+  state.busP3Result = {card, correct};
+  triggerBurst(card);
+  render();
+}
+function bus3Next(){
+  const wasCorrect = state.busP3Result.correct;
+  state.busP3Result = null;
+  if(!wasCorrect){
+    state.busP3Mistakes++;
+    tallyAdd(state.busDriver, 'drunk', 1);
+    state.busP3QIdx = 0;
+    state.busP3Cards = [];
+    feedback('wrong');
+    render();
+    return;
+  }
+  state.busP3QIdx++;
+  if(state.busP3QIdx>=4){
+    state.busP3Done = true;
+    clearInterval(timers.p3);
+    timers.p3 = null;
+    state.busIsNewRecord = (busBestTime===null || state.busP3Elapsed < busBestTime);
+    if(state.busIsNewRecord) busBestTime = state.busP3Elapsed;
+    feedback('win');
+    saveStore();
+  }
+  render();
+}
+
+/* ---------------------------------------------------------
+   START
+--------------------------------------------------------- */
+loadStore();
+if(roster.length>0) state.screen = 'home';
+render();
+
+// PWA: Service Worker registrieren, falls unterstützt (macht die App
+// offline-fähig, nachdem sie einmal geladen wurde). Schlägt in mancher
+// eingebetteter Vorschau fehl — das ist ok, die App läuft trotzdem normal.
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
