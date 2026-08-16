@@ -830,6 +830,163 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
   .turnbanner .who{ font-size:18px; }
   .pyramid{ transform:scale(0.85); margin:-14px 0; }
 }
+
+/* ===========================================================
+   CARD DARTS — dark arcade dartboard built entirely from
+   programmatic layers (no static board image per player count).
+=========================================================== */
+.cover-cd{
+  background:
+    radial-gradient(circle at 50% 42%, rgba(255,77,94,0.32) 0%, transparent 28%),
+    radial-gradient(circle at 50% 42%, rgba(45,166,90,0.24) 0%, transparent 44%),
+    linear-gradient(to top, rgba(10,8,20,0.9), rgba(10,8,20,0.2) 55%, transparent),
+    radial-gradient(circle at 50% 42%, #333 0%, #161616 58%, #060606 100%);
+}
+.cover-cd .glyph{ opacity:0.16; }
+
+.setup-screen.cd{ background:radial-gradient(120% 260px at 50% 0, rgba(255,77,94,0.22), transparent 70%); }
+
+.cd-screen{
+  position:relative; min-height:100dvh; display:flex; flex-direction:column;
+  background:radial-gradient(120% 340px at 50% 0, rgba(255,77,94,0.10), transparent 60%);
+}
+
+.cd-modepill{
+  display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:20px;
+  font-family:'Bebas Neue',sans-serif; font-size:13px; letter-spacing:0.05em; flex-shrink:0;
+}
+.cd-modepill.classic{ background:rgba(45,232,208,0.14); color:var(--teal); border:1px solid rgba(45,232,208,0.35); }
+.cd-modepill.action{ background:rgba(255,77,94,0.16); color:#FF7A87; border:1px solid rgba(255,77,94,0.4); }
+.cd-round{ font-family:'Bebas Neue',sans-serif; font-size:14px; color:var(--ash); letter-spacing:0.03em; text-align:center; flex:1; }
+
+.cd-strip{ display:flex; gap:8px; padding:6px 20px 10px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+.cd-strip::-webkit-scrollbar{ display:none; }
+.cd-pcard{
+  flex-shrink:0; display:flex; flex-direction:column; align-items:center; gap:3px;
+  background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:8px 12px; min-width:70px;
+  position:relative;
+}
+.cd-pcard.active{ border-color:var(--gold); box-shadow:0 0 0 1px var(--gold), 0 0 14px rgba(255,182,39,0.4); }
+.cd-pcard.active::after{
+  content:''; position:absolute; bottom:-6px; left:50%; transform:translateX(-50%);
+  border-left:6px solid transparent; border-right:6px solid transparent; border-top:6px solid var(--gold);
+}
+.cd-pname{ font-size:10.5px; font-weight:700; color:var(--cream); max-width:64px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.cd-pscore{ font-family:'Bebas Neue',sans-serif; font-size:19px; color:var(--ash); line-height:1; }
+.cd-pcard.active .cd-pscore{ color:var(--gold); }
+
+.cd-boardwrap{ position:relative; margin:4px auto 0; }
+.cd-rim{
+  position:absolute; inset:0; border-radius:50%;
+  background:radial-gradient(circle at 32% 28%, #3a3a3a, #161616 55%, #060606 100%);
+  box-shadow:0 16px 34px rgba(0,0,0,0.55), inset 0 0 0 3px rgba(255,255,255,0.06), inset 0 2px 10px rgba(0,0,0,0.6);
+}
+.cd-outerzone{
+  position:absolute; left:3%; top:3%; right:3%; bottom:3%; border-radius:50%;
+  background:repeating-conic-gradient(from 0deg, rgba(120,20,24,0.55) 0deg 14deg, rgba(10,10,10,0.72) 14deg 28deg);
+  box-shadow:inset 0 0 24px rgba(0,0,0,0.6);
+}
+.cd-middlezone{
+  position:absolute; left:19%; top:19%; right:19%; bottom:19%; border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #1F6B44, #0E3F27 65%, #082A1A 100%);
+  box-shadow:inset 0 0 20px rgba(0,0,0,0.55), 0 0 0 2px rgba(0,0,0,0.4);
+}
+.cd-centerzone{
+  position:absolute; left:38%; top:38%; right:38%; bottom:38%; border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #A82430, #6E0F1A 65%, #430A12 100%);
+  box-shadow:inset 0 0 16px rgba(0,0,0,0.55), 0 0 0 2px var(--gold-dim);
+}
+.cd-ringlabel{
+  position:absolute; font-family:'Bebas Neue',sans-serif; letter-spacing:0.04em; color:rgba(255,255,255,0.85);
+  text-shadow:0 2px 4px rgba(0,0,0,0.65); pointer-events:none; z-index:3; white-space:nowrap;
+}
+.cd-ringlabel.outer{ top:2%; left:50%; transform:translateX(-50%); font-size:11px; }
+.cd-ringlabel.middle{ top:19%; left:50%; transform:translateX(-50%); font-size:11px; }
+.cd-ringlabel.center{ top:50%; left:50%; transform:translate(-50%,-50%); font-size:10px; z-index:4; }
+
+.cd-slot{
+  position:absolute; border-radius:5px; overflow:hidden;
+  background:linear-gradient(160deg,#FBF3E3,var(--cream));
+  box-shadow:0 3px 8px rgba(0,0,0,0.5), inset 0 0 0 1px rgba(0,0,0,0.08);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  transition:transform .18s ease, opacity .2s ease, filter .2s ease;
+  z-index:2;
+}
+.cd-slot .r{ font-family:'Bebas Neue',sans-serif; line-height:1; }
+.cd-slot .s{ line-height:1; margin-top:2px; }
+.cd-slot.red{ color:var(--wine); }
+.cd-slot.black{ color:#241835; }
+.cd-slot.blocked{ filter:saturate(0.35) brightness(0.55); }
+.cd-slot.blocked::after{
+  content:'🔒'; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-size:65%; background:rgba(0,0,0,0.3);
+}
+.cd-slot.acquiring{ animation:pulse .3s ease; filter:brightness(1.55); z-index:6; box-shadow:0 0 0 2px var(--gold), 0 0 14px rgba(255,182,39,0.85); }
+.cd-slot.hitpulse{ animation:cdhitpulse .3s ease; z-index:6; box-shadow:0 0 0 2px var(--gold), 0 0 16px rgba(255,182,39,0.9); }
+@keyframes cdhitpulse{ 0%{transform:scale(1);} 45%{transform:scale(0.86);} 100%{transform:scale(1);} }
+.cd-slot.removing{ animation:cdremove .22s ease forwards; z-index:6; }
+@keyframes cdremove{ to{ transform:scale(0.25) translateY(-14px); opacity:0; } }
+.cd-slot.entering{ animation:cdenter .28s ease; }
+@keyframes cdenter{ from{ transform:scale(0.25); opacity:0; } to{ transform:scale(1); opacity:1; } }
+
+.cd-popupwrap{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:9; }
+.cd-popup{ font-family:'Bebas Neue',sans-serif; text-align:center; animation:winpopKF 0.4s cubic-bezier(.2,1.4,.4,1); }
+.cd-popup .big{ font-size:44px; color:var(--gold); text-shadow:0 4px 16px rgba(0,0,0,0.75); }
+.cd-popup .callout{ font-size:27px; color:#FF7A87; letter-spacing:0.03em; text-shadow:0 4px 16px rgba(0,0,0,0.75); }
+.cd-popup.miss .big{ color:#E28584; font-size:27px; }
+
+.cd-activepanel{ text-align:center; padding:10px 20px 0; }
+.cd-activename{ font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--gold); letter-spacing:0.02em; }
+.cd-activepts{ font-size:12px; color:var(--ash); }
+.cd-instr{ font-size:12px; color:var(--gold-dim); letter-spacing:0.06em; margin:8px 0 2px; font-weight:700; }
+
+.cd-hand{ display:flex; gap:12px; justify-content:center; padding:8px 20px 4px; }
+.cd-handcard{ width:64px; height:90px; border-radius:10px; cursor:pointer; position:relative; transition:transform .12s ease; }
+.cd-handcard:active{ transform:translateY(-4px); }
+.cd-handcard.locked, .cd-handcard.resolved{ cursor:default; pointer-events:none; }
+.cd-handcard.resolving{ transform:translateY(-8px); box-shadow:0 10px 18px rgba(0,0,0,0.45); border-color:var(--gold); }
+.cd-handcard.facedown{
+  background:repeating-linear-gradient(45deg,#1F1238 0 4px,#170A29 4px 8px);
+  border:2px solid var(--gold-dim);
+  display:flex; align-items:center; justify-content:center; font-size:22px;
+}
+.cd-handcard.faceup{
+  background:linear-gradient(160deg,#FBF3E3,var(--cream));
+  border:2px solid transparent; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  animation:flipin .22s ease;
+}
+.cd-handcard.faceup.miss{ opacity:0.55; }
+.cd-handcard .r{ font-family:'Bebas Neue',sans-serif; font-size:26px; line-height:1; }
+.cd-handcard .s{ font-size:18px; margin-top:2px; }
+
+.cd-summary{ text-align:center; padding:20px; }
+.cd-summary .h{ font-family:'Bebas Neue',sans-serif; font-size:26px; color:var(--gold); letter-spacing:0.03em; }
+.cd-ranklist{ margin-top:14px; display:flex; flex-direction:column; gap:8px; }
+.cd-rankrow{ display:flex; align-items:center; gap:10px; background:var(--panel-2); border:1px solid var(--line); border-radius:12px; padding:9px 12px; }
+.cd-rankrow .pos{ font-family:'Bebas Neue',sans-serif; color:var(--gold); width:20px; flex-shrink:0; }
+.cd-rankrow .nm{ flex:1; text-align:left; font-weight:600; }
+.cd-rankrow .sc{ font-family:'Bebas Neue',sans-serif; color:var(--cream); }
+
+.cd-sdwrap{ text-align:center; padding:26px 20px; }
+.cd-sdwrap .tie{ font-family:'Bebas Neue',sans-serif; font-size:18px; color:var(--ash); letter-spacing:0.06em; }
+.cd-sdwrap .sd{
+  font-family:'Bebas Neue',sans-serif; font-size:34px; color:var(--wine); letter-spacing:0.04em;
+  text-shadow:0 0 20px rgba(255,77,94,0.6); animation:winpopKF .5s cubic-bezier(.2,1.4,.4,1);
+}
+.cd-sdrow{ display:flex; align-items:center; gap:10px; background:var(--panel-2); border:1px solid var(--line); border-radius:12px; padding:9px 12px; margin-top:8px; }
+.cd-sdrow .out{ opacity:0.4; text-decoration:line-through; }
+
+.cd-victory{ text-align:center; padding:20px; }
+.cd-victory .win{ font-family:'Bebas Neue',sans-serif; font-size:20px; color:var(--ash); letter-spacing:0.1em; }
+.cd-victory .avatar{ width:88px; height:88px; font-size:34px; margin:12px auto; box-shadow:0 0 0 3px var(--gold), 0 0 26px rgba(255,182,39,0.55); }
+.cd-victory .nm{ font-family:'Bebas Neue',sans-serif; font-size:32px; color:var(--gold); }
+.cd-victory .sc{ font-size:14px; color:var(--ash); margin-bottom:14px; }
+.cd-statline{ font-size:12px; color:var(--ash); margin-bottom:16px; }
+
+@media (max-height:700px){
+  .cd-hand{ padding:6px 20px 2px; }
+  .cd-handcard{ width:54px; height:76px; }
+}
 </style>
 </head>
 <body>
@@ -857,7 +1014,10 @@ function buildDeck(size){
   const deck=[];
   SUITS.forEach(s=>{
     ranksToUse.forEach(r=>{
-      deck.push({rank:r, suit:s.sym, color:s.color, suitName:s.name, value:RANKS.indexOf(r)});
+      // `id` is a stable 0..N-1 identity for this exact card, used by Card
+      // Darts to enforce deck integrity (a physical card can't exist twice).
+      // Harmless for every other game, which never reads it.
+      deck.push({id:deck.length, rank:r, suit:s.sym, color:s.color, suitName:s.name, value:RANKS.indexOf(r)});
     });
   });
   return deck;
@@ -929,6 +1089,12 @@ function sfx(name){
   else if(name==='win'){ [523,659,784,1047].forEach((f,i)=>tone(f,i*0.09,0.28,'triangle',0.16)); }
   else if(name==='wrong'){ tone(180,0,0.28,'sawtooth',0.13); tone(120,0.06,0.30,'sawtooth',0.11); }
   else if(name==='tap'){ tone(440,0,0.05,'sine',0.08); }
+  // Card Darts: kurzer "Board-Thud" statt Dartflug-Sound, klare Miss-/Double-/Triple-Stinger.
+  else if(name==='dart-hit'){ tone(180,0,0.05,'square',0.10); tone(300,0.01,0.09,'triangle',0.14); }
+  else if(name==='dart-miss'){ tone(160,0,0.14,'sawtooth',0.09); }
+  else if(name==='dart-double'){ tone(300,0,0.06,'square',0.11); tone(500,0.05,0.16,'triangle',0.15); }
+  else if(name==='dart-triple'){ tone(300,0,0.05,'square',0.11); tone(500,0.05,0.06,'triangle',0.13); tone(760,0.1,0.22,'triangle',0.17); }
+  else if(name==='dart-refill'){ tone(660,0,0.05,'sine',0.07); tone(880,0.04,0.05,'sine',0.06); }
 }
 function buzz(pattern){
   try{ if('vibrate' in navigator) navigator.vibrate(pattern); }catch(e){}
@@ -939,6 +1105,11 @@ function feedback(kind){
   else if(kind==='win'){ sfx('win'); buzz([0,40,60,40,60,90]); }
   else if(kind==='wrong'){ sfx('wrong'); buzz([0,60,40,60]); }
   else if(kind==='tap'){ sfx('tap'); buzz(8); }
+  else if(kind==='hit'){ sfx('dart-hit'); buzz(14); }
+  else if(kind==='miss'){ sfx('dart-miss'); buzz(10); }
+  else if(kind==='double'){ sfx('dart-double'); buzz([0,16,30,22]); }
+  else if(kind==='triple'){ sfx('dart-triple'); buzz([0,18,26,18,26,30]); }
+  else if(kind==='refill'){ sfx('dart-refill'); buzz(6); }
 }
 function toggleSound(){ soundOn = !soundOn; if(soundOn){ ensureAudio(); feedback('tap'); } saveStore(); render(); }
 function toggleKcSpeaker(){ kcSpeaker = !kcSpeaker; saveStore(); if(kcSpeaker) pfSpeak('Sprecher an. Ich lese die Regeln vor.'); render(); }
@@ -1120,6 +1291,8 @@ function render(){
   else if(state.screen==='bus-phase1') renderBusPhase1();
   else if(state.screen==='bus-phase2') renderBusPhase2();
   else if(state.screen==='bus-phase3') renderBusPhase3();
+  else if(state.screen==='darts-setup') renderDartsSetup();
+  else if(state.screen==='darts') renderDarts();
 
   if(state.helpOpen){
     app.insertAdjacentHTML('beforeend', helpHTML(state.helpOpen));
@@ -1207,6 +1380,17 @@ const HELP_TEXT = {
       'Phase 2: Aus den restlichen Karten wird eine Pyramide aufgedeckt. Wer eine passende Karte auf der Hand hat, legt sie ab und verteilt Schlucke (Anzahl = Ebene der Pyramide).',
       'Wer am Ende die meisten Karten übrig hat, wird Busfahrer.',
       'Phase 3: Der Busfahrer muss die 4 Fragen aus Phase 1 hintereinander richtig beantworten. Bei jedem Fehler: trinken und von vorne.'
+    ]
+  },
+  carddarts: {
+    title:'Card Darts — so geht\'s',
+    steps:[
+      'Das Board ist aus Karten gebaut: Zentrum = 3 Punkte, mittlerer Ring = 2 Punkte, äußerer Ring = 1 Punkt.',
+      'Jeder Spieler hat 3 verdeckte Karten. Reihum aufdecken — die Suchfarbe zählt nicht, nur der Wert (Rang) entscheidet.',
+      'Passt der Rang zu einer Karte auf dem Board, trifft automatisch das höchstwertige verfügbare Ziel (Zentrum vor Mitte vor Außen). Kein passendes Ziel = MISS, 0 Punkte.',
+      'CLASSIC: Ein getroffenes Ziel bleibt liegen, ist aber für den Rest der Runde blockiert. Derselbe Wert kann später noch eine niedrigere, unblockierte Kopie treffen.',
+      'ACTION: Ein getroffenes Ziel verschwindet vom Board und rückt sofort nach (von außen nach innen). Ass = TRIPLE (×3), König = DOUBLE (×2) — nur bei Treffer. Bube und Dame sind normal.',
+      'Nach 3 aufgedeckten Karten ist der nächste Spieler dran. Nach jeder Runde rotiert der Startspieler. Bei Gleichstand am Ende: Sudden Death, eine Karte pro Spieler, bis ein Sieger feststeht.'
     ]
   }
 };
@@ -1359,6 +1543,7 @@ const GAMES = [
   {key:'kc', title:'KINGS CUP',    desc:'Ring of Fire · jede Karte eine Regel', glyph:'🂡', cls:'cover-kc', screen:'kingscup-setup'},
   {key:'pf', title:'PFERDERENNEN', desc:'Setz auf eine Farbe und fiebere mit',  glyph:'🐎', cls:'cover-pf', screen:'pferd-setup'},
   {key:'bf', title:'BUSFAHRER',    desc:'Raten · Pyramide · Endspiel',           glyph:'🚌', cls:'cover-bf', screen:'bus-setup'},
+  {key:'cd', title:'CARD DARTS',   desc:'Karten statt Pfeile · triff das Board', glyph:'🎯', cls:'cover-cd', screen:'darts-setup'},
 ];
 function openGame(screen){ reset(screen); }
 function openRoster(from){ state.rosterReturn = from; nav('roster'); }
@@ -2692,6 +2877,587 @@ function bus3Next(){
     feedback('win');
     saveStore();
   }
+  render();
+}
+
+/* ---------------------------------------------------------
+   CARD DARTS — dark arcade darts-with-cards mini-game.
+   Central config (board sizes/points/timing) lives in CD_CONFIG so no
+   view hardcodes 15/18/21/24 separately. Board geometry is generic radial
+   slot placement, not per-player-count screens. Engine functions are pure
+   (take/return plain data via a `g` game object) and use a seedable RNG
+   (cdMakeRng) so tests can reproduce deals/refills exactly.
+--------------------------------------------------------- */
+const CD_CONFIG = {
+  ringPoints: { center:3, middle:2, outer:1 },
+  boardByPlayerCount: {
+    2:{center:1,middle:5,outer:9,total:15},  3:{center:1,middle:5,outer:9,total:15},
+    4:{center:1,middle:6,outer:11,total:18}, 5:{center:1,middle:6,outer:11,total:18},
+    6:{center:1,middle:7,outer:13,total:21}, 7:{center:1,middle:7,outer:13,total:21},
+    8:{center:1,middle:8,outer:15,total:24}
+  },
+  matchLengths: { quick:{rounds:1}, standard:{rounds:3}, long:{formula:'max(playerCount,4)'} },
+  startPlayerRotation: 1,
+  radii: { center:0.0, middle:0.43, outer:0.78 },
+  startAngleDeg: -90,
+  cardHeightFrac: { 15:0.24, 18:0.22, 21:0.20, 24:0.18 },
+  centerScale: 1.08,
+  timing: { tapLift:100, flip:220, targetAcquire:150, hitResolve:240, scoreSettle:200, actionRemove:220, actionMove:280, roundGather:520, shuffle:420, redeal:650 },
+  actionMultipliers: { A:3, K:2 } // Action-only. Q/J stay ordinary; no entry = ×1.
+};
+const CD_COPY = {
+  chooseCard:'WÄHLE EINE KARTE', miss:'MISS', double:'DOUBLE!', triple:'TRIPLE!',
+  roundComplete:'ROUND COMPLETE', tie:'TIE', suddenDeath:'SUDDEN DEATH', winner:'WINNER',
+  rematch:'REMATCH', menu:'MENÜ'
+};
+
+/* --- seedable RNG (mulberry32): production uses a fresh seed, tests pass
+   a fixed one so deals/refills are exactly reproducible. --- */
+function cdMakeRng(seed){
+  let s = seed>>>0;
+  return function(){
+    s |= 0; s = (s + 0x6D2B79F5) | 0;
+    let t = Math.imul(s ^ (s>>>15), 1 | s);
+    t = (t + Math.imul(t ^ (t>>>7), 61 | t)) ^ t;
+    return ((t ^ (t>>>14)) >>> 0) / 4294967296;
+  };
+}
+function cdShuffle(arr, rng){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(rng()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function cdBoardConfigFor(n){ return CD_CONFIG.boardByPlayerCount[Math.max(2,Math.min(8,n))]; }
+function cdRoundsFor(matchLength, n){
+  if(matchLength==='quick') return CD_CONFIG.matchLengths.quick.rounds;
+  if(matchLength==='standard') return CD_CONFIG.matchLengths.standard.rounds;
+  return Math.max(n,4); // long / "full rotation"
+}
+
+/* ---- pure engine: board & deal ---- */
+function cdBuildBoardSlots(cfg){
+  const slots=[];
+  ['center','middle','outer'].forEach(ring=>{
+    for(let i=0;i<cfg[ring];i++){
+      slots.push({ id:ring[0]+i, ring, indexWithinRing:i, scoreValue:CD_CONFIG.ringPoints[ring], card:null, blocked:false });
+    }
+  });
+  return slots;
+}
+// Deal order per spec: shuffle -> hands (3 each) -> board -> remainder = reserve.
+function cdNewRoundDeal(g){
+  const cfg = g.boardConfig;
+  let deck = cdShuffle(buildDeck(52), g.rng);
+  g.hands = {};
+  g.playerOrder.forEach(nm=>{
+    g.hands[nm] = deck.splice(0,3).map(c=>({card:c, status:'faceDown', result:null, awardedPoints:0, targetSlotId:null, effect:'normal'}));
+  });
+  g.board = cdBuildBoardSlots(cfg);
+  const boardCards = deck.splice(0, cfg.total);
+  g.board.forEach((slot,i)=>{ slot.card = boardCards[i]; });
+  g.reserve = deck;      // whatever remains after hands + board
+  g.discard = [];
+  g.turnCardIndex = 0;
+  g.players.forEach(p=>{ p._roundStart = p.totalScore; });
+  g.phase = 'awaitingReveal';
+  g.uiTargetId = null; g.uiHitSlotId = null; g.uiPopup = null; g.uiResolvingIdx = null;
+}
+
+/* ---- pure engine: target resolution & scoring ---- */
+// rank-only match; center beats middle beats outer; Classic excludes blocked targets.
+function cdFindTarget(g, rank){
+  const order = { center:0, middle:1, outer:2 };
+  const cands = g.board.filter(s=> s.card && s.card.rank===rank && !(g.mode==='classic' && s.blocked));
+  if(cands.length===0) return null;
+  cands.sort((a,b)=> order[a.ring]-order[b.ring] || a.indexWithinRing-b.indexWithinRing);
+  return cands[0];
+}
+function cdScoreFor(g, target, rank){
+  const mult = (g.mode==='action' && CD_CONFIG.actionMultipliers[rank]) ? CD_CONFIG.actionMultipliers[rank] : 1;
+  return target.scoreValue * mult;
+}
+function cdEffectFor(g, rank){
+  if(g.mode!=='action') return 'normal';
+  const mult = CD_CONFIG.actionMultipliers[rank];
+  return mult===3 ? 'triple' : mult===2 ? 'double' : 'normal';
+}
+
+/* ---- pure engine: Action removal / inward refill / discard recycle ---- */
+function cdDrawReplacement(g){
+  if(g.reserve.length===0){
+    g.reserve = cdShuffle(g.discard, g.rng); // recycle discard; board/hand cards never included, they're just not in this array
+    g.discard = [];
+  }
+  return g.reserve.pop();
+}
+function cdActionRemoveAndRefill(g, hitSlot){
+  const removed = hitSlot.card;
+  hitSlot.card = null;
+  g.discard.push(removed);
+  if(hitSlot.ring==='center'){
+    const mids = g.board.filter(s=>s.ring==='middle');
+    const mSrc = mids[Math.floor(g.rng()*mids.length)];
+    hitSlot.card = mSrc.card; mSrc.card = null;
+    const outers = g.board.filter(s=>s.ring==='outer');
+    const oSrc = outers[Math.floor(g.rng()*outers.length)];
+    mSrc.card = oSrc.card; oSrc.card = null;
+    oSrc.card = cdDrawReplacement(g);
+  } else if(hitSlot.ring==='middle'){
+    const outers = g.board.filter(s=>s.ring==='outer');
+    const oSrc = outers[Math.floor(g.rng()*outers.length)];
+    hitSlot.card = oSrc.card; oSrc.card = null;
+    oSrc.card = cdDrawReplacement(g);
+  } else {
+    hitSlot.card = cdDrawReplacement(g);
+  }
+}
+
+/* ---- pure engine: resolve one revealed card ---- */
+function cdResolveReveal(g, activeName, turnCard){
+  const player = g.players.find(p=>p.name===activeName);
+  const rank = turnCard.card.rank;
+  const target = cdFindTarget(g, rank);
+  let result;
+  if(!target){
+    turnCard.status='faceUp'; turnCard.result='miss'; turnCard.awardedPoints=0; turnCard.effect='normal';
+    player.misses++;
+    result = { hit:false, target:null, points:0, effect:'normal' };
+  } else {
+    const points = cdScoreFor(g, target, rank);
+    const effect = cdEffectFor(g, rank);
+    turnCard.status='faceUp'; turnCard.result='hit'; turnCard.awardedPoints=points; turnCard.targetSlotId=target.id; turnCard.effect=effect;
+    player.totalScore += points;
+    player.hits++;
+    if(effect==='double') player.doubles++;
+    if(effect==='triple') player.triples++;
+    if(target.ring==='center') player.centerHits++;
+    else if(target.ring==='middle') player.middleHits++;
+    else player.outerHits++;
+    if(points>player.bestSingleReveal) player.bestSingleReveal = points;
+    if(g.mode==='classic'){ target.blocked = true; }
+    else { cdActionRemoveAndRefill(g, target); }
+    result = { hit:true, target, points, effect };
+  }
+  // Enters discard right after resolving (per spec), even though the UI keeps
+  // showing it face-up in the hand row until the turn visually ends — so it
+  // can legitimately be recycled if the reserve empties later this round.
+  g.discard.push(turnCard.card);
+  return result;
+}
+
+/* ---- pure engine: turn / round / match progression ---- */
+function cdAfterResolve(g){
+  g.turnCardIndex++;
+  if(g.turnCardIndex>=3){
+    g.turnCardIndex = 0;
+    g.activePlayerIndex++;
+    if(g.activePlayerIndex>=g.playerOrder.length){
+      g.players.forEach(p=>{ p.roundScores.push(p.totalScore-(p._roundStart||0)); });
+      g.startPlayerIndex = (g.startPlayerIndex + CD_CONFIG.startPlayerRotation) % g.playerOrder.length;
+      g.roundIndex++;
+      if(g.roundIndex>=g.totalRounds){ cdEvaluateWinner(g); }
+      else { g.phase = 'roundSummary'; }
+    }
+  }
+}
+function cdEvaluateWinner(g){
+  const max = Math.max(...g.players.map(p=>p.totalScore));
+  const tied = g.players.filter(p=>p.totalScore===max).map(p=>p.name);
+  if(tied.length<=1){
+    g.winner = tied[0];
+    g.phase = 'matchResult';
+  } else {
+    g.suddenDeath = { tiedNames:tied, hands:null, board:null, reserve:null, discard:null, iterationScores:null, resolved:false };
+    g.phase = 'suddenDeath';
+  }
+}
+
+/* ---- pure engine: Sudden Death (one card per tied player per iteration) ---- */
+function cdSuddenDeathDeal(g){
+  const sd = g.suddenDeath;
+  const deck = cdShuffle(buildDeck(52), g.rng);
+  sd.hands = {};
+  sd.tiedNames.forEach(nm=>{ sd.hands[nm] = { card: deck.shift(), status:'faceDown', result:null, points:0 }; });
+  const sdCfg = cdBoardConfigFor(sd.tiedNames.length);
+  sd.board = cdBuildBoardSlots(sdCfg);
+  const boardCards = deck.splice(0, sdCfg.total);
+  sd.board.forEach((slot,i)=>{ slot.card = boardCards[i]; });
+  sd.reserve = deck;
+  sd.discard = [];
+  sd.iterationScores = {};
+  sd.resolved = false;
+}
+function cdSuddenDeathResolveAll(g){
+  const sd = g.suddenDeath;
+  const proxy = { board:sd.board, mode:g.mode, reserve:sd.reserve, discard:sd.discard, rng:g.rng };
+  sd.tiedNames.forEach(nm=>{
+    const tc = sd.hands[nm];
+    const rank = tc.card.rank;
+    const target = cdFindTarget(proxy, rank);
+    let pts = 0;
+    if(target){
+      pts = cdScoreFor(proxy, target, rank);
+      if(g.mode==='classic'){ target.blocked = true; }
+      else { cdActionRemoveAndRefill(proxy, target); }
+    }
+    tc.status='faceUp'; tc.result = target?'hit':'miss'; tc.points = pts;
+    sd.iterationScores[nm] = pts;
+  });
+  const maxPts = Math.max(...Object.values(sd.iterationScores));
+  sd.tiedNames = sd.tiedNames.filter(nm=> sd.iterationScores[nm]===maxPts);
+  sd.resolved = true;
+  if(sd.tiedNames.length<=1){ g.winner = sd.tiedNames[0]; }
+}
+
+/* ---- pure engine: start a match ---- */
+function cdStartMatch({names, mode, matchLength, seed}){
+  const n = names.length;
+  const g = {
+    mode, matchLength, totalRounds: cdRoundsFor(matchLength, n), roundIndex:0,
+    startPlayerIndex:0, activePlayerIndex:0,
+    playerOrder: names.slice(),
+    boardConfig: cdBoardConfigFor(n),
+    players: names.map(nm=>({ name:nm, totalScore:0, roundScores:[], hits:0, misses:0, doubles:0, triples:0, centerHits:0, middleHits:0, outerHits:0, bestSingleReveal:0 })),
+    seed, rng: cdMakeRng(seed),
+    locked:false,
+    phase:'awaitingReveal',
+    suddenDeath:null, winner:null
+  };
+  cdNewRoundDeal(g);
+  return g;
+}
+
+// Exposed for the standalone Node test harness (tests/card_darts.test.js);
+// harmless in the browser, never referenced by app UI.
+if(typeof window!=='undefined'){
+  window.CardDartsEngine = {
+    CD_CONFIG, cdMakeRng, cdShuffle, cdBoardConfigFor, cdRoundsFor, cdBuildBoardSlots,
+    cdNewRoundDeal, cdFindTarget, cdScoreFor, cdEffectFor, cdDrawReplacement,
+    cdActionRemoveAndRefill, cdResolveReveal, cdAfterResolve, cdEvaluateWinner,
+    cdSuddenDeathDeal, cdSuddenDeathResolveAll, cdStartMatch, buildDeck
+  };
+}
+
+/* ---------------------------------------------------------
+   CARD DARTS — UI
+--------------------------------------------------------- */
+function renderDartsSetup(){
+  state.cdMode = state.cdMode || 'classic';
+  state.cdLength = state.cdLength || 'standard';
+  const n = roster.length;
+  const enough = n>=2;
+  const overCap = n>8;
+  const cfg = enough ? cdBoardConfigFor(n) : null;
+  const rounds = enough ? cdRoundsFor(state.cdLength, Math.max(2,Math.min(8,n))) : null;
+  app.innerHTML = `
+   <div class="setup-screen cd">
+    <div class="topbar">
+      <div class="backbtn" onclick="nav('home')">‹</div>
+      <div class="spacer"></div>
+      ${helpBtnHTML('carddarts')}
+    </div>
+    <div class="setup-hero"><div class="gtitle" style="color:#FF7A87;">CARD DARTS</div><div class="rulesub">Karten statt Pfeile</div></div>
+    <div class="section">
+      <div class="setcard">
+        <div class="setrow tapp ${!enough?'warn':''}" onclick="openRoster('darts-setup')">
+          <div class="ic">👥</div><div class="rl">Spieler</div>
+          <div class="rv">${!enough?'⚠️ ':''}${n} <span class="chev">›</span></div>
+        </div>
+        <div class="setrow" style="flex-direction:column; align-items:stretch; gap:10px;">
+          <div style="display:flex; align-items:center; gap:12px;"><div class="ic">🎯</div><div class="rl">Modus</div></div>
+          <div class="segmented">
+            <div class="seg ${state.cdMode==='classic'?'on':''}" onclick="state.cdMode='classic'; render();">Classic</div>
+            <div class="seg ${state.cdMode==='action'?'on':''}" onclick="state.cdMode='action'; render();">🔥 Action</div>
+          </div>
+        </div>
+        <div class="setrow" style="flex-direction:column; align-items:stretch; gap:10px;">
+          <div style="display:flex; align-items:center; gap:12px;"><div class="ic">⏱️</div><div class="rl">Länge</div></div>
+          <div class="segmented">
+            <div class="seg ${state.cdLength==='quick'?'on':''}" onclick="state.cdLength='quick'; render();">Quick</div>
+            <div class="seg ${state.cdLength==='standard'?'on':''}" onclick="state.cdLength='standard'; render();">Standard</div>
+            <div class="seg ${state.cdLength==='long'?'on':''}" onclick="state.cdLength='long'; render();">Long</div>
+          </div>
+        </div>
+        <div class="setrow tapp" onclick="showHelp('carddarts')">
+          <div class="ic">📺</div><div class="rl">Regeln & So geht's</div>
+          <div class="rv">Ansehen <span class="chev">›</span></div>
+        </div>
+      </div>
+      ${!enough ? `<div class="warnbox">Card Darts braucht mindestens 2 Spieler. Aktuell: ${n}. Tippe oben auf Spieler.</div>`
+        : overCap ? `<div class="warnbox">Es spielen die ersten 8 von ${n} mit (Board-Limit).</div>` : ''}
+      ${cfg ? `<p class="centerinfo" style="text-align:left;">Board: ${cfg.total} Karten (1 Zentrum · ${cfg.middle} Mitte · ${cfg.outer} Außen) · ${rounds} Runde${rounds===1?'':'n'}. ${state.cdMode==='action' ? 'Action: Treffer verschwinden, das Board rückt sofort nach. Ass = TRIPLE, König = DOUBLE.' : 'Classic: Treffer bleiben liegen, sind aber für den Rest der Runde blockiert.'}</p>` : ''}
+    </div>
+    <div class="floatbar">
+      <button class="btn btn-primary" ${enough?'':'disabled'} onclick="cdStart()">🎯 Spiel starten</button>
+    </div>
+   </div>
+  `;
+}
+function cdStart(){
+  const names = roster.slice(0,8);
+  const mode = state.cdMode||'classic';
+  const matchLength = state.cdLength||'standard';
+  const seed = (Date.now() ^ Math.floor(Math.random()*0xFFFFFFFF)) >>> 0;
+  clearTimers(); clearUndo();
+  state = { screen:'darts', cd: cdStartMatch({names, mode, matchLength, seed}) };
+  render();
+}
+
+function cdBoardDiameterPx(){
+  const w = (app && app.clientWidth) || 380;
+  const h = window.innerHeight || 700;
+  return Math.max(210, Math.min(0.94*w, 0.54*h, 360));
+}
+function cdSlotPosStyle(ring, indexWithinRing, ringCount, boardTotal, diameterPx){
+  const radiusNorm = CD_CONFIG.radii[ring];
+  const angleDeg = CD_CONFIG.startAngleDeg + (ringCount>0 ? indexWithinRing*(360/ringCount) : 0);
+  const angleRad = angleDeg*Math.PI/180;
+  const r = radiusNorm*(diameterPx/2);
+  const x = diameterPx/2 + r*Math.cos(angleRad);
+  const y = diameterPx/2 + r*Math.sin(angleRad);
+  const rotateDeg = ring==='center' ? 0 : angleDeg+90;
+  return { x, y, rotateDeg };
+}
+function cdBoardHTML(g){
+  const diameter = cdBoardDiameterPx();
+  const cfg = g.boardConfig;
+  let slotsHTML = '';
+  g.board.forEach(slot=>{
+    if(!slot.card) return; // only momentarily empty mid-refill, which is synchronous
+    const ringCount = cfg[slot.ring];
+    const pos = cdSlotPosStyle(slot.ring, slot.indexWithinRing, ringCount, cfg.total, diameter);
+    let heightPx = (CD_CONFIG.cardHeightFrac[cfg.total]||0.20) * diameter;
+    if(slot.ring==='center') heightPx *= CD_CONFIG.centerScale;
+    const widthPx = heightPx*0.714;
+    const rFont = Math.max(9, heightPx*0.30), sFont = Math.max(7, heightPx*0.22);
+    const colorClass = slot.card.color==='red' ? 'red':'black';
+    let stateClass = '';
+    if(slot.blocked) stateClass += ' blocked';
+    if(g.uiTargetId===slot.id) stateClass += ' acquiring';
+    if(g.uiHitSlotId===slot.id) stateClass += (g.mode==='action' ? ' removing' : ' hitpulse');
+    slotsHTML += `<div class="cd-slot ${colorClass}${stateClass}" style="left:${pos.x}px; top:${pos.y}px; width:${widthPx}px; height:${heightPx}px; transform:translate(-50%,-50%) rotate(${pos.rotateDeg}deg);">
+      <div class="r" style="font-size:${rFont}px;">${slot.card.rank}</div>
+      <div class="s" style="font-size:${sFont}px;">${slot.card.suit}</div>
+    </div>`;
+  });
+  const popup = g.uiPopup ? `
+    <div class="cd-popupwrap"><div class="cd-popup ${g.uiPopup.miss?'miss':''}">
+      ${g.uiPopup.callout ? `<div class="callout">${g.uiPopup.callout}</div>` : ''}
+      <div class="big">${g.uiPopup.text}</div>
+    </div></div>` : '';
+  return `
+    <div class="cd-boardwrap" style="width:${diameter}px; height:${diameter}px;">
+      <div class="cd-rim"></div>
+      <div class="cd-outerzone"></div>
+      <div class="cd-middlezone"></div>
+      <div class="cd-centerzone"></div>
+      <div class="cd-ringlabel outer">1 PT</div>
+      <div class="cd-ringlabel middle">2 PTS</div>
+      <div class="cd-ringlabel center">3 PTS</div>
+      ${slotsHTML}
+      ${popup}
+    </div>`;
+}
+function cdStripHTML(g){
+  return `<div class="cd-strip">
+    ${g.playerOrder.map((nm,i)=>{
+      const p = g.players.find(x=>x.name===nm);
+      const active = i===g.activePlayerIndex;
+      return `<div class="cd-pcard ${active?'active':''}">
+        ${avatarHTML(nm, 36)}
+        <div class="cd-pname">${esc(nm)}</div>
+        <div class="cd-pscore">${p.totalScore}</div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+function cdHandHTML(g){
+  const activeName = g.playerOrder[g.activePlayerIndex];
+  const hand = g.hands[activeName] || [];
+  return `<div class="cd-hand">
+    ${hand.map((tc,i)=>{
+      if(tc.status==='faceDown'){
+        const resolving = g.uiResolvingIdx===i ? ' resolving' : '';
+        return `<div class="cd-handcard facedown${g.locked?' locked':''}${resolving}" onclick="cdTapHand(${i})">🎯</div>`;
+      }
+      const colorClass = tc.card.color==='red'?'red':'black';
+      const missCls = tc.result==='miss' ? 'miss':'';
+      return `<div class="cd-handcard faceup resolved ${missCls}">
+        <div class="r ${colorClass}">${tc.card.rank}</div>
+        <div class="s ${colorClass}">${tc.card.suit}</div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+function renderDarts(){
+  const g = state.cd;
+  if(!g) return nav('darts-setup');
+  if(g.phase==='matchResult') return renderDartsVictory(g);
+  if(g.phase==='suddenDeath') return renderDartsSuddenDeath(g);
+  if(g.phase==='roundSummary') return renderDartsRoundSummary(g);
+
+  const activeName = g.playerOrder[g.activePlayerIndex];
+  const activePlayer = g.players.find(p=>p.name===activeName);
+
+  app.innerHTML = `
+   <div class="cd-screen">
+    <div class="topbar">
+      <div class="backbtn" onclick="askLeave('home')">‹</div>
+      <div class="cd-modepill ${g.mode}">${g.mode==='classic'?'CLASSIC':'🔥 ACTION'}</div>
+      <div class="cd-round">ROUND ${g.roundIndex+1}/${g.totalRounds}</div>
+      ${helpBtnHTML('carddarts')}
+    </div>
+    ${cdStripHTML(g)}
+    ${cdBoardHTML(g)}
+    <div class="cd-activepanel">
+      <div class="cd-activename">${esc(activeName)}</div>
+      <div class="cd-activepts">${activePlayer.totalScore} POINTS</div>
+      <div class="cd-instr">${g.locked ? '&nbsp;' : CD_COPY.chooseCard}</div>
+    </div>
+    ${cdHandHTML(g)}
+   </div>
+  `;
+}
+function cdTapHand(idx){
+  const g = state.cd;
+  if(!g || g.locked || g.phase!=='awaitingReveal') return;
+  const activeName = g.playerOrder[g.activePlayerIndex];
+  const hand = g.hands[activeName];
+  const tc = hand && hand[idx];
+  if(!tc || tc.status!=='faceDown') return;
+
+  g.locked = true;
+  g.uiResolvingIdx = idx;
+  feedback('tap');
+  render();
+
+  timers.cd1 = setTimeout(()=>{
+    const rank = tc.card.rank;
+    const target = cdFindTarget(g, rank);
+    g.uiTargetId = target ? target.id : null;
+    if(target) render();
+
+    timers.cd2 = setTimeout(()=>{
+      const result = cdResolveReveal(g, activeName, tc);
+      g.uiResolvingIdx = null;
+      g.uiTargetId = null;
+      g.uiHitSlotId = result.hit ? result.target.id : null;
+      g.uiPopup = result.hit
+        ? { text:'+'+result.points, callout: result.effect==='triple'?CD_COPY.triple:result.effect==='double'?CD_COPY.double:null }
+        : { text:CD_COPY.miss, miss:true };
+      render();
+      feedback(!result.hit ? 'miss' : (result.effect==='triple'?'triple':result.effect==='double'?'double':'hit'));
+      if(result.hit && g.mode==='action'){ timers.cdrefill = setTimeout(()=>feedback('refill'), CD_CONFIG.timing.actionRemove); }
+
+      const settleDelay = CD_CONFIG.timing.hitResolve
+        + (result.hit && g.mode==='action' ? (CD_CONFIG.timing.actionRemove+CD_CONFIG.timing.actionMove) : 0)
+        + CD_CONFIG.timing.scoreSettle;
+      timers.cd3 = setTimeout(()=>{
+        g.uiHitSlotId = null;
+        g.uiPopup = null;
+        cdAfterResolve(g);
+        g.locked = false;
+        render();
+      }, settleDelay);
+    }, target ? CD_CONFIG.timing.targetAcquire : 40);
+  }, CD_CONFIG.timing.flip);
+}
+
+function renderDartsRoundSummary(g){
+  const ranked = [...g.players].sort((a,b)=>b.totalScore-a.totalScore);
+  app.innerHTML = `
+   <div class="cd-screen">
+    <div class="cd-summary">
+      <div class="h">${CD_COPY.roundComplete}</div>
+      <div class="cd-ranklist">
+        ${ranked.map((p,i)=>`<div class="cd-rankrow"><div class="pos">${i+1}.</div>${avatarHTML(p.name,26)}<div class="nm">${esc(p.name)}</div><div class="sc">${p.totalScore}</div></div>`).join('')}
+      </div>
+      <button class="btn btn-primary" style="margin-top:20px;" onclick="cdNextRound()">Nächste Runde ▶</button>
+    </div>
+   </div>
+  `;
+}
+function cdNextRound(){
+  const g = state.cd;
+  if(!g) return;
+  g.activePlayerIndex = g.startPlayerIndex;
+  cdNewRoundDeal(g);
+  render();
+}
+
+function renderDartsSuddenDeath(g){
+  const sd = g.suddenDeath;
+  const rows = sd.hands ? Object.keys(sd.hands).map(nm=>{
+    const h = sd.hands[nm];
+    const out = sd.resolved && !sd.tiedNames.includes(nm);
+    const valueHTML = h.status==='faceUp'
+      ? `<b>${h.card.rank}${h.card.suit}</b> ${h.result==='hit' ? '+'+h.points : CD_COPY.miss}`
+      : '🎯';
+    return `<div class="cd-sdrow ${out?'out':''}">${avatarHTML(nm,26)}<div class="nm" style="flex:1;text-align:left;">${esc(nm)}</div><div>${valueHTML}</div></div>`;
+  }).join('') : '';
+  const btnLabel = !sd.resolved ? 'Karten aufdecken' : (g.winner ? `Zum Sieger 🏆` : 'Nächste Karte ▶');
+  app.innerHTML = `
+   <div class="cd-screen">
+    <div class="cd-sdwrap">
+      <div class="tie">${CD_COPY.tie}</div>
+      <div class="sd">${CD_COPY.suddenDeath}</div>
+      <p style="font-size:12.5px;color:var(--ash);margin-top:10px;">${sd.tiedNames.length} Spieler gleichauf. Jeder bekommt eine Karte, die höchste Punktzahl bleibt im Rennen.</p>
+      ${rows}
+      <button class="btn btn-primary" style="margin-top:20px;" ${g.locked?'disabled':''} onclick="cdSuddenDeathStep()">${btnLabel}</button>
+    </div>
+   </div>
+  `;
+}
+function cdSuddenDeathRunIteration(g){
+  g.locked = true;
+  cdSuddenDeathDeal(g);
+  render();
+  timers.cd1 = setTimeout(()=>{
+    cdSuddenDeathResolveAll(g);
+    g.locked = false;
+    render();
+  }, CD_CONFIG.timing.flip + CD_CONFIG.timing.hitResolve);
+}
+function cdSuddenDeathStep(){
+  const g = state.cd;
+  if(!g || g.locked) return;
+  const sd = g.suddenDeath;
+  if(sd.resolved){
+    if(g.winner){ g.phase='matchResult'; render(); return; }
+    sd.resolved = false;
+  }
+  cdSuddenDeathRunIteration(g);
+}
+
+function renderDartsVictory(g){
+  const winner = g.players.find(p=>p.name===g.winner);
+  app.innerHTML = `
+   <div class="cd-screen">
+    <div class="cd-victory">
+      ${confettiHTML()}
+      <div class="win">${CD_COPY.winner}</div>
+      ${avatarHTML(winner.name, 88)}
+      <div class="nm">${esc(winner.name)}</div>
+      <div class="sc">${winner.totalScore} POINTS</div>
+      <div class="cd-statline">${winner.hits} Treffer · ${winner.doubles}× Double · ${winner.triples}× Triple</div>
+      <button class="btn btn-primary" onclick="cdRematch()">🔁 ${CD_COPY.rematch}</button>
+      <button class="btn btn-ghost" style="margin-top:10px;" onclick="reset('home')">${CD_COPY.menu}</button>
+    </div>
+   </div>
+  `;
+  if(!g._winFxDone){ g._winFxDone = true; feedback('win'); }
+}
+function cdRematch(){
+  const g = state.cd;
+  if(!g) return;
+  const names = g.playerOrder.slice();
+  const mode = g.mode, matchLength = g.matchLength;
+  const seed = (Date.now() ^ Math.floor(Math.random()*0xFFFFFFFF)) >>> 0;
+  clearTimers(); clearUndo();
+  state = { screen:'darts', cd: cdStartMatch({names, mode, matchLength, seed}) };
   render();
 }
 
