@@ -987,6 +987,185 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
   .cd-hand{ padding:6px 20px 2px; }
   .cd-handcard{ width:54px; height:76px; }
 }
+
+/* ===========================================================
+   CARDPONG — "Draw. Hit. Drink." Beer-Pong-trifft-Kartenspiel.
+   Alle Elemente nativ/CSS gerendert (keine Screen-Assets nötig,
+   siehe Asset-Manifest). Eigene Markenfarben (Team Rot/Blau,
+   Neon) sind hier lokal definiert, weil die Spielidentität
+   bewusst von der App-Palette abweicht — dieselbe Konvention wie
+   bei Card Darts' eigenem Dartboard-Look.
+=========================================================== */
+.cover-cp{
+  background:
+    radial-gradient(circle at 30% 40%, rgba(255,59,77,0.34) 0%, transparent 42%),
+    radial-gradient(circle at 72% 55%, rgba(53,167,255,0.30) 0%, transparent 46%),
+    linear-gradient(to top, rgba(8,8,16,0.92), rgba(8,8,16,0.15) 55%, transparent),
+    #0B0F1A;
+}
+.cover-cp .glyph{ opacity:0.18; }
+
+.cp-screen{
+  --cp-red:#FF3B4D; --cp-red-dark:#A81829; --cp-blue:#35A7FF; --cp-blue-dark:#145B91;
+  --cp-gold:#FFC857; --cp-purple:#A855F7; --cp-cyan:#51E5FF; --cp-success:#58E38A;
+  position:relative; min-height:100dvh; display:flex; flex-direction:column;
+  background:
+    radial-gradient(130% 220px at 50% 0, rgba(255,59,77,0.14), transparent 60%),
+    radial-gradient(130% 220px at 50% 100%, rgba(53,167,255,0.14), transparent 60%),
+    #0B0F1A;
+}
+.setup-screen.cp{ background:radial-gradient(120% 260px at 50% 0, rgba(255,59,77,0.16), transparent 50%), radial-gradient(120% 260px at 50% 100%, rgba(53,167,255,0.16), transparent 50%); }
+.cp-tagline{ font-family:'Bebas Neue',sans-serif; letter-spacing:0.14em; font-size:13px; color:var(--cp-gold, #FFC857); text-align:center; }
+
+.cp-modeseg .seg{ font-size:12.5px; }
+.cp-team-toggle{
+  display:flex; flex-wrap:wrap; gap:8px; padding:4px 0;
+}
+.cp-chip{
+  display:flex; align-items:center; gap:6px; padding:7px 12px; border-radius:14px;
+  font-size:12.5px; font-weight:700; cursor:pointer; border:1.5px solid transparent;
+  background:var(--ink); color:var(--ash);
+}
+.cp-chip.red{ background:rgba(255,59,77,0.16); border-color:var(--cp-red); color:#FFD3D8; }
+.cp-chip.blue{ background:rgba(53,167,255,0.16); border-color:var(--cp-blue); color:#CFEBFF; }
+.cp-teamlabel{ font-family:'Bebas Neue',sans-serif; letter-spacing:0.05em; font-size:12px; margin-top:10px; }
+.cp-teamlabel.red{ color:var(--cp-red); } .cp-teamlabel.blue{ color:var(--cp-blue); }
+
+/* --- in-game top bar --- */
+.cp-topinfo{ display:flex; align-items:center; gap:8px; padding:2px 16px; }
+.cp-turnpill{
+  flex:1; text-align:center; font-family:'Bebas Neue',sans-serif; font-size:14px; letter-spacing:0.05em;
+  padding:6px 10px; border-radius:20px; background:var(--panel); border:1px solid var(--line); color:var(--ash);
+}
+.cp-turnpill.red{ background:rgba(255,59,77,0.18); border-color:var(--cp-red); color:#FFD3D8; }
+.cp-turnpill.blue{ background:rgba(53,167,255,0.18); border-color:var(--cp-blue); color:#CFEBFF; }
+
+/* --- team banner (Action Pong) --- */
+.cp-banner{
+  display:flex; align-items:center; gap:10px; padding:8px 16px; margin:2px 0;
+}
+.cp-banner .swatch{ width:10px; height:26px; border-radius:4px; flex-shrink:0; }
+.cp-banner.red .swatch{ background:var(--cp-red); box-shadow:0 0 10px rgba(255,59,77,0.6); }
+.cp-banner.blue .swatch{ background:var(--cp-blue); box-shadow:0 0 10px rgba(53,167,255,0.6); }
+.cp-banner .nm{ font-family:'Bebas Neue',sans-serif; font-size:16px; letter-spacing:0.03em; flex:1; }
+.cp-banner .left{ font-size:11.5px; color:var(--ash); }
+.cp-banner .icons{ display:flex; gap:6px; align-items:center; }
+.cp-jokericon{ font-size:15px; opacity:0.25; filter:grayscale(1); }
+.cp-jokericon.on{ opacity:1; filter:none; text-shadow:0 0 8px var(--cp-cyan, #51E5FF); animation:cpPulse 1.4s ease-in-out infinite; }
+.cp-streakicon{ font-size:11px; color:var(--ash); font-weight:700; }
+.cp-streakicon.on{ color:#FF9E3D; }
+@keyframes cpPulse{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.18); } }
+
+/* --- pyramids --- */
+.cp-pyramid{ display:flex; flex-direction:column; align-items:center; gap:4px; padding:2px 8px; }
+.cp-pyramid.mirror{ flex-direction:column-reverse; }
+.cp-prow{ display:flex; gap:4px; justify-content:center; }
+.cp-cup{
+  width:26px; height:34px; border-radius:5px 5px 8px 8px; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; font-family:'Bebas Neue',sans-serif; line-height:1;
+  background:linear-gradient(180deg,#fff,#EDEDED); color:#1A1A1A; border:1.5px solid rgba(0,0,0,0.15);
+  box-shadow:0 2px 4px rgba(0,0,0,0.35); transition:transform .18s ease, opacity .18s ease;
+}
+.cp-cup .r{ font-size:12px; } .cp-cup .s{ font-size:9px; margin-top:-1px; }
+.cp-cup.red-suit{ color:#C21F2E; } .cp-cup.black-suit{ color:#151515; }
+.cp-cup.team-red{ box-shadow:0 0 0 1.5px var(--cp-red), 0 2px 6px rgba(255,59,77,0.45); }
+.cp-cup.team-blue{ box-shadow:0 0 0 1.5px var(--cp-blue), 0 2px 6px rgba(53,167,255,0.45); }
+.cp-cup.removed{ opacity:0; transform:scale(0.3) translateY(-8px); pointer-events:none; }
+.cp-cup.selectable{ cursor:pointer; animation:cpTargetPulse 1s ease-in-out infinite; }
+@keyframes cpTargetPulse{ 0%,100%{ box-shadow:0 0 0 1.5px var(--cp-purple,#A855F7),0 0 6px rgba(168,85,247,0.5);} 50%{ box-shadow:0 0 0 3px var(--cp-purple,#A855F7),0 0 16px rgba(168,85,247,0.85);} }
+
+/* --- center deck / draw zone --- */
+.cp-centerzone{ display:flex; flex-direction:column; align-items:center; gap:6px; padding:6px 16px; flex:1; justify-content:center; }
+.cp-decks{ display:flex; align-items:center; gap:16px; }
+.cp-stack{
+  width:46px; height:64px; border-radius:7px; background:linear-gradient(145deg,#2A1749,#171126);
+  border:1.5px solid var(--line); display:flex; align-items:center; justify-content:center;
+  font-size:18px; color:var(--ash); position:relative;
+}
+.cp-stack .cnt{ position:absolute; bottom:-16px; font-size:10px; color:var(--ash); white-space:nowrap; }
+.cp-drawnwrap{ width:64px; height:88px; perspective:600px; }
+.cp-drawncard{
+  width:100%; height:100%; border-radius:9px; background:linear-gradient(180deg,#fff,#EDEDED);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  font-family:'Bebas Neue',sans-serif; box-shadow:0 6px 18px rgba(0,0,0,0.5); animation:flipin .22s ease;
+}
+.cp-drawncard .r{ font-size:26px; } .cp-drawncard .s{ font-size:19px; margin-top:2px; }
+.cp-drawncard.joker{ background:linear-gradient(160deg,#2A1749,#0B0F1A); color:var(--cp-cyan,#51E5FF); font-size:11px; letter-spacing:0.06em; text-align:center; }
+.cp-drawncard.placeholder{ background:transparent; box-shadow:none; }
+.cp-drawbtn{ width:100%; max-width:220px; }
+
+/* --- event popup / drink toast --- */
+.cp-popupwrap{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:5; }
+.cp-popup{
+  text-align:center; padding:14px 26px; border-radius:16px; background:rgba(11,15,26,0.86);
+  border:1.5px solid var(--cp-gold,#FFC857); box-shadow:0 0 30px rgba(255,200,87,0.35);
+  animation:winpopKF .35s cubic-bezier(.2,1.4,.4,1);
+}
+.cp-popup .big{ font-family:'Bebas Neue',sans-serif; font-size:30px; letter-spacing:0.05em; color:var(--cp-gold,#FFC857); }
+.cp-popup .sub{ font-size:11.5px; color:var(--ash); margin-top:2px; }
+.cp-popup.miss{ border-color:var(--ash); box-shadow:none; }
+.cp-popup.miss .big{ color:var(--ash); }
+.cp-popup.airball{ border-color:var(--cp-purple,#A855F7); box-shadow:0 0 30px rgba(168,85,247,0.4); }
+.cp-popup.airball .big{ color:var(--cp-purple,#A855F7); }
+.cp-popup.trickshot{ border-color:var(--cp-gold,#FFC857); }
+.cp-popup.joker{ border-color:var(--cp-cyan,#51E5FF); box-shadow:0 0 30px rgba(81,229,255,0.4); }
+.cp-popup.joker .big{ color:var(--cp-cyan,#51E5FF); }
+.cp-popup.blocked{ border-color:var(--cp-cyan,#51E5FF); }
+.cp-popup.ballsback{ border-color:#FF9E3D; box-shadow:0 0 30px rgba(255,158,61,0.45); }
+.cp-popup.ballsback .big{ color:#FF9E3D; }
+.cp-drinktoast{
+  position:absolute; left:50%; bottom:14px; transform:translateX(-50%); pointer-events:none; z-index:6;
+  font-family:'Bebas Neue',sans-serif; font-size:13px; letter-spacing:0.05em; padding:7px 16px; border-radius:20px;
+  background:rgba(11,15,26,0.9); animation:cpToast 1.4s ease forwards;
+}
+.cp-drinktoast.red{ color:#FFD3D8; border:1px solid var(--cp-red,#FF3B4D); }
+.cp-drinktoast.blue{ color:#CFEBFF; border:1px solid var(--cp-blue,#35A7FF); }
+@keyframes cpToast{ 0%{opacity:0; transform:translate(-50%,8px);} 12%{opacity:1; transform:translate(-50%,0);} 82%{opacity:1;} 100%{opacity:0;} }
+
+/* --- victory / result --- */
+.cp-victory{ text-align:center; padding:22px; }
+.cp-victory .win{ font-family:'Bebas Neue',sans-serif; font-size:20px; color:var(--ash); letter-spacing:0.14em; }
+.cp-victory .team{ font-family:'Bebas Neue',sans-serif; font-size:36px; margin:8px 0 4px; }
+.cp-victory .team.red{ color:var(--cp-red,#FF3B4D); text-shadow:0 0 26px rgba(255,59,77,0.55); }
+.cp-victory .team.blue{ color:var(--cp-blue,#35A7FF); text-shadow:0 0 26px rgba(53,167,255,0.55); }
+.cp-statgrid{ display:flex; justify-content:center; gap:18px; margin:14px 0 18px; }
+.cp-statgrid .st{ text-align:center; }
+.cp-statgrid .st .v{ font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--cream); }
+.cp-statgrid .st .l{ font-size:10px; color:var(--ash); letter-spacing:0.04em; }
+
+@media (max-width:360px){
+  .cp-cup{ width:22px; height:29px; }
+  .cp-cup .r{ font-size:10px; } .cp-cup .s{ font-size:8px; }
+  .cp-stack{ width:40px; height:56px; }
+  .cp-drawnwrap{ width:54px; height:74px; }
+}
+
+/* --- home / mode selection (added alongside the block above) --- */
+.cp-wordmark{
+  font-family:'Bebas Neue',sans-serif; font-size:clamp(38px,13vw,56px); letter-spacing:0.04em; line-height:1;
+  background:linear-gradient(90deg,var(--cp-red,#FF3B4D),var(--cp-gold,#FFC857) 50%,var(--cp-blue,#35A7FF));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  text-align:center; margin-top:10px;
+}
+.cp-modelist{ display:flex; flex-direction:column; gap:12px; padding:16px 20px 4px; }
+.cp-modecard{
+  text-align:left; border-radius:18px; padding:16px 18px; cursor:pointer; border:1px solid var(--line);
+  background:linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%); transition:transform .12s ease;
+}
+.cp-modecard:active{ transform:scale(0.97); }
+.cp-modecard.quick{ border-color:rgba(255,200,87,0.4); }
+.cp-modecard.action{ border-color:rgba(255,59,77,0.45); }
+.cp-modecard .mt{ font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:0.03em; }
+.cp-modecard.quick .mt{ color:#FFC857; }
+.cp-modecard.action .mt{ color:#FF7A87; }
+.cp-modecard .md{ font-size:12.5px; color:var(--ash); margin-top:4px; line-height:1.4; }
+.cp-homebtns{ display:flex; flex-direction:column; gap:10px; padding:8px 20px 20px; }
+
+/* --- airball target selection --- */
+.cp-airballwrap{ text-align:center; padding:10px 20px; flex:1; display:flex; flex-direction:column; justify-content:center; }
+.cp-airballtitle{ font-family:'Bebas Neue',sans-serif; font-size:20px; color:var(--cp-purple,#A855F7); letter-spacing:0.03em; margin-bottom:4px; }
+.cp-airballsub{ font-size:12px; color:var(--ash); margin-bottom:14px; }
+.cp-airballgrid{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
 </style>
 </head>
 <body>
@@ -1095,6 +1274,19 @@ function sfx(name){
   else if(name==='dart-double'){ tone(300,0,0.06,'square',0.11); tone(500,0.05,0.16,'triangle',0.15); }
   else if(name==='dart-triple'){ tone(300,0,0.05,'square',0.11); tone(500,0.05,0.06,'triangle',0.13); tone(760,0.1,0.22,'triangle',0.17); }
   else if(name==='dart-refill'){ tone(660,0,0.05,'sine',0.07); tone(880,0.04,0.05,'sine',0.06); }
+  // CARDPONG: eigene, unabhängige Sound-Palette (siehe 06_CARDPONG_ANIMATION_AUDIO_HAPTICS.md
+  // Audio Keys) — bewusst getrennt von Card Darts, damit keins der beiden Spiele das andere beeinflusst.
+  else if(name==='cp-draw'){ tone(340,0,0.05,'sine',0.08); }
+  else if(name==='cp-flip'){ tone(520,0,0.06,'triangle',0.10); }
+  else if(name==='cp-hit'){ tone(200,0,0.06,'square',0.11); tone(620,0.02,0.14,'triangle',0.17); }
+  else if(name==='cp-miss'){ tone(150,0,0.16,'sawtooth',0.09); }
+  else if(name==='cp-airball'){ tone(700,0,0.05,'sine',0.10); tone(420,0.05,0.10,'sine',0.09); tone(260,0.11,0.18,'sine',0.08); }
+  else if(name==='cp-trickshot'){ [660,880,1100].forEach((f,i)=>tone(f,i*0.05,0.14,'triangle',0.12)); }
+  else if(name==='cp-joker'){ tone(880,0,0.08,'sine',0.10); tone(1180,0.05,0.12,'sine',0.08); }
+  else if(name==='cp-block'){ tone(140,0,0.05,'square',0.12); tone(90,0.05,0.16,'square',0.10); }
+  else if(name==='cp-ballsback'){ [400,600,900].forEach((f,i)=>tone(f,i*0.06,0.16,'sawtooth',0.11)); }
+  else if(name==='cp-drink'){ tone(300,0,0.07,'sine',0.09); tone(220,0.05,0.10,'sine',0.07); }
+  else if(name==='cp-victory'){ [523,659,784,1047,1319].forEach((f,i)=>tone(f,i*0.08,0.3,'triangle',0.17)); }
 }
 function buzz(pattern){
   try{ if('vibrate' in navigator) navigator.vibrate(pattern); }catch(e){}
@@ -1110,6 +1302,17 @@ function feedback(kind){
   else if(kind==='double'){ sfx('dart-double'); buzz([0,16,30,22]); }
   else if(kind==='triple'){ sfx('dart-triple'); buzz([0,18,26,18,26,30]); }
   else if(kind==='refill'){ sfx('dart-refill'); buzz(6); }
+  else if(kind==='cp-draw'){ sfx('cp-draw'); buzz(6); }
+  else if(kind==='cp-flip'){ sfx('cp-flip'); buzz(8); }
+  else if(kind==='cp-hit'){ sfx('cp-hit'); buzz(16); }
+  else if(kind==='cp-miss'){ sfx('cp-miss'); buzz(10); }
+  else if(kind==='cp-airball'){ sfx('cp-airball'); buzz([0,20,30,20]); }
+  else if(kind==='cp-trickshot'){ sfx('cp-trickshot'); buzz([0,14,20,14]); }
+  else if(kind==='cp-joker'){ sfx('cp-joker'); buzz(12); }
+  else if(kind==='cp-block'){ sfx('cp-block'); buzz([0,40,30,40]); }
+  else if(kind==='cp-ballsback'){ sfx('cp-ballsback'); buzz([0,18,26,18,26,30]); }
+  else if(kind==='cp-drink'){ sfx('cp-drink'); buzz(10); }
+  else if(kind==='cp-victory'){ sfx('cp-victory'); buzz([0,40,60,40,60,90]); }
 }
 function toggleSound(){ soundOn = !soundOn; if(soundOn){ ensureAudio(); feedback('tap'); } saveStore(); render(); }
 function toggleKcSpeaker(){ kcSpeaker = !kcSpeaker; saveStore(); if(kcSpeaker) pfSpeak('Sprecher an. Ich lese die Regeln vor.'); render(); }
@@ -1293,6 +1496,8 @@ function render(){
   else if(state.screen==='bus-phase3') renderBusPhase3();
   else if(state.screen==='darts-setup') renderDartsSetup();
   else if(state.screen==='darts') renderDarts();
+  else if(state.screen==='cardpong-setup') renderCardpongSetup();
+  else if(state.screen==='cardpong') renderCardpong();
 
   if(state.helpOpen){
     app.insertAdjacentHTML('beforeend', helpHTML(state.helpOpen));
@@ -1391,6 +1596,19 @@ const HELP_TEXT = {
       'CLASSIC: Ein getroffenes Ziel bleibt liegen, ist aber für den Rest der Runde blockiert. Derselbe Wert kann später noch eine niedrigere, unblockierte Kopie treffen.',
       'ACTION: Ein getroffenes Ziel verschwindet vom Board und rückt sofort nach (von außen nach innen). Ass = TRIPLE (×3), König = DOUBLE (×2) — nur bei Treffer. Bube und Dame sind normal.',
       'Nach 3 aufgedeckten Karten ist der nächste Spieler dran. Nach jeder Runde rotiert der Startspieler. Bei Gleichstand am Ende: Sudden Death, eine Karte pro Spieler, bis ein Sieger feststeht.'
+    ]
+  },
+  cardpong: {
+    title:'CARDPONG — so geht\'s',
+    steps:[
+      'Zwei Teams. Jedes Team hat eigene Zielkarten (eine Kartenpyramide) auf der Seite des Gegners. Verschwindet eine Karte, trinkt das Team auf dieser Seite.',
+      'QUICK PONG: 6 Zielkarten pro Team (3-2-1), ein gemeinsamer Zugstapel. Reihum wird gezogen — passt die Karte zu einer aktiven Zielkarte, verschwindet sie und der Gegner trinkt. Kein Treffer = MISS. Wer zuerst alle eigenen 6 Karten abgeräumt hat, gewinnt sofort.',
+      'ACTION PONG: 10 Zielkarten pro Team (4-3-2-1), Ass und König sind nie Ziel. Jedes Team zieht aus dem eigenen 34-Karten-Deck (32 Skatkarten + 2 Joker).',
+      'ASS = AIRBALL: Streak endet, du wählst eine gegnerische Zielkarte auf deiner Seite — sie verschwindet, dein Team trinkt. Bleibt dem Gegner nur noch 1 Karte, ist sie sicher (kein Airball möglich).',
+      'KÖNIG = TRICKSHOT: Kein Treffer, kein Miss, Streak bleibt — du ziehst sofort erneut.',
+      'JOKER = DEFENSE: Aktiviert automatisch einen Schutz, der den nächsten regulären Treffer des Gegners blockiert (Karte geht zurück ins Zugdeck des Gegners, das dann gemischt wird). Ein zweiter Joker bei bereits aktivem Schutz zählt als MISS.',
+      'Zwei Treffer in Folge (auch mit Gegnerzügen dazwischen) lösen BALLS BACK aus: du ziehst direkt weiter. Jeder weitere Treffer im Lauf gibt einen weiteren Bonuszug. Miss, Airball, Joker oder Block beenden den Lauf — der König unterbricht ihn nicht.',
+      'Sieg nur durch einen echten Treffer auf die letzte eigene Zielkarte — ein Airball kann das Spiel nie beenden.'
     ]
   }
 };
@@ -1544,6 +1762,7 @@ const GAMES = [
   {key:'pf', title:'PFERDERENNEN', desc:'Setz auf eine Farbe und fiebere mit',  glyph:'🐎', cls:'cover-pf', screen:'pferd-setup'},
   {key:'bf', title:'BUSFAHRER',    desc:'Raten · Pyramide · Endspiel',           glyph:'🚌', cls:'cover-bf', screen:'bus-setup'},
   {key:'cd', title:'CARD DARTS',   desc:'Karten statt Pfeile · triff das Board', glyph:'🎯', cls:'cover-cd', screen:'darts-setup'},
+  {key:'cp', title:'CARDPONG',     desc:'Draw. Hit. Drink. · Beer Pong mit Karten', glyph:'🍺', cls:'cover-cp', screen:'cardpong-setup'},
 ];
 function openGame(screen){ reset(screen); }
 function openRoster(from){ state.rosterReturn = from; nav('roster'); }
@@ -3458,6 +3677,607 @@ function cdRematch(){
   const seed = (Date.now() ^ Math.floor(Math.random()*0xFFFFFFFF)) >>> 0;
   clearTimers(); clearUndo();
   state = { screen:'darts', cd: cdStartMatch({names, mode, matchLength, seed}) };
+  render();
+}
+
+/* ---------------------------------------------------------
+   CARDPONG — "Draw. Hit. Drink." Beer-Pong trifft Kartenspiel.
+   Zwei Teams (rot/blau); die eigenen Zielkarten eines Teams liegen
+   auf der GEGNERISCHEN Tischseite — räumt ein Team alle eigenen
+   Karten dort ab, gewinnt es, und der Gegner trinkt bei jeder
+   Entfernung. Engine ist strikt von UI/Animation getrennt: alle
+   `cp*`-Funktionen unten (bis zum Export) sind rein (nehmen/geben
+   nur Plain-Data über ein `g`-Objekt zurück) und nutzen dieselbe
+   seedbare RNG wie Card Darts (cdMakeRng/cdShuffle) für reproduzierbare
+   Tests. Die UI-Funktionen danach lesen nur das Ergebnis aus einem
+   Draw aus — sie entscheiden nie selbst über Treffer/Miss/Sieg.
+--------------------------------------------------------- */
+const CP_CONFIG = {
+  quick:  { targetsPerTeam:6,  rows:[1,2,3] },
+  action: { targetsPerTeam:10, rows:[1,2,3,4] },
+  timing: { flip:220, resolve:420, drink:650 }
+};
+const CP_COPY = {
+  chooseCupAirball:'CHOOSE A CUP', hit:'HIT', miss:'MISS', airball:'AIRBALL',
+  lastCup:'LAST CUP IS SAFE', trickshot:'TRICKSHOT', drawAgain:'DRAW AGAIN',
+  defenseReady:'DEFENSE READY', blocked:'BLOCKED', ballsBack:'BALLS BACK',
+  victory:'VICTORY', rematch:'REMATCH', changeMode:'MODUS WECHSELN', home:'HOME'
+};
+// Verbindliche Markenfarben aus dem CARDPONG-Design-System (Team Rot/Blau,
+// Gold). Bewusst als eigene Konstante statt der App-Palette, weil die
+// Spielidentität ausdrücklich "Red vs Blue Neon" verlangt.
+const CP_TEAM_META = {
+  red:  { name:'TEAM ROT',  color:'#FF3B4D', dark:'#A81829' },
+  blue: { name:'TEAM BLAU', color:'#35A7FF', dark:'#145B91' }
+};
+function cpOther(side){ return side==='red' ? 'blue' : 'red'; }
+
+/* ---- pure engine: Kartenpools (nutzt buildDeck/cdShuffle/cdMakeRng) ---- */
+function cpSkatDeck(rng){ return cdShuffle(buildDeck(32), rng); }
+function cpPersonalDeck(rng){
+  // 32 Skatkarten + 2 Joker = 34 Karten (Spezifikation: "jedes persönliche
+  // Deck startet mit 34 Karten"). Eigene id-Range (32/33), damit Joker nie
+  // mit einer echten Karte kollidieren.
+  const cards = buildDeck(32);
+  cards.push({id:32, rank:'JOKER', suit:null, color:null, suitName:null, value:-1, isJoker:true});
+  cards.push({id:33, rank:'JOKER', suit:null, color:null, suitName:null, value:-1, isJoker:true});
+  return cdShuffle(cards, rng);
+}
+
+/* ---- pure engine: Quick Pong ---- */
+function cpBuildQuickTargets(rng){
+  // 12 eindeutige Zielkarten aus einem eigenen 32er-Pool (getrennt vom
+  // Zugdeck) — "keine Zielkarte darf beiden Teams gehören".
+  const chosen = cdShuffle(buildDeck(32), rng).slice(0, 12);
+  return {
+    red:  chosen.slice(0, 6).map(c=>({card:c, active:true})),
+    blue: chosen.slice(6, 12).map(c=>({card:c, active:true}))
+  };
+}
+function cpStartQuick({seed}){
+  const rng = cdMakeRng(seed);
+  const targets = cpBuildQuickTargets(rng);
+  return {
+    mode:'quick', seed, rng,
+    teams:{
+      red:  { side:'red',  ...CP_TEAM_META.red,  targets:targets.red },
+      blue: { side:'blue', ...CP_TEAM_META.blue, targets:targets.blue }
+    },
+    drawDeck: cpSkatDeck(rng),
+    discard: [],
+    drawnCard:null, lastEvent:null,
+    locked:false, winner:null, phase:'active'
+  };
+}
+function cpQuickFindTarget(g, card){
+  for(const side of ['red','blue']){
+    const t = g.teams[side].targets.find(t=>t.active && t.card.rank===card.rank && t.card.suit===card.suit);
+    if(t) return { side, target:t };
+  }
+  return null;
+}
+function cpQuickDraw(g){
+  if(g.winner) return null;
+  if(g.drawDeck.length===0){
+    // Fallback, falls das 32er-Deck je leergezogen würde: Ablage neu mischen.
+    g.drawDeck = cdShuffle(g.discard, g.rng);
+    g.discard = [];
+  }
+  const card = g.drawDeck.pop();
+  g.drawnCard = card;
+  const found = cpQuickFindTarget(g, card);
+  let result;
+  if(found){
+    found.target.active = false;
+    g.discard.push(card);
+    const scoringTeam = g.teams[found.side];
+    const drinkingSide = cpOther(found.side);
+    const remaining = scoringTeam.targets.filter(t=>t.active).length;
+    result = { type:'hit', card, scoringSide:found.side, drinkingSide, remaining };
+    if(remaining===0){ g.winner = found.side; g.phase = 'result'; g.locked = true; }
+  } else {
+    g.discard.push(card);
+    result = { type:'miss', card };
+  }
+  g.lastEvent = result;
+  return result;
+}
+
+/* ---- pure engine: Action Pong — Setup ---- */
+function cpBuildActionTargets(rng){
+  // Ass/König raus (32-8=24), davon 20 eindeutige Ziele (10 je Team).
+  const pool = cdShuffle(buildDeck(32).filter(c=> c.rank!=='A' && c.rank!=='K'), rng);
+  const chosen = pool.slice(0, 20);
+  return {
+    red:  chosen.slice(0, 10).map(c=>({card:c, active:true})),
+    blue: chosen.slice(10, 20).map(c=>({card:c, active:true}))
+  };
+}
+function cpMakeActionTeam(side, targets, rng){
+  return {
+    side, ...CP_TEAM_META[side],
+    targets, deck: cpPersonalDeck(rng), discard:[],
+    jokerShield:false, streak:0, bestStreak:0,
+    hits:0, misses:0, airballs:0, trickshots:0, blocksMade:0, blocksTaken:0
+  };
+}
+function cpStartAction({seed}){
+  const rng = cdMakeRng(seed);
+  const targets = cpBuildActionTargets(rng);
+  const startSide = rng() < 0.5 ? 'red' : 'blue'; // "App bestimmt zufällig den Startspieler"
+  return {
+    mode:'action', seed, rng,
+    teams:{
+      red:  cpMakeActionTeam('red', targets.red, rng),
+      blue: cpMakeActionTeam('blue', targets.blue, rng)
+    },
+    activeSide: startSide,
+    pendingAirball:null,
+    drawnCard:null, lastEvent:null,
+    locked:false, winner:null, phase:'active'
+  };
+}
+function cpActionFindTarget(team, card){
+  return team.targets.find(t=>t.active && t.card.rank===card.rank && t.card.suit===card.suit) || null;
+}
+function cpDrawReplacementAction(team, rng){
+  if(team.deck.length===0){
+    team.deck = cdShuffle(team.discard, rng);
+    team.discard = [];
+  }
+  return team.deck.pop();
+}
+
+/* ---- pure engine: Action Pong — einen Zug auflösen ---- */
+function cpActionDraw(g){
+  if(g.winner || g.pendingAirball) return null;
+  const side = g.activeSide;
+  const other = cpOther(side);
+  const team = g.teams[side];
+  const opp = g.teams[other];
+  const card = cpDrawReplacementAction(team, g.rng);
+  g.drawnCard = card;
+  let result, switchTurn = true;
+
+  if(card.isJoker){
+    team.discard.push(card);
+    if(team.jokerShield){
+      // "Zweiter Joker bei bereits aktivem Joker = Miss" — kein Stapeln.
+      team.streak = 0;
+      result = { type:'joker-miss', card, side };
+    } else {
+      team.jokerShield = true;
+      team.streak = 0;
+      result = { type:'joker-ready', card, side };
+    }
+  } else if(card.rank==='A'){
+    // AIRBALL
+    team.streak = 0;
+    team.discard.push(card);
+    team.airballs++;
+    const oppActive = opp.targets.filter(t=>t.active);
+    if(oppActive.length<=1){
+      // Last-Cup-Airball-Schutz: darf die letzte gegnerische Karte nie entfernen.
+      result = { type:'airball-safe', card, side };
+    } else {
+      result = { type:'airball-pending', card, side, options: oppActive.map(t=>t.card.id) };
+      switchTurn = false; // wartet auf Zielauswahl, siehe cpActionResolveAirball
+      g.pendingAirball = { side };
+    }
+  } else if(card.rank==='K'){
+    // TRICKSHOT: kein Treffer, kein Miss, Streak bleibt, gleicher Spieler zieht erneut.
+    team.discard.push(card);
+    team.trickshots++;
+    switchTurn = false;
+    result = { type:'trickshot', card, side };
+  } else {
+    const target = cpActionFindTarget(team, card);
+    if(!target){
+      team.streak = 0;
+      team.discard.push(card);
+      team.misses++;
+      result = { type:'miss', card, side };
+    } else if(opp.jokerShield){
+      // Automatischer Block: Zielkarte bleibt stehen, niemand trinkt, Joker
+      // verbraucht, Trefferkarte zurück ins Angreifer-Deck + nur dieses mischen.
+      opp.jokerShield = false;
+      opp.blocksMade++;
+      team.blocksTaken++;
+      team.streak = 0;
+      team.deck.push(card);
+      team.deck = cdShuffle(team.deck, g.rng);
+      result = { type:'blocked', card, side, blockedBy:other };
+    } else {
+      target.active = false;
+      team.streak++;
+      if(team.streak > team.bestStreak) team.bestStreak = team.streak;
+      team.hits++;
+      team.discard.push(card);
+      const remaining = team.targets.filter(t=>t.active).length;
+      const ballsBack = team.streak >= 2;
+      if(ballsBack) switchTurn = false;
+      result = { type:'hit', card, side, drinkingSide:other, remaining, ballsBack, streak:team.streak };
+      if(remaining===0){
+        g.winner = side; g.phase = 'result'; g.locked = true; switchTurn = false;
+      }
+    }
+  }
+  g.lastEvent = result;
+  if(switchTurn && !g.winner) g.activeSide = other;
+  return result;
+}
+function cpActionResolveAirball(g, targetCardId){
+  if(!g.pendingAirball) return null;
+  const side = g.pendingAirball.side;
+  const team = g.teams[side];
+  const opp = g.teams[cpOther(side)];
+  const oppActive = opp.targets.filter(t=>t.active);
+  const target = oppActive.find(t=>t.card.id===targetCardId);
+  if(!target) return null;
+  let result;
+  if(oppActive.length<=1){
+    // Defensive Zweitprüfung: die letzte gegnerische Karte darf nie fallen.
+    result = { type:'airball-safe', side };
+  } else {
+    target.active = false;
+    result = { type:'airball-hit', side, drinkingSide:side, targetCard:target.card };
+  }
+  g.pendingAirball = null;
+  g.lastEvent = result;
+  g.activeSide = cpOther(side);
+  return result;
+}
+
+// Für den eigenständigen Node-Testharness (tests/cardpong.test.js) exponiert;
+// in der App selbst harmlos, wird von der UI nie referenziert.
+if(typeof window!=='undefined'){
+  window.CardPongEngine = {
+    CP_CONFIG, CP_TEAM_META, cpOther, cpSkatDeck, cpPersonalDeck,
+    cpBuildQuickTargets, cpStartQuick, cpQuickFindTarget, cpQuickDraw,
+    cpBuildActionTargets, cpMakeActionTeam, cpStartAction, cpActionFindTarget,
+    cpDrawReplacementAction, cpActionDraw, cpActionResolveAirball,
+    buildDeck, cdMakeRng, cdShuffle
+  };
+}
+
+/* ---------------------------------------------------------
+   CARDPONG — UI
+--------------------------------------------------------- */
+function cpTeamDisplayName(g, side){
+  const names = (state.cpRoster && state.cpRoster[side]) || [];
+  return names.length ? `${g.teams[side].name} · ${names.join(', ')}` : g.teams[side].name;
+}
+function cpEnsureAssign(){
+  state.cpAssign = state.cpAssign || {};
+  roster.forEach((nm,i)=>{
+    if(state.cpAssign[nm]!=='red' && state.cpAssign[nm]!=='blue'){
+      state.cpAssign[nm] = i%2===0 ? 'red' : 'blue';
+    }
+  });
+}
+function cpToggleAssign(name){
+  cpEnsureAssign();
+  state.cpAssign[name] = state.cpAssign[name]==='red' ? 'blue' : 'red';
+  feedback('tap');
+  render();
+}
+function renderCardpongSetup(){
+  state.cpMode = state.cpMode || 'quick';
+  cpEnsureAssign();
+  const n = roster.length;
+  const redNames = roster.filter(nm=>state.cpAssign[nm]==='red');
+  const blueNames = roster.filter(nm=>state.cpAssign[nm]==='blue');
+  const enough = n>=2 && redNames.length>=1 && blueNames.length>=1;
+  const cfg = state.cpMode==='quick' ? CP_CONFIG.quick : CP_CONFIG.action;
+  app.innerHTML = `
+   <div class="setup-screen cp">
+    <div class="topbar">
+      <div class="backbtn" onclick="nav('home')">‹</div>
+      <div class="spacer"></div>
+      ${helpBtnHTML('cardpong')}
+    </div>
+    <div class="setup-hero">
+      <div class="gtitle" style="color:#FF3B4D;">CARDPONG</div>
+      <div class="cp-tagline">DRAW. HIT. DRINK.</div>
+    </div>
+    <div class="section">
+      <div class="setcard">
+        <div class="setrow tapp ${n<2?'warn':''}" onclick="openRoster('cardpong-setup')">
+          <div class="ic">👥</div><div class="rl">Spieler</div>
+          <div class="rv">${n<2?'⚠️ ':''}${n} <span class="chev">›</span></div>
+        </div>
+        <div class="setrow" style="flex-direction:column; align-items:stretch; gap:10px;">
+          <div style="display:flex; align-items:center; gap:12px;"><div class="ic">🍺</div><div class="rl">Modus</div></div>
+          <div class="segmented cp-modeseg">
+            <div class="seg ${state.cpMode==='quick'?'on':''}" onclick="state.cpMode='quick'; render();">Quick Pong</div>
+            <div class="seg ${state.cpMode==='action'?'on':''}" onclick="state.cpMode='action'; render();">🔥 Action Pong</div>
+          </div>
+        </div>
+        ${n>=1 ? `
+        <div class="setrow" style="flex-direction:column; align-items:stretch; gap:8px;">
+          <div style="display:flex; align-items:center; gap:12px;"><div class="ic">🆚</div><div class="rl">Teams — antippen zum Wechseln</div></div>
+          <div class="cp-team-toggle">
+            ${roster.map(nm=>`<div class="cp-chip ${state.cpAssign[nm]}" onclick="cpToggleAssign('${jsAttr(nm)}')">${esc(nm)}</div>`).join('')}
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:11px; gap:8px;">
+            <span class="cp-teamlabel red">ROT: ${redNames.length ? esc(redNames.join(', ')) : '—'}</span>
+            <span class="cp-teamlabel blue">BLAU: ${blueNames.length ? esc(blueNames.join(', ')) : '—'}</span>
+          </div>
+        </div>` : ''}
+        <div class="setrow tapp" onclick="showHelp('cardpong')">
+          <div class="ic">📺</div><div class="rl">Regeln & So geht's</div>
+          <div class="rv">Ansehen <span class="chev">›</span></div>
+        </div>
+      </div>
+      ${n<2 ? `<div class="warnbox">CARDPONG braucht mindestens 2 Spieler (mind. 1 pro Team). Aktuell: ${n}.</div>`
+        : !enough ? `<div class="warnbox">Jedes Team braucht mindestens 1 Spieler. Tippe oben auf einen Namen, um das Team zu wechseln.</div>` : ''}
+      ${enough ? `<p class="centerinfo" style="text-align:left;">${state.cpMode==='quick' ? `${cfg.targetsPerTeam} Karten pro Team · gemeinsames Deck · keine Sonderregeln.` : `${cfg.targetsPerTeam} Karten pro Team · Joker Defense · Airball · Trickshot · Treffer-Serien.`}</p>` : ''}
+    </div>
+    <div class="floatbar">
+      <button class="btn btn-primary" ${enough?'':'disabled'} onclick="cpStart()">🍺 Spiel starten</button>
+    </div>
+   </div>
+  `;
+}
+function cpStart(){
+  cpEnsureAssign();
+  const redNames = roster.filter(nm=>state.cpAssign[nm]==='red');
+  const blueNames = roster.filter(nm=>state.cpAssign[nm]==='blue');
+  const mode = state.cpMode||'quick';
+  const seed = (Date.now() ^ Math.floor(Math.random()*0xFFFFFFFF)) >>> 0;
+  clearTimers(); clearUndo();
+  const g = mode==='quick' ? cpStartQuick({seed}) : cpStartAction({seed});
+  state = { screen:'cardpong', cp:g, cpMode:mode, cpRoster:{red:redNames, blue:blueNames} };
+  render();
+}
+
+function cpPyramidHTML(g, side, mirror, opts){
+  opts = opts || {};
+  const team = g.teams[side];
+  const rowSizes = g.mode==='quick' ? CP_CONFIG.quick.rows : CP_CONFIG.action.rows;
+  const rows = [];
+  let i = 0;
+  rowSizes.forEach(size=>{ rows.push(team.targets.slice(i, i+size)); i += size; });
+  const rowsHTML = rows.map(row=>`<div class="cp-prow">${row.map(t=>cpCupHTML(t, side, opts)).join('')}</div>`).join('');
+  return `<div class="cp-pyramid ${mirror?'mirror':''}">${rowsHTML}</div>`;
+}
+function cpCupHTML(t, side, opts){
+  const colorClass = t.card.color==='red' ? 'red-suit' : 'black-suit';
+  const removed = !t.active ? ' removed' : '';
+  const selectable = opts.selectableIds && t.active && opts.selectableIds.has(t.card.id) ? ' selectable' : '';
+  const onclick = selectable ? ` onclick="cpAirballChoose(${t.card.id})"` : '';
+  return `<div class="cp-cup team-${side} ${colorClass}${removed}${selectable}"${onclick}>
+    <div class="r">${t.card.rank}</div><div class="s">${t.card.suit}</div>
+  </div>`;
+}
+function cpDeckZoneHTML(deckCount, discardCount, drawnCard){
+  let drawnHTML;
+  if(!drawnCard){ drawnHTML = `<div class="cp-drawncard placeholder"></div>`; }
+  else if(drawnCard.isJoker){ drawnHTML = `<div class="cp-drawncard joker">JOKER</div>`; }
+  else {
+    const cc = drawnCard.color==='red' ? 'red-suit' : 'black-suit';
+    drawnHTML = `<div class="cp-drawncard ${cc}"><div class="r">${drawnCard.rank}</div><div class="s">${drawnCard.suit}</div></div>`;
+  }
+  return `
+    <div class="cp-decks">
+      <div class="cp-stack">🂠<div class="cnt">${deckCount}</div></div>
+      <div class="cp-drawnwrap">${drawnHTML}</div>
+      <div class="cp-stack" style="opacity:0.6;">🗑️<div class="cnt">${discardCount}</div></div>
+    </div>`;
+}
+function cpPopupHTML(g){
+  if(!g.uiPopup) return '';
+  const p = g.uiPopup;
+  return `<div class="cp-popupwrap"><div class="cp-popup ${p.cls||''}">
+    <div class="big">${p.text}</div>
+    ${p.sub?`<div class="sub">${p.sub}</div>`:''}
+  </div></div>`;
+}
+function cpDrinkToastHTML(g){
+  if(!g.uiDrink) return '';
+  return `<div class="cp-drinktoast ${g.uiDrink.side}">${esc(CP_TEAM_META[g.uiDrink.side].name)} TRINKT 🍻</div>`;
+}
+
+function renderCardpong(){
+  const g = state.cp;
+  if(!g) return nav('cardpong-setup');
+  if(g.phase==='result' && !g.uiRevealing) return renderCardpongVictory(g);
+  if(g.mode==='quick') renderCardpongQuick(g); else renderCardpongAction(g);
+}
+function renderCardpongQuick(g){
+  app.innerHTML = `
+   <div class="cp-screen">
+    <div class="topbar">
+      <div class="backbtn" onclick="askLeave('home')">‹</div>
+      <div class="cp-turnpill">QUICK PONG</div>
+      ${helpBtnHTML('cardpong')}
+    </div>
+    <div class="cp-teamlabel blue" style="text-align:center;">${esc(cpTeamDisplayName(g,'blue'))}</div>
+    ${cpPyramidHTML(g,'blue',true)}
+    <div class="cp-centerzone">
+      ${cpDeckZoneHTML(g.drawDeck.length, g.discard.length, g.drawnCard)}
+      <button class="btn btn-primary cp-drawbtn" ${g.locked?'disabled':''} onclick="cpTapDrawQuick()">🍺 DRAW</button>
+    </div>
+    ${cpPyramidHTML(g,'red',false)}
+    <div class="cp-teamlabel red" style="text-align:center;">${esc(cpTeamDisplayName(g,'red'))}</div>
+    ${cpPopupHTML(g)}
+    ${cpDrinkToastHTML(g)}
+   </div>
+  `;
+}
+function cpTapDrawQuick(){
+  const g = state.cp;
+  if(!g || g.locked || g.winner) return;
+  g.locked = true; g.uiRevealing = true; g.drawnCard = null; g.uiPopup = null;
+  feedback('tap');
+  render();
+  timers.cp1 = setTimeout(()=>{
+    const result = cpQuickDraw(g);
+    if(result.type==='hit'){
+      g.uiPopup = { text:CP_COPY.hit, sub:'−1' };
+      g.uiDrink = { side: result.drinkingSide };
+      feedback('cp-hit');
+    } else {
+      g.uiPopup = { text:CP_COPY.miss, cls:'miss' };
+      feedback('cp-miss');
+    }
+    render();
+    timers.cp2 = setTimeout(()=>{
+      g.uiPopup = null; g.uiDrink = null; g.uiRevealing = false; g.locked = false;
+      render();
+      if(g.winner) feedback('cp-victory');
+    }, CP_CONFIG.timing.resolve + (result.type==='hit' ? CP_CONFIG.timing.drink : 0));
+  }, CP_CONFIG.timing.flip);
+}
+
+function cpBannerHTML(g, side){
+  const t = g.teams[side];
+  const left = t.targets.filter(x=>x.active).length;
+  return `<div class="cp-banner ${side}">
+    <div class="swatch"></div>
+    <div class="nm">${esc(cpTeamDisplayName(g,side))}</div>
+    <div class="left">${left} LEFT</div>
+    <div class="icons">
+      <span class="cp-jokericon ${t.jokerShield?'on':''}" title="Joker Defense">🃏</span>
+      <span class="cp-streakicon ${t.streak>=2?'on':''}">🔥${t.streak>=2?t.streak:''}</span>
+    </div>
+  </div>`;
+}
+function renderCardpongAction(g){
+  const active = g.activeSide;
+  const opts = {};
+  if(g.pendingAirball){
+    const opp = cpOther(g.pendingAirball.side);
+    opts.selectableIds = new Set(g.teams[opp].targets.filter(t=>t.active).map(t=>t.card.id));
+  }
+  const activeTeam = g.teams[active];
+  app.innerHTML = `
+   <div class="cp-screen">
+    <div class="topbar">
+      <div class="backbtn" onclick="askLeave('home')">‹</div>
+      <div class="cp-turnpill ${active}">${g.pendingAirball ? CP_COPY.chooseCupAirball : esc(activeTeam.name)+' AM ZUG'}</div>
+      ${helpBtnHTML('cardpong')}
+    </div>
+    ${cpBannerHTML(g,'blue')}
+    ${cpPyramidHTML(g,'blue',true,opts)}
+    <div class="cp-centerzone">
+      ${cpDeckZoneHTML(activeTeam.deck.length, activeTeam.discard.length, g.drawnCard)}
+      <button class="btn btn-primary cp-drawbtn" ${(g.locked||g.pendingAirball)?'disabled':''} onclick="cpTapDrawAction()">🍺 DRAW</button>
+    </div>
+    ${cpPyramidHTML(g,'red',false,opts)}
+    ${cpBannerHTML(g,'red')}
+    ${cpPopupHTML(g)}
+    ${cpDrinkToastHTML(g)}
+   </div>
+  `;
+}
+function cpApplyActionPopup(g, result){
+  switch(result.type){
+    case 'hit':
+      g.uiPopup = { text: result.ballsBack?CP_COPY.ballsBack:CP_COPY.hit, cls: result.ballsBack?'ballsback':'', sub: result.ballsBack?CP_COPY.drawAgain:null };
+      g.uiDrink = { side: cpOther(result.side) };
+      feedback(result.ballsBack ? 'cp-ballsback' : 'cp-hit');
+      break;
+    case 'miss':
+      g.uiPopup = { text:CP_COPY.miss, cls:'miss' };
+      feedback('cp-miss');
+      break;
+    case 'blocked':
+      g.uiPopup = { text:CP_COPY.blocked, cls:'blocked', sub:'Joker verbraucht' };
+      feedback('cp-block');
+      break;
+    case 'joker-ready':
+      g.uiPopup = { text:CP_COPY.defenseReady, cls:'joker' };
+      feedback('cp-joker');
+      break;
+    case 'joker-miss':
+      g.uiPopup = { text:CP_COPY.miss, cls:'miss', sub:'2. Joker' };
+      feedback('cp-miss');
+      break;
+    case 'trickshot':
+      g.uiPopup = { text:CP_COPY.trickshot, cls:'trickshot', sub:CP_COPY.drawAgain };
+      feedback('cp-trickshot');
+      break;
+    case 'airball-pending':
+      g.uiPopup = { text:CP_COPY.airball, cls:'airball', sub:CP_COPY.chooseCupAirball };
+      feedback('cp-airball');
+      break;
+    case 'airball-safe':
+      g.uiPopup = { text:CP_COPY.airball, cls:'airball', sub:CP_COPY.lastCup };
+      feedback('cp-airball');
+      break;
+  }
+}
+function cpFinishActionStep(g, result){
+  g.uiPopup = null; g.uiDrink = null;
+  if(g.winner){ g.uiRevealing = false; render(); feedback('cp-victory'); return; }
+  if(result.type==='trickshot'){
+    g.locked = false; g.uiRevealing = false;
+    render();
+    timers.cp3 = setTimeout(()=> cpTapDrawAction(), 260);
+    return;
+  }
+  g.locked = false; g.uiRevealing = false;
+  render();
+}
+function cpTapDrawAction(){
+  const g = state.cp;
+  if(!g || g.locked || g.winner || g.pendingAirball) return;
+  g.locked = true; g.uiRevealing = true; g.drawnCard = null; g.uiPopup = null;
+  feedback('tap');
+  render();
+  timers.cp1 = setTimeout(()=>{
+    const result = cpActionDraw(g);
+    cpApplyActionPopup(g, result);
+    render();
+    if(result.type==='airball-pending') return; // wartet auf Tap auf einen Becher
+    const extra = (result.type==='hit' || result.type==='airball-safe') ? CP_CONFIG.timing.drink : 0;
+    timers.cp2 = setTimeout(()=> cpFinishActionStep(g, result), CP_CONFIG.timing.resolve + extra);
+  }, CP_CONFIG.timing.flip);
+}
+function cpAirballChoose(cardId){
+  const g = state.cp;
+  if(!g || !g.pendingAirball) return;
+  feedback('tap');
+  const result = cpActionResolveAirball(g, cardId);
+  if(!result) return;
+  g.uiPopup = { text:CP_COPY.airball, cls:'airball', sub: result.type==='airball-hit' ? '' : CP_COPY.lastCup };
+  g.uiDrink = result.type==='airball-hit' ? { side: result.drinkingSide } : null;
+  feedback('cp-airball');
+  render();
+  timers.cp2 = setTimeout(()=> cpFinishActionStep(g, result), CP_CONFIG.timing.resolve + CP_CONFIG.timing.drink);
+}
+
+function renderCardpongVictory(g){
+  const side = g.winner;
+  const cupsCleared = g.mode==='quick' ? CP_CONFIG.quick.targetsPerTeam : CP_CONFIG.action.targetsPerTeam;
+  const bestStreak = g.mode==='action' ? (g.teams[side].bestStreak||0) : null;
+  app.innerHTML = `
+   <div class="cp-screen">
+    <div class="cp-victory">
+      ${confettiHTML()}
+      <div class="win">${CP_COPY.victory}</div>
+      <div class="team ${side}">${esc(cpTeamDisplayName(g,side))}</div>
+      <div class="cp-statgrid">
+        <div class="st"><div class="v">${cupsCleared}</div><div class="l">CUPS CLEARED</div></div>
+        ${bestStreak!==null ? `<div class="st"><div class="v">${bestStreak}</div><div class="l">BEST STREAK</div></div>` : ''}
+        <div class="st"><div class="v">${g.mode==='quick'?'QUICK':'ACTION'}</div><div class="l">MODE</div></div>
+      </div>
+      <button class="btn btn-primary" onclick="cpRematch()">🔁 ${CP_COPY.rematch}</button>
+      <button class="btn btn-ghost" style="margin-top:10px;" onclick="nav('cardpong-setup')">${CP_COPY.changeMode}</button>
+      <button class="btn btn-ghost" style="margin-top:10px;" onclick="reset('home')">${CP_COPY.home}</button>
+    </div>
+   </div>
+  `;
+  if(!g._winFxDone){ g._winFxDone = true; feedback('cp-victory'); }
+}
+function cpRematch(){
+  const g = state.cp;
+  if(!g) return;
+  const seed = (Date.now() ^ Math.floor(Math.random()*0xFFFFFFFF)) >>> 0;
+  clearTimers(); clearUndo();
+  const fresh = g.mode==='quick' ? cpStartQuick({seed}) : cpStartAction({seed});
+  state = { screen:'cardpong', cp: fresh, cpMode:g.mode, cpRoster: state.cpRoster };
   render();
 }
 
