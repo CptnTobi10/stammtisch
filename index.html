@@ -1481,6 +1481,90 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
 .cp-introtext{ font-size:13.5px; color:var(--ash); line-height:1.5; max-width:320px; margin:0; }
 .cp-introtext.strong{ color:var(--cream); font-weight:600; }
 .cp-introhint{ margin-top:18px; font-size:11px; letter-spacing:0.06em; color:var(--ash); opacity:0.7; text-transform:uppercase; }
+
+/* ---------------------------------------------------------
+   LOADING SCREEN
+   Layout über Prozent-Bänder der Viewporthöhe (kein fixes Gerät):
+   Deko oben (2%-12%) und unten (88%-98%) bleibt strikt von der
+   zentrierten Content-Spalte (14%-86%) getrennt -> nie Überlappung,
+   unabhängig von Bildschirmgröße (siehe lsLayoutRects() im Script,
+   das dieselben Formeln fürs programmatische Überlappungs-Testing nutzt).
+--------------------------------------------------------- */
+.ls-screen{
+  position:relative; width:100%; height:100%;
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+.ls-center{
+  position:relative; z-index:2;
+  display:flex; flex-direction:column; align-items:center;
+  gap:clamp(18px,4.5vh,32px);
+  width:min(78vw,340px);
+}
+.ls-logo-wrap{ position:relative; width:100%; overflow:hidden; border-radius:14px; }
+.ls-logo{ display:block; width:100%; height:auto; }
+.ls-sweep{
+  position:absolute; inset:0;
+  background:linear-gradient(115deg, transparent 35%, rgba(255,214,102,0.55) 50%, transparent 65%);
+  background-size:220% 100%;
+  mix-blend-mode:screen;
+  animation:lsSweep 2600ms linear infinite;
+  pointer-events:none;
+}
+@keyframes lsSweep{
+  0%{ background-position:120% 0; }
+  100%{ background-position:-120% 0; }
+}
+.ls-suits{ display:flex; align-items:center; justify-content:center; gap:clamp(10px,3vw,18px); }
+.ls-suit{
+  width:clamp(32px,8.5vw,48px); height:auto;
+  opacity:.35; filter:drop-shadow(0 0 0px var(--gold));
+  animation:lsPulse 1600ms ease-in-out infinite;
+}
+@keyframes lsPulse{
+  0%{ opacity:.35; transform:scale(1); filter:drop-shadow(0 0 0px var(--gold)); }
+  8%{ opacity:1; transform:scale(1.16); filter:drop-shadow(0 0 12px var(--gold)); }
+  25%{ opacity:.35; transform:scale(1); filter:drop-shadow(0 0 0px var(--gold)); }
+  100%{ opacity:.35; transform:scale(1); filter:drop-shadow(0 0 0px var(--gold)); }
+}
+.ls-progress{ width:100%; display:flex; flex-direction:column; align-items:center; gap:8px; }
+.ls-progress-track{
+  width:100%; height:8px; border-radius:99px;
+  background:var(--panel); border:1px solid var(--line); overflow:hidden;
+}
+.ls-progress-fill{
+  height:100%; border-radius:99px;
+  background:linear-gradient(90deg, var(--gold-dim), var(--gold));
+  transition:width 120ms linear;
+}
+.ls-progress-pct{ color:var(--gold); font-size:13px; letter-spacing:0.04em; }
+.ls-lantern{
+  position:absolute; z-index:1;
+  top:2%; right:3%;
+  width:clamp(24px, min(16vw,8.5vh), 90px);
+  animation:lsLanternGlow 2200ms ease-in-out infinite;
+}
+.ls-lantern img{ display:block; width:100%; height:auto; }
+@keyframes lsLanternGlow{
+  0%,100%{ filter:drop-shadow(0 0 4px rgba(255,182,39,0.25)) brightness(1); transform:translateY(0px); }
+  50%{ filter:drop-shadow(0 0 14px rgba(255,182,39,0.55)) brightness(1.12); transform:translateY(3px); }
+}
+.ls-vine{
+  position:absolute; z-index:1; bottom:2%;
+  width:clamp(24px, min(30vw,8.5vh), 130px);
+  animation:lsVineBob 4200ms ease-in-out infinite;
+}
+.ls-vine img{ display:block; width:100%; height:auto; }
+.ls-vine-l{ left:0; transform-origin:top left; }
+.ls-vine-r{ right:0; animation-name:lsVineBobR; transform-origin:top right; }
+@keyframes lsVineBob{
+  0%,100%{ transform:translateY(0px); }
+  50%{ transform:translateY(-5px); }
+}
+@keyframes lsVineBobR{
+  0%,100%{ transform:scaleX(-1) translateY(0px); }
+  50%{ transform:scaleX(-1) translateY(-5px); }
+}
 </style>
 </head>
 <body>
@@ -1785,7 +1869,8 @@ function nav(screen){
 }
 function render(){
   window.scrollTo(0,0);
-  if(state.screen==='roster') renderRoster();
+  if(state.screen==='loading') renderLoading();
+  else if(state.screen==='roster') renderRoster();
   else if(state.screen==='home') renderHome();
   else if(state.screen==='bilanz') renderBilanz();
   else if(state.screen==='kingscup-setup') renderKingsCupSetup();
@@ -1816,6 +1901,139 @@ function render(){
   if(state.burst){
     app.insertAdjacentHTML('beforeend', burstHTML(state.burst));
   }
+}
+
+/* ---------------------------------------------------------
+   LOADING SCREEN
+   Kurzer Ladebildschirm ganz am App-Start, bevor Home/Roster
+   erscheint. Hintergrund bleibt statisch (App-Hintergrund aus
+   body{}), nur Logo-Glow-Sweep, sequenzielles Puls der 4
+   Kartenfarben-Icons und ein nativ (CSS/JS, kein Bild!) animierter
+   Fortschrittsbalken + Prozenttext laufen.
+   Diese App rendert Screens grundsätzlich per volligem
+   app.innerHTML-Rebuild (siehe render()/timers.*-Muster in
+   anderen Screens, z.B. timers.hero, timers.race). Damit CSS-
+   Loop-Animationen (Sweep/Puls/Parallax) trotz wiederholtem
+   Rebuild NICHT bei jedem Tick von vorn starten, wird ihre
+   Phase bei jedem Tick per negativem animation-delay aus der
+   seit Start verstrichenen Zeit neu ausgerechnet (lsPhaseDelay).
+   So bleiben die Loops für das Auge nahtlos, obwohl das DOM
+   dahinter alle ~90ms neu aufgebaut wird — exakt das bestehende
+   Render-Muster dieser App, nur fürs Auge geglättet. --------- */
+const LS_CONFIG = {
+  totalMs: 1700,     // Dauer bis Fortschrittsbalken 100% erreicht
+  holdMs: 450,       // kurzes Halten bei 100%, bevor weitergeleitet wird
+  tickMs: 90,        // Render-Tick-Intervall
+  suits: ['heart','diamond','spade','club'], // Reihenfolge = animation_manifest.json suits_sequence
+  pulseMs: 400,      // animation_manifest.json pulse_seconds (0.4s) je Symbol
+  sweepMs: 2600,      // Logo-Glow-Sweep-Zykluszeit
+  lanternMs: 2200,    // Laternen-Ambient-Glow-Zykluszeit
+  parallaxMs: 4200     // Parallax-Bob-Zykluszeit für Deko-Elemente
+};
+
+// Reiner Fortschritts-Prozentsatz (0-100, gerundet) aus verstrichener Zeit.
+// Kein Bild, kein Rateraten — Ladefortschritt kommt immer aus dieser Formel.
+function lsProgressPercent(elapsedMs, totalMs){
+  if(!(totalMs>0)) return 100;
+  const pct = Math.round((elapsedMs/totalMs)*100);
+  return Math.max(0, Math.min(100, pct));
+}
+// Welches Symbol (Index in suits) gerade "aktiv" pulsiert, rein aus der Zeit.
+function lsActiveSuitIndex(elapsedMs, pulseMs, suitsLen){
+  if(!(pulseMs>0) || !(suitsLen>0)) return 0;
+  return Math.floor(elapsedMs/pulseMs) % suitsLen;
+}
+// Ist der Ladebildschirm fertig (inkl. Halte-Zeit bei 100%)?
+function lsIsComplete(elapsedMs, totalMs, holdMs){
+  return elapsedMs >= (totalMs + (holdMs||0));
+}
+// Negativer animation-delay (ms), der eine CSS-Loop-Animation so verschiebt,
+// als liefe sie bereits seit "elapsedMs + offsetMs" — macht sie über volle
+// DOM-Rebuilds hinweg nahtlos, statt bei jedem Tick neu bei 0% zu starten.
+function lsPhaseDelay(elapsedMs, durationMs, offsetMs){
+  offsetMs = offsetMs || 0;
+  if(!(durationMs>0)) return 0;
+  const cycle = ((elapsedMs + offsetMs) % durationMs + durationMs) % durationMs;
+  return -cycle;
+}
+// Layout-Rechtecke (in px) der Deko-Elemente + der zentralen Content-Spalte,
+// aus denselben Formeln wie das CSS unten (Prozent-Bänder statt fixer
+// Pixelpositionen je Gerät). Dient dem programmatischen
+// Überlappungsfreiheits-Check in tests/loading-screen.test.js.
+function lsLayoutRects(vw, vh){
+  // Top-Deko-Band 2%-12%, Boden-Deko-Band 88%-98%, Content-Spalte 14%-86%.
+  // Größe wird zusätzlich aufs jeweilige Band begrenzt (*0.85 Sicherheitsrand),
+  // damit Deko bei kleinen/schmalen Screens nie ins Content-Band hineinragt.
+  const topBand = vh*0.10, bottomBand = vh*0.10;
+  const lanternSize = Math.min(0.16*vw, topBand*0.85, 90);
+  const vineSize = Math.min(0.30*vw, bottomBand*0.85, 130);
+  return {
+    lantern: { x0: vw*0.97 - lanternSize, x1: vw*0.97, y0: vh*0.02, y1: vh*0.02 + lanternSize },
+    vineLeft: { x0: 0, x1: vineSize, y0: vh*0.98 - vineSize, y1: vh*0.98 },
+    vineRight:{ x0: vw - vineSize, x1: vw, y0: vh*0.98 - vineSize, y1: vh*0.98 },
+    center:   { x0: (vw - Math.min(0.78*vw,340))/2, x1: (vw + Math.min(0.78*vw,340))/2, y0: vh*0.14, y1: vh*0.86 }
+  };
+}
+function lsRectsOverlap(a, b){
+  return a.x0 < b.x1 && a.x1 > b.x0 && a.y0 < b.y1 && a.y1 > b.y0;
+}
+
+// Exposed for the standalone Node test harness (tests/loading-screen.test.js);
+// harmless in the browser, never referenced by app UI.
+if(typeof window!=='undefined'){
+  window.LoadingScreenEngine = {
+    LS_CONFIG, lsProgressPercent, lsActiveSuitIndex, lsIsComplete,
+    lsPhaseDelay, lsLayoutRects, lsRectsOverlap
+  };
+}
+
+function renderLoading(){
+  state.lsStart = state.lsStart || Date.now();
+  const elapsed = Date.now() - state.lsStart;
+
+  if(lsIsComplete(elapsed, LS_CONFIG.totalMs, LS_CONFIG.holdMs)){
+    // Gleiche Entscheidung wie am App-Start unten (START-Block):
+    // vorhandene Runde -> Home, sonst erst die Spielerauswahl.
+    const target = roster.length>0 ? 'home' : 'roster';
+    state = { screen: target };
+    render();
+    return;
+  }
+
+  const pct = lsProgressPercent(elapsed, LS_CONFIG.totalMs);
+  const activeIdx = lsActiveSuitIndex(elapsed, LS_CONFIG.pulseMs, LS_CONFIG.suits.length);
+
+  const sweepDelay = lsPhaseDelay(elapsed, LS_CONFIG.sweepMs, 0);
+  const lanternDelay = lsPhaseDelay(elapsed, LS_CONFIG.lanternMs, 0);
+  const vineLeftDelay = lsPhaseDelay(elapsed, LS_CONFIG.parallaxMs, 0);
+  const vineRightDelay = lsPhaseDelay(elapsed, LS_CONFIG.parallaxMs, LS_CONFIG.parallaxMs/2);
+
+  const suitsHTML = LS_CONFIG.suits.map((s,i)=>{
+    const delay = lsPhaseDelay(elapsed, LS_CONFIG.pulseMs*LS_CONFIG.suits.length, i*LS_CONFIG.pulseMs);
+    const active = i===activeIdx;
+    return `<img class="ls-suit ${active?'is-active':''}" style="animation-delay:${delay}ms" src="assets/loading/ls-suit-${s}.png" alt="">`;
+  }).join('');
+
+  app.innerHTML = `
+    <div class="ls-screen">
+      <div class="ls-lantern" style="animation-delay:${lanternDelay}ms"><img src="assets/loading/ls-lantern.png" alt=""></div>
+      <div class="ls-vine ls-vine-l" style="animation-delay:${vineLeftDelay}ms"><img src="assets/loading/ls-vines.png" alt=""></div>
+      <div class="ls-vine ls-vine-r" style="animation-delay:${vineRightDelay}ms"><img src="assets/loading/ls-vines.png" alt=""></div>
+      <div class="ls-center">
+        <div class="ls-logo-wrap">
+          <img class="ls-logo" src="assets/loading/ls-logo.png" alt="Stammtisch">
+          <div class="ls-sweep" style="animation-delay:${sweepDelay}ms"></div>
+        </div>
+        <div class="ls-suits">${suitsHTML}</div>
+        <div class="ls-progress">
+          <div class="ls-progress-track"><div class="ls-progress-fill" style="width:${pct}%"></div></div>
+          <div class="ls-progress-pct mono">${pct}%</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  timers.ls = setTimeout(()=>{ render(); }, LS_CONFIG.tickMs);
 }
 
 function burstHTML(card){
@@ -4987,7 +5205,10 @@ if(window.visualViewport) window.visualViewport.addEventListener('resize', setAp
    START
 --------------------------------------------------------- */
 loadStore();
-if(roster.length>0) state.screen = 'home';
+// Ladebildschirm immer zuerst zeigen; er leitet nach LS_CONFIG.totalMs +
+// holdMs selbst zu 'home' (falls schon eine Runde gespeichert ist) oder
+// 'roster' weiter (siehe renderLoading()).
+state.screen = 'loading';
 render();
 
 // PWA: Service Worker registrieren, falls unterstützt (macht die App
