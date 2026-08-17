@@ -292,26 +292,27 @@ test('random start side is either red or blue', ()=>{
   assert.ok(sides.has('red') || sides.has('blue'));
   assert.ok([...sides].every(s=>s==='red'||s==='blue'));
 });
-test('normal hit removes exactly the matching target, drink goes to the opponent side, streak increments, turn switches on the first hit', ()=>{
+test('normal hit removes exactly the matching target from the OPPONENT\'s pyramid (classic beer-pong: you throw at the other side\'s cups), drink goes to the opponent side, streak increments, turn switches on the first hit', ()=>{
   const g = CP.cpStartAction({seed:12});
   const side = g.activeSide, other = CP.cpOther(side);
-  const target = g.teams[side].targets[0];
+  const target = g.teams[other].targets[0];
   const card = normalCardLike(target.card.rank, target.card.suit, target.card.color);
   forceNextDraw(g.teams[side], card);
-  const before = g.teams[side].targets.filter(t=>t.active).length;
+  const before = g.teams[other].targets.filter(t=>t.active).length;
   const result = CP.cpActionDraw(g);
   assert.strictEqual(result.type, 'hit');
   assert.strictEqual(target.active, false);
-  assert.strictEqual(g.teams[side].targets.filter(t=>t.active).length, before-1);
-  assert.strictEqual(result.drinkingSide, other, 'opponent (whose side the removed card sat on) must drink');
+  assert.strictEqual(g.teams[other].targets.filter(t=>t.active).length, before-1, 'the opponent\'s cup must be the one removed, not the attacker\'s own');
+  assert.strictEqual(g.teams[side].targets.filter(t=>t.active).length, g.teams[side].targets.length, 'the attacker\'s own pyramid must stay completely untouched');
+  assert.strictEqual(result.drinkingSide, other, 'the side whose cup got hit must drink');
   assert.strictEqual(g.teams[side].streak, 1);
   assert.strictEqual(g.activeSide, other, 'first hit in a run switches turn normally');
 });
 test('miss removes nothing and switches turn', ()=>{
   const g = CP.cpStartAction({seed:13});
   const side = g.activeSide, other = CP.cpOther(side);
-  const usedKeys = new Set(g.teams[side].targets.map(t=>keyOf(t.card)));
-  // A card whose rank/suit is guaranteed not to be one of this team's targets.
+  // A card whose rank/suit is guaranteed not to be one of the OPPONENT's targets (a miss is now defined against the opponent's pyramid).
+  const usedKeys = new Set(g.teams[other].targets.map(t=>keyOf(t.card)));
   let missCard = null;
   for(const c of CP.buildDeck(32)){ if(!usedKeys.has(keyOf(c))){ missCard = c; break; } }
   assert.ok(missCard);
@@ -324,11 +325,11 @@ test('miss removes nothing and switches turn', ()=>{
   assert.strictEqual(g.teams[side].streak, 0);
   assert.strictEqual(g.activeSide, other);
 });
-test('already-removed target (e.g. via Airball) counts as a miss when its matching card is later drawn, and cannot be removed twice', ()=>{
+test('already-removed target (e.g. via a prior hit) counts as a miss when its matching card is later drawn, and cannot be removed twice', ()=>{
   const g = CP.cpStartAction({seed:14});
-  const side = g.activeSide;
-  const target = g.teams[side].targets[0];
-  target.active = false; // simulate: already removed earlier via Airball
+  const side = g.activeSide, other = CP.cpOther(side);
+  const target = g.teams[other].targets[0];
+  target.active = false; // simulate: already removed earlier
   const card = normalCardLike(target.card.rank, target.card.suit, target.card.color);
   forceNextDraw(g.teams[side], card);
   const result = CP.cpActionDraw(g);
@@ -407,7 +408,7 @@ test('Joker Defense automatically blocks the next regular opposing hit: target s
   const g = CP.cpStartAction({seed:20});
   const attackerSide = g.activeSide, defenderSide = CP.cpOther(attackerSide);
   g.teams[defenderSide].jokerShield = true;
-  const target = g.teams[attackerSide].targets[0];
+  const target = g.teams[defenderSide].targets[0]; // attacker aims at the defender's own cup
   const card = normalCardLike(target.card.rank, target.card.suit, target.card.color);
   forceNextDraw(g.teams[attackerSide], card);
   const discardBefore = g.teams[attackerSide].discard.length;
@@ -441,7 +442,7 @@ test('Joker blocks neither Airball nor King nor a Miss; King never interrupts a 
   assert.strictEqual(g.teams[defenderSide].jokerShield, true, 'joker must not intercept a King');
   assert.strictEqual(g.teams[attackerSide].streak, 4, 'King never interrupts a streak');
 
-  const usedKeys = new Set(g.teams[attackerSide].targets.map(t=>keyOf(t.card)));
+  const usedKeys = new Set(g.teams[defenderSide].targets.map(t=>keyOf(t.card))); // miss = no match in the defender's (opponent's) pyramid
   let missCard = null;
   for(const c of CP.buildDeck(32)){ if(!usedKeys.has(keyOf(c))){ missCard = c; break; } }
   forceNextDraw(g.teams[attackerSide], normalCardLike(missCard.rank, missCard.suit, missCard.color));
@@ -453,7 +454,7 @@ test('Balls Back: two consecutive hits by the same team (opponent turns in betwe
   const g = CP.cpStartAction({seed:22});
   const side = g.activeSide, other = CP.cpOther(side);
   function hitOnce(forSide){
-    const target = g.teams[forSide].targets.find(t=>t.active);
+    const target = g.teams[CP.cpOther(forSide)].targets.find(t=>t.active); // aim at the opponent's pyramid
     forceNextDraw(g.teams[forSide], normalCardLike(target.card.rank, target.card.suit, target.card.color));
     return CP.cpActionDraw(g);
   }
@@ -471,8 +472,8 @@ test('Balls Back: two consecutive hits by the same team (opponent turns in betwe
 });
 test('Miss / Airball / Joker-draw / second-Joker / Block all reset the streak', ()=>{
   const scenarios = [
-    ()=>{ const g = CP.cpStartAction({seed:30}); const s=g.activeSide; g.teams[s].streak=3;
-      const uk=new Set(g.teams[s].targets.map(t=>keyOf(t.card))); let mc=null;
+    ()=>{ const g = CP.cpStartAction({seed:30}); const s=g.activeSide, o=CP.cpOther(s); g.teams[s].streak=3;
+      const uk=new Set(g.teams[o].targets.map(t=>keyOf(t.card))); let mc=null;
       for(const c of CP.buildDeck(32)){ if(!uk.has(keyOf(c))){ mc=c; break; } }
       forceNextDraw(g.teams[s], normalCardLike(mc.rank,mc.suit,mc.color)); CP.cpActionDraw(g);
       return g.teams[s].streak; },
@@ -483,16 +484,17 @@ test('Miss / Airball / Joker-draw / second-Joker / Block all reset the streak', 
     ()=>{ const g = CP.cpStartAction({seed:33}); const s=g.activeSide, o=CP.cpOther(s); g.teams[s].streak=3;
       g.teams[s].jokerShield = true; forceNextDraw(g.teams[s], {...JOKER_CARD,id:-9}); CP.cpActionDraw(g); return g.teams[s].streak; },
     ()=>{ const g = CP.cpStartAction({seed:34}); const s=g.activeSide, o=CP.cpOther(s); g.teams[s].streak=3;
-      g.teams[o].jokerShield = true; const t=g.teams[s].targets[0];
+      g.teams[o].jokerShield = true; const t=g.teams[o].targets[0]; // attacker aims at the defender's own cup
       forceNextDraw(g.teams[s], normalCardLike(t.card.rank,t.card.suit,t.card.color)); CP.cpActionDraw(g); return g.teams[s].streak; },
   ];
   scenarios.forEach((fn,i)=> assert.strictEqual(fn(), 0, `scenario ${i} must reset streak to 0`));
 });
 test('win can only be triggered once; last target must be removed by a genuine unblocked hit, not by Airball', ()=>{
   const g = CP.cpStartAction({seed:23});
-  const side = g.activeSide;
-  g.teams[side].targets.slice(1).forEach(t=> t.active=false);
-  const last = g.teams[side].targets.find(t=>t.active);
+  const side = g.activeSide, other = CP.cpOther(side);
+  // Reduce the OPPONENT down to their last active target — side wins by clearing it.
+  g.teams[other].targets.slice(1).forEach(t=> t.active=false);
+  const last = g.teams[other].targets.find(t=>t.active);
   forceNextDraw(g.teams[side], normalCardLike(last.card.rank, last.card.suit, last.card.color));
   const result = CP.cpActionDraw(g);
   assert.strictEqual(result.type, 'hit');
@@ -505,7 +507,7 @@ test('a card blocked by Joker Defense returning to the attacker\'s deck can be d
   const g = CP.cpStartAction({seed:24});
   const attackerSide = g.activeSide, defenderSide = CP.cpOther(attackerSide);
   g.teams[defenderSide].jokerShield = true;
-  const target = g.teams[attackerSide].targets[0];
+  const target = g.teams[defenderSide].targets[0]; // attacker aims at the defender's own cup
   const card = normalCardLike(target.card.rank, target.card.suit, target.card.color);
   forceNextDraw(g.teams[attackerSide], card);
   CP.cpActionDraw(g); // blocked; card returns to attacker's own (reshuffled) deck
@@ -536,7 +538,9 @@ test('full random Action Pong game terminates with exactly one winner, no duplic
     const redLeft = g.teams.red.targets.filter(t=>t.active).length;
     const blueLeft = g.teams.blue.targets.filter(t=>t.active).length;
     assert.ok(redLeft===0 || blueLeft===0, 'seed='+seed);
-    assert.strictEqual(g.teams[g.winner].targets.filter(t=>t.active).length, 0);
+    // Winner is whoever cleared the OPPONENT's pyramid, so it's the loser's
+    // targets (not the winner's own) that must be at 0.
+    assert.strictEqual(g.teams[CP.cpOther(g.winner)].targets.filter(t=>t.active).length, 0);
   }
 });
 
@@ -677,8 +681,9 @@ test('Action Pong renders through a full random match without throwing or leakin
       state.cpMode='action'; cpStart();
       // Force a plain miss so the chain settles after a single step (no King auto-redraw, no pending airball).
       (function(){
-        var g = state.cp, side = g.activeSide;
-        var used = new Set(g.teams[side].targets.map(function(t){ return t.card.rank+'|'+t.card.suit; }));
+        var g = state.cp, side = g.activeSide, other = cpOther(side);
+        // A miss is now defined against the OPPONENT's pyramid (that's what a normal hit targets).
+        var used = new Set(g.teams[other].targets.map(function(t){ return t.card.rank+'|'+t.card.suit; }));
         var pool = buildDeck(32);
         var missCard = null;
         for(var i=0;i<pool.length;i++){ var k = pool[i].rank+'|'+pool[i].suit; if(!used.has(k)){ missCard = pool[i]; break; } }
