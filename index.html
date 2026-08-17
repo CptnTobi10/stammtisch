@@ -34,6 +34,11 @@
 }
 *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
 html,body{margin:0;padding:0;height:100%;overflow:hidden;overscroll-behavior:none;}
+/* Grundfarbe auf html: der Bereich unter der gemessenen --app-vh-Höhe
+   (untere Safe-Area / Home-Indicator-Zone) wird von body nicht mehr
+   abgedeckt — ohne diese Farbe schiene dort ein andersfarbiges Rechteck
+   durch. --ink matcht den App-Hintergrund, also nahtlos. */
+html{background:var(--ink);}
 body{
   background:
     radial-gradient(circle at 15% 8%, rgba(255,46,147,0.35) 0%, transparent 38%),
