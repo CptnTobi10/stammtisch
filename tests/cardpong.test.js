@@ -192,7 +192,7 @@ test('a miss removes nothing', ()=>{
   const activeAfter = [...g.teams.red.targets, ...g.teams.blue.targets].filter(t=>t.active).length;
   assert.strictEqual(activeAfter, activeBefore, 'miss must not remove any target');
 });
-test('last card ends the game immediately; no equalizer turn', ()=>{
+test('last card ends the game immediately; the emptied side LOSES, the opponent wins; the emptied side drinks', ()=>{
   const g = CP.cpStartQuick({seed:4});
   // Force red down to 1 target, then hit it directly.
   g.teams.red.targets.slice(1).forEach(t=> t.active=false);
@@ -200,7 +200,9 @@ test('last card ends the game immediately; no equalizer turn', ()=>{
   g.drawDeck.push(lastTarget.card); // next pop() draws exactly this card
   const result = CP.cpQuickDraw(g);
   assert.strictEqual(result.type, 'hit');
-  assert.strictEqual(g.winner, 'red');
+  assert.strictEqual(result.drinkingSide, 'red', 'the side whose own cup just disappeared drinks');
+  assert.strictEqual(result.scoringSide, 'blue', 'the opponent gets credit for the win');
+  assert.strictEqual(g.winner, 'blue', 'red emptied its own pyramid and therefore loses; blue wins');
   assert.strictEqual(g.phase, 'result');
   assert.strictEqual(g.teams.red.targets.filter(t=>t.active).length, 0);
 });
@@ -228,8 +230,10 @@ test('full random Quick Pong game terminates with exactly one winner and consist
     assertNoDuplicateTargets(g, 'seed='+seed);
     const redLeft = g.teams.red.targets.filter(t=>t.active).length;
     const blueLeft = g.teams.blue.targets.filter(t=>t.active).length;
-    assert.ok(redLeft===0 || blueLeft===0, 'winner must have 0 remaining targets, seed='+seed);
-    assert.strictEqual(g.teams[g.winner].targets.filter(t=>t.active).length, 0);
+    assert.ok(redLeft===0 || blueLeft===0, 'the loser must have 0 remaining targets, seed='+seed);
+    // Winner is whoever's OPPONENT emptied their own pyramid — so it's the
+    // loser (opponent of the winner) whose targets must be at 0.
+    assert.strictEqual(g.teams[CP.cpOther(g.winner)].targets.filter(t=>t.active).length, 0);
   }
 });
 

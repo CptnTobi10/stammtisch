@@ -910,9 +910,14 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
    kc/pf/bf: kräftigerer Gradient blendet den Bildtext ab, der HTML-Titel
    übernimmt (gleicher Stil wie die anderen 3 Spiele). */
 .cover-cd{
+  /* Quell-Bild ist Hochformat (1054x1492), die quadratische Kachel zeigte per
+     mittigem Zuschnitt zu wenig vom Dartboard und einen Rest des eingebrannten
+     Titeltexts ("...RTS") am unteren Rand. Zuschnitt nach oben verschoben,
+     damit Dartboard/Karten (der eigentliche Blickfang) voll sichtbar sind
+     und der Textrest komplett rausfällt (Titel kommt ohnehin per HTML). */
   background:
     linear-gradient(to top, rgba(10,8,20,0.92), rgba(10,8,20,0.35) 42%, rgba(10,8,20,0.1) 62%, transparent),
-    url('assets/cover-cd.png') center/cover;
+    url('assets/cover-cd.png') center 12% / cover;
 }
 .cover-cd .glyph{ display:none; }
 
@@ -1112,9 +1117,13 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
    Gradient blendet den eingebrannten Bildtext ab, HTML-Titel übernimmt
    einheitlich wie bei kc/pf/bf. */
 .cover-cp{
+  /* Gleicher Grund wie bei cover-cd: Hochformat-Quellbild (1051x1496), Zuschnitt
+     nach oben verschoben auf die Becher-Pyramide + fliegende Karte (der
+     eigentliche Blickfang) statt den unteren Bereich mit dem eingebrannten
+     "CARD PONG"-Schriftzug mittig anzuschneiden. */
   background:
     linear-gradient(to top, rgba(8,8,16,0.92), rgba(8,8,16,0.35) 42%, rgba(8,8,16,0.1) 62%, transparent),
-    url('assets/cover-cp.png') center/cover;
+    url('assets/cover-cp.png') center 18% / cover;
 }
 .cover-cp .glyph{ display:none; }
 
@@ -1374,6 +1383,13 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
   .cp-teamlabel{ writing-mode:vertical-rl; text-orientation:mixed; font-size:clamp(10px,2.2vh,13px); flex:0 0 auto; max-height:100%; }
   .cp-teamzone.blue .cp-teamlabel{ transform:rotate(180deg); }
   .cp-pyramid{ flex:1 1 auto; min-width:0; flex-direction:row !important; }
+  /* Bugfix: Die Reihen (1,2,3,4 Karten) liegen im DOM immer in dieser
+     Reihenfolge, unabhängig von .mirror. Blaus Pyramide sitzt im Querformat
+     links (außen), Rots rechts (außen) — ohne Korrektur zeigt bei Blau die
+     schmale 1er-Reihe nach außen und die breite 4er-Reihe zur Mitte (Spitze
+     zeigt nach außen, falsch). Reihenfolge für Blau umkehren, damit die
+     Spitze bei beiden Teams zur Bildschirmmitte zeigt. */
+  .cp-pyramid.mirror{ flex-direction:row-reverse !important; }
   .cp-pyramid .cp-prow{ flex-direction:column; }
   .cp-centerzone{ flex-direction:column; justify-content:center; }
   .cp-decocup{ display:none; }
@@ -1847,7 +1863,7 @@ const HELP_TEXT = {
     title:'CARDPONG — so geht\'s',
     steps:[
       'Zwei Teams. Jedes Team hat eine eigene Kartenpyramide auf seiner Seite. Verschwindet eine Karte aus deiner Pyramide, trinkt dein Team.',
-      'QUICK PONG: 6 Zielkarten pro Team (3-2-1), ein gemeinsamer Zugstapel. Reihum wird gezogen — passt die Karte zu einer aktiven Zielkarte, verschwindet sie und der Gegner trinkt. Kein Treffer = MISS. Wer zuerst alle eigenen 6 Karten abgeräumt hat, gewinnt sofort.',
+      'QUICK PONG: 6 Zielkarten pro Team (3-2-1), ein gemeinsamer Zugstapel. Reihum wird gezogen — passt die Karte zu einer aktiven eigenen Zielkarte, verschwindet sie und dieses Team trinkt. Kein Treffer = MISS. Wessen 6 Karten zuerst komplett verschwunden sind, hat verloren — das andere Team gewinnt.',
       'ACTION PONG: 10 Zielkarten pro Team (4-3-2-1), Ass und König sind nie Ziel. Jedes Team zieht aus dem eigenen 34-Karten-Deck (32 Skatkarten + 2 Joker).',
       'ASS = AIRBALL: Streak endet, eine eigene Zielkarte verschwindet — dein Team trinkt. Bleibt dir nur noch 1 Karte, ist sie sicher (kein Airball möglich).',
       'KÖNIG = TRICKSHOT: Kein Treffer, kein Miss, Streak bleibt — du ziehst sofort erneut.',
@@ -4070,13 +4086,25 @@ const CP_LINES = {
     '{a} zeigt Zielwasser, {o} trinkt.',
     'Klarer Treffer von {a}, {o} greift zum Becher.',
     '{a} erwischt {o} eiskalt!',
-    'Eine Karte weniger bei {o} — {a} sei Dank.'
+    'Eine Karte weniger bei {o} — {a} sei Dank.',
+    'Bumm, {a} trifft! {o} muss ran.',
+    'Sauber gespielt, {a}! {o} trinkt.',
+    '{a} findet die Lücke, {o} bezahlt mit einem Schluck.',
+    'Scharfschütze {a}! {o} greift zum Becher.',
+    'Und wieder eine Karte weg bei {o} — {a} macht Druck.',
+    '{a} setzt {o} unter Druck, wieder eine Karte futsch.',
+    'Da ist nichts zu machen für {o}, {a} trifft.',
+    '{a} spielt stark, {o} kommt ins Schwitzen.',
+    'Volle Kanne, {a} trifft {o} mitten rein!',
+    '{o} verliert eine Karte, {a} lässt nicht locker.'
   ],
   hitBallsBack:[
     '{a} trifft erneut und darf gleich weiterziehen — {o} trinkt schon wieder!',
     'Balls Back! {a} bleibt heiß und zieht sofort nochmal, {o} muss trinken.',
     '{a} legt nach, {o} trinkt — und {a} ist immer noch nicht fertig!',
-    'Serie läuft! {a} trifft {o} erneut und zieht direkt weiter.'
+    'Serie läuft! {a} trifft {o} erneut und zieht direkt weiter.',
+    '{a} ist nicht zu stoppen, nochmal am Zug, {o} trinkt erneut.',
+    'Doppelt getroffen! {a} zieht weiter, {o} leert schon wieder den Becher.'
   ],
   miss:[
     'Daneben! Nichts passiert.',
@@ -4086,7 +4114,11 @@ const CP_LINES = {
     'Schade, kein Treffer diesmal.',
     'Daneben gegriffen, nächster Versuch.',
     'Nichts zu holen bei diesem Zug.',
-    'Knapp vorbei, keine Karte fällt.'
+    'Knapp vorbei, keine Karte fällt.',
+    'Das saß nicht, weiter im Text.',
+    'Keine Karte weg, nächster Versuch kommt bestimmt.',
+    'Luft erwischt, nichts passiert.',
+    'Diesmal nicht, nächste Karte könnte es richten.'
   ],
   airball:[
     '{a} hat den Tisch nicht getroffen und muss eine eigene Karte ablegen!',
@@ -4094,23 +4126,29 @@ const CP_LINES = {
     'Daneben und wie! {a} muss selbst eine Karte hergeben.',
     '{a} trifft nicht mal den Tisch — das kostet eine eigene Karte.',
     'Kompletter Fehlwurf von {a}, eine eigene Karte verschwindet.',
-    '{a} baut ab: Airball, eine eigene Karte fällt weg.'
+    '{a} baut ab: Airball, eine eigene Karte fällt weg.',
+    'Autsch, {a} greift komplett daneben — eine eigene Karte ist weg.',
+    'Peinlich für {a}: Airball, eine eigene Karte muss dran glauben.'
   ],
   airballSafe:[
     '{a} hat nur noch eine Karte übrig — die bleibt sicher stehen.',
     'Airball, aber {a}s letzte Karte ist tabu.',
-    'Glück gehabt, {a}s letzte Karte bleibt stehen.'
+    'Glück gehabt, {a}s letzte Karte bleibt stehen.',
+    'Die letzte Karte von {a} darf nicht fallen — sicher.'
   ],
   trickshot:[
     '{a} zieht einen Trickshot und darf sofort weiterziehen!',
     'Kein Treffer, kein Fehlwurf — {a} zieht einfach nochmal.',
     'Trickshot! {a} bleibt am Zug.',
-    '{a} dreht eine Extrarunde dank Trickshot.'
+    '{a} dreht eine Extrarunde dank Trickshot.',
+    'Stilvoll umspielt: {a} zieht direkt weiter.',
+    'Trickshot von {a}, die Serie geht ungebremst weiter.'
   ],
   jokerReady:[
     '{a} aktiviert die Verteidigung, der nächste Treffer wird geblockt!',
     'Joker! {a} baut einen Schutzschild auf.',
-    '{a} rüstet auf: Verteidigung bereit.'
+    '{a} rüstet auf: Verteidigung bereit.',
+    '{a} zieht den Joker, der nächste Angriff prallt ab.'
   ],
   jokerMiss:[
     'Zweiter Joker zählt nicht doppelt — das ist ein Fehlwurf für {a}.',
@@ -4119,13 +4157,16 @@ const CP_LINES = {
   blocked:[
     'Geblockt! {o} wehrt den Angriff von {a} ab.',
     '{o}s Verteidigung hält, {a} beißt sich die Zähne aus.',
-    'Nichts zu holen, {o} hat geblockt!'
+    'Nichts zu holen, {o} hat geblockt!',
+    'Der Joker von {o} rettet die Karte, {a} beißt auf Granit.'
   ],
   win:[
     '{a} gewinnt das Spiel, Prost!',
     'Sieg für {a}! Die Runde ist entschieden.',
     '{a} räumt als Erstes ab und gewinnt!',
-    'Das war\'s, {a} holt sich den Sieg!'
+    'Das war\'s, {a} holt sich den Sieg!',
+    'Feierabend! {a} gewinnt verdient.',
+    '{a} macht den Sack zu und gewinnt die Runde!'
   ]
 };
 function cpPickLine(cat, a, o){
@@ -4220,11 +4261,18 @@ function cpQuickDraw(g){
   if(found){
     found.target.active = false;
     g.discard.push(card);
-    const scoringTeam = g.teams[found.side];
-    const drinkingSide = cpOther(found.side);
-    const remaining = scoringTeam.targets.filter(t=>t.active).length;
-    result = { type:'hit', card, scoringSide:found.side, drinkingSide, remaining };
-    if(remaining===0){ g.winner = found.side; g.phase = 'result'; g.locked = true; }
+    // found.side = die Seite, deren eigener Becher gerade verschwunden ist —
+    // sie trinkt (klassische Bierpong-Logik: dein Becher fällt, du trinkst).
+    // Wird eine Seite komplett leergeräumt, hat sie verloren; die ANDERE
+    // Seite gewinnt (nicht die geleerte selbst) — Bugfix, spiegelt den
+    // Action-Pong-Fix: die Pyramide sind eure eigenen Becher, nicht Ziele,
+    // die euch zum Sieg verhelfen, wenn sie verschwinden.
+    const hitSide = found.side;
+    const scoringSide = cpOther(hitSide);
+    const drinkingSide = hitSide;
+    const remaining = g.teams[hitSide].targets.filter(t=>t.active).length;
+    result = { type:'hit', card, scoringSide, drinkingSide, remaining };
+    if(remaining===0){ g.winner = scoringSide; g.phase = 'result'; g.locked = true; }
   } else {
     g.discard.push(card);
     result = { type:'miss', card };
@@ -4493,9 +4541,9 @@ function cpStart(){
   const seed = (Date.now() ^ Math.floor(Math.random()*0xFFFFFFFF)) >>> 0;
   clearTimers(); clearUndo();
   const g = mode==='quick' ? cpStartQuick({seed}) : cpStartAction({seed});
-  // Einmalige Kurz-Erklärung nur bei einem frischen Quick-Pong-Start (nicht
-  // bei Rematch-Fortsetzungen mitten im Spiel) — siehe renderCardpong().
-  if(mode==='quick') g.showIntro = true;
+  // Einmalige Kurz-Erklärung bei jedem frischen Spielstart (beide Modi) —
+  // siehe renderCardpong()/renderCardpongIntro().
+  g.showIntro = true;
   state = { screen:'cardpong', cp:g, cpMode:mode, cpRoster:{red:redNames, blue:blueNames} };
   render();
 }
@@ -4589,34 +4637,44 @@ function renderCardpong(){
   const g = state.cp;
   if(!g) return nav('cardpong-setup');
   if(g.phase==='result' && !g.uiRevealing) return renderCardpongVictory(g);
-  if(g.mode==='quick' && g.showIntro) return renderCardpongQuickIntro(g);
+  if(g.showIntro) return renderCardpongIntro(g);
   if(g.mode==='quick') renderCardpongQuick(g); else renderCardpongAction(g);
 }
-// Einmalige Erklär-Animation beim Start von Quick Pong (Wunsch: "Regeln und
-// Ablauf müssen schneller erkennbar sein"). Rein CSS-animiert (siehe
-// .cp-introcard/@keyframes cpIntroFade), kein Bild-Asset nötig. Verschwindet
-// nach Antippen oder automatisch nach ~3.8s, dann normales Spielfeld.
-function renderCardpongQuickIntro(g){
+// Einmalige Erklär-Animation beim Spielstart, für beide Modi (Wunsch:
+// "Regeln und Ablauf müssen schneller erkennbar sein"). Rein CSS-animiert
+// (siehe .cp-introcard/@keyframes cpIntroFade), kein Bild-Asset nötig.
+// Verschwindet NUR per Antippen, kein Auto-Weiterschalten (bewusst — der
+// Nutzer soll die Erklärung tatsächlich lesen können, nicht nur sehen).
+function renderCardpongIntro(g){
+  const isQuick = g.mode==='quick';
+  const n = isQuick ? CP_CONFIG.quick.targetsPerTeam : CP_CONFIG.action.targetsPerTeam;
+  const lines = isQuick
+    ? [
+        'Reihum wird gezogen. Passt die Karte zu einer eigenen Zielkarte, verschwindet sie — dieses Team trinkt!',
+        `Wessen ${n} Karten zuerst komplett weg sind, hat verloren — das andere Team gewinnt!`
+      ]
+    : [
+        'Ihr zieht abwechselnd. Passt eure Karte zu einer Zielkarte des Gegners, verschwindet sie — der Gegner trinkt!',
+        `Wer zuerst alle ${n} gegnerischen Karten abräumt, gewinnt. Sonderkarten erklärt „Regeln & So geht's".`
+      ];
   app.innerHTML = `
    <div class="cp-screen cp-intro" onclick="cpDismissIntro()">
     ${cpDecoCupsHTML()}
     <div class="cp-introbody">
-      <div class="cp-wordmark" style="margin-top:0;">QUICK PONG</div>
+      <div class="cp-wordmark" style="margin-top:0;">${isQuick ? 'QUICK PONG' : 'ACTION PONG'}</div>
       <div class="cp-introstack">
         ${[0,1,2,3].map(i=>`<div class="cp-introcard" style="animation-delay:${(0.4+i*0.4).toFixed(2)}s"></div>`).join('')}
       </div>
-      <p class="cp-introtext">Reihum wird gezogen. Passt die Karte zu einer offenen Zielkarte, verschwindet sie — der Gegner trinkt!</p>
-      <p class="cp-introtext strong">Wer zuerst alle eigenen ${CP_CONFIG.quick.targetsPerTeam} Karten los ist, gewinnt sofort.</p>
+      <p class="cp-introtext">${lines[0]}</p>
+      <p class="cp-introtext strong">${lines[1]}</p>
       <div class="cp-introhint">Antippen zum Starten</div>
     </div>
    </div>
   `;
-  timers.cpIntro = setTimeout(()=> cpDismissIntro(), 3800);
 }
 function cpDismissIntro(){
   const g = state.cp;
   if(!g || !g.showIntro) return;
-  if(timers.cpIntro){ clearTimeout(timers.cpIntro); timers.cpIntro = null; }
   g.showIntro = false;
   render();
 }
