@@ -275,9 +275,15 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
 }
 .card-back .glyph{font-size:40px; color:var(--gold); opacity:0.85;}
 
-/* Ring of Fire layout */
+/* Ring of Fire layout. Größe bewusst NICHT mehr fest (280px) + per
+   transform:scale() gestaucht (alte Landscape-Lösung) — stattdessen echte
+   responsive Größe: min(88% der Spalte, 64dvh), damit der Ring in beiden
+   Ausrichtungen tatsächlich dominant ist (~2/3-Faustregel) statt nur
+   herunterskaliert zu werden. .ringslots-Kinder (siehe kcRingSVG()) und
+   .ringcup sind deshalb in % statt px positioniert/dimensioniert — sie
+   skalieren dadurch automatisch mit der Boxgröße mit. */
 .ringwrap{
-  position:relative; width:280px; height:280px; margin:4px auto 0 auto;
+  position:relative; width:min(88%, 82dvh); aspect-ratio:1; margin:4px auto 0 auto;
 }
 .ringglow{
   position:absolute; inset:0; border-radius:50%; pointer-events:none;
@@ -299,7 +305,7 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
 .ringslot.picked{ filter:brightness(1.85); border-color:var(--gold); box-shadow:0 0 16px 4px rgba(255,182,39,0.95); z-index:5; }
 .ringslot.safe{ border-color:var(--gold); box-shadow:0 0 7px rgba(217,164,65,0.85), 0 2px 5px rgba(0,0,0,0.35); }
 .ringcup{
-  position:absolute; left:50%; top:50%; width:96px;
+  position:absolute; left:50%; top:50%; width:34.3%;
   transform:translate(-50%,-50%); z-index:2;
 }
 .ringcup svg{ width:100%; display:block; filter:drop-shadow(0 6px 10px rgba(0,0,0,0.5)); }
@@ -355,7 +361,7 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
 .cupmeter{display:flex; flex-direction:column; align-items:center; gap:6px;}
 .cupwrap svg{width:100%; height:auto; display:block;}
 
-.kingdots{display:flex; gap:8px; justify-content:center; margin-top:10px;}
+.kingdots{display:flex; gap:8px; justify-content:center; margin-top:10px; margin-bottom:10px;}
 .kdot{width:12px;height:12px;border-radius:50%; background:var(--panel-2); border:1px solid var(--line); transition:background .2s, border-color .2s;}
 .kdot.on{background:var(--gold); border-color:var(--gold);}
 .kdot.active{outline:2px solid rgba(217,164,65,0.5); outline-offset:2px;}
@@ -383,8 +389,23 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
 /* Kings-Cup-Ambiente-Hintergrund (Rahmen, Blätter, Strahlen, Podest) plus
    warme Glut-Lichtreflexe an den Bildschirmrändern (oben rechts / unten
    links), damit der ganze Screen — nicht nur der Ring — nach Ring-of-Fire
-   aussieht, ohne die Kartenlesbarkeit in der Bildmitte zu beeinträchtigen. */
-.kc-screen{ position:relative; min-height:100dvh; }
+   aussieht, ohne die Kartenlesbarkeit in der Bildmitte zu beeinträchtigen.
+   Bugfix, Teil 1: min-height:100dvh (statt 100%) ignorierte das eigene
+   Padding von #app — min-height:100% füllt die Content-Box von #app aus
+   (gleiches Prinzip wie bei Cardpong).
+   Bugfix, Teil 2: #app selbst hat oben/unten Padding (Safe-Area + 24px) —
+   dieses Padding liegt AUSSERHALB der Box jedes Kindelements und kann von
+   keinem Kind-Hintergrund abgedeckt werden, gleich wie hoch .kc-screen ist.
+   Genau dort schimmerte am unteren Rand (dem tatsächlichen Scroll-Ende)
+   der App-Grundhintergrund (dunkles Magenta/Lila) durch. Fix: negative
+   Margin + gleich große Padding lässt .kc-screen bewusst in das
+   #app-Padding hineinbluten, sein eigener Hintergrund deckt es dann mit ab. */
+.kc-screen{
+  position:relative; min-height:100%;
+  margin: calc(-1 * (env(safe-area-inset-top) + 8px)) 0 -24px 0;
+  padding-top: calc(env(safe-area-inset-top) + 8px);
+  padding-bottom: 24px;
+}
 .kc-screen::before{ content:''; position:absolute; inset:0; z-index:0; pointer-events:none;
   background:
     radial-gradient(60% 40% at 92% 4%, rgba(255,140,40,0.22) 0%, transparent 68%),
@@ -400,18 +421,17 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
     0 0 24px rgba(255,140,40,0.35), 0 0 46px rgba(255,90,30,0.16);
 }
 
-/* Kings-Cup-Layout: im Hochformat einfach eine gestapelte Spalte (Verlauf
-   oben, Spielfeld/Regel/Effekte darunter). Im Querformat wird daraus ein
-   3-Spalten-Layout (siehe Landscape-Media-Query weiter unten). */
-.kc-layout{ display:flex; flex-direction:column; }
-.kc-col-right-only{ display:none; }
-.kc-histlabel{ font-family:'Bebas Neue',sans-serif; letter-spacing:0.08em; font-size:12px; color:var(--gold-dim); padding:8px 16px 2px; }
-.kc-histlist{ display:flex; flex-direction:column; gap:4px; padding:0 16px 6px; }
-.kc-hist-empty{ font-size:11.5px; color:var(--ash); padding:0 16px 6px; }
-.kc-histrow{ display:flex; align-items:center; gap:8px; font-size:11.5px; color:rgba(255,255,255,0.75); }
-.kc-histcard{ font-family:'Bebas Neue',sans-serif; font-size:13px; flex-shrink:0; width:30px; text-align:center; }
-.kc-histcard.red{ color:var(--wine); } .kc-histcard.black{ color:#cfcfcf; }
-.kc-histrule{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+/* Kings-Cup-Layout: Ring (Kelch-Kreis) ist das dominante Element in BEIDEN
+   Ausrichtungen — Faustregel ~2/3 des verfügbaren Platzes. Hochformat:
+   Ring oben (groß), gezogene Karte + Regeltext darunter (kleiner). Quer-
+   format (siehe Media-Query weiter unten): Ring links (~64% Breite),
+   Karte + Regeltext/Effekte als schmale Seitenspalte rechts — nie
+   umgekehrt, und die Seitenspalte scrollt notfalls für sich, damit der
+   Ring selbst nie schrumpft oder der Screen insgesamt scrollen muss.
+   Kein separater Verlauf mehr (auf Wunsch entfernt — unnötige Fläche). */
+.kc-layout{ display:flex; flex-direction:column; align-items:center; width:100%; }
+.kc-ringcol{ display:flex; flex-direction:column; align-items:center; width:100%; flex:0 0 auto; }
+.kc-sidecol{ display:flex; flex-direction:column; align-items:center; width:100%; }
 
 /* Timer */
 .timerbox{
@@ -858,7 +878,6 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
   .hero p{ font-size:10.5px; margin-top:2px; }
   .topbar{ padding:6px 16px 4px 16px; }
   .topbar h1{ font-size:20px; }
-  .ringwrap{ transform:scale(0.6); margin:-58px auto -58px auto; }
   .card-box{ padding:10px; margin-bottom:8px; }
   .rosterbar{ padding:8px 12px; margin-bottom:0; }
   .footnote{ display:none; }
@@ -881,22 +900,37 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
   .turnbanner .who{ font-size:18px; }
   .pyramid{ transform:scale(0.85); margin:-14px 0; }
 
-  /* Kings Cup: eigenes 3-Spalten-Layout im Querformat — links Verlauf,
-     Mitte der große Kartenkreis (dominant), rechts aktuelle Regel/Effekte.
-     Jede Spalte scrollt notfalls für sich, damit der Screen nie insgesamt
-     scrollt. */
+  /* Kings Cup Querformat: 2 Bereiche statt 3 (kein Verlauf mehr). Ring
+     links, dominant (~64% Breite, siehe .kc-ringcol flex-basis) — Karte +
+     Regeltext/Effekte rechts als schmale Seitenspalte, die notfalls für
+     sich scrollt, damit der Ring nie schrumpft und der Screen nie
+     insgesamt scrollen muss. */
   .kc-layout{
-    display:grid; grid-template-columns:minmax(120px,180px) minmax(0,1.4fr) minmax(150px,220px);
-    gap:8px; align-items:start; height:calc(100dvh - 64px); overflow:hidden;
+    flex-direction:row; align-items:stretch; gap:10px;
+    height:calc(100dvh - 64px); overflow:hidden;
   }
-  .kc-col{ min-height:0; height:100%; overflow-y:auto; -webkit-overflow-scrolling:touch; }
-  .kc-col-center{ display:flex; flex-direction:column; align-items:center; }
-  .kc-col-center-only{ display:none; }
-  .kc-col-right-only{ display:block; }
-  .kc-histlabel{ padding:4px 8px 0; }
-  .kc-histlist{ padding:0 8px 6px; }
-  .kc-col-center .ringwrap{ transform:scale(0.72); margin:-30px auto -30px auto; }
-  .kc-col-center .kingdots{ margin-bottom:2px; }
+  /* Ring ist durch die knappe Landscape-Höhe zwangsläufig höhenbegrenzt
+     (Kreis kann nie höher als die verfügbare Höhe werden) — eine breitere
+     Spalte als der Ring tatsächlich braucht, erzeugt nur leere Seitenränder
+     statt echter Dominanz. Spaltenbreite deshalb enger an der realen
+     Ringgröße orientiert (~52% statt 64%), der Rest geht an die Seitenspalte. */
+  .kc-ringcol{ flex:0 0 52%; justify-content:center; min-height:0; }
+  .kc-sidecol{
+    flex:1 1 auto; min-width:0; min-height:0; overflow-y:auto;
+    -webkit-overflow-scrolling:touch; justify-content:flex-start; padding-top:4px;
+  }
+  .kingdots{ margin-bottom:4px; }
+  /* kc-bg.jpg ist ein Hochformat-Bild (853x1844) — im breiten Querformat
+     wird es über "cover" massiv hochskaliert, fast alles außer einem
+     dünnen, detaillosen Streifen fällt weg (die matschige lila Fläche,
+     die gemeldet wurde). Im Querformat deshalb ohne Bild, nur die
+     warmen Eck-Glows + dunkle Basisfarbe — sauber statt verzerrt. */
+  .kc-screen::before{
+    background:
+      radial-gradient(60% 60% at 92% 4%, rgba(255,140,40,0.22) 0%, transparent 68%),
+      radial-gradient(55% 60% at 4% 96%, rgba(255,90,30,0.18) 0%, transparent 68%),
+      #160a24;
+  }
 }
 
 /* ===========================================================
@@ -2216,6 +2250,36 @@ const KC_RULES = {
   'K': {t:'Kings Cup', s:'Gieße einen Schluck deines Getränks in den Becher in der Mitte.'}
 };
 
+// Kurze, prägnante Sprecher-Ansagen je Rang (bewusst NICHT die volle
+// KC_RULES-Regel vorgelesen — das wäre zu lang). Mehrere Varianten pro
+// Rang + Bag-Mechanik (siehe kcSpeak/cpPickLine-Vorbild) sorgen dafür,
+// dass sich nichts innerhalb einer Runde wiederholt.
+const KC_SPEAK_LINES = {
+  'A': ['Ass! Wasserfall — alle trinken, bis der Nachbar stoppt.', 'Wasserfall läuft, reihum stoppen.', 'Ass gezogen, alle trinken gleichzeitig.'],
+  '2': ['Die Zwei — du bestimmst, wer trinkt.', 'Zwei gezogen, wähl jemanden aus.', 'Du entscheidest: wer trinkt?'],
+  '3': ['Die Drei — du trinkst selbst.', 'Drei gezogen, ran an den Becher.', 'Selbst schuld, du bist dran.'],
+  '4': ['Vier — Hand auf den Boden, Letzter trinkt.', 'Boden! Schnell die Hand runter.', 'Wer zuletzt den Boden berührt, trinkt.'],
+  '5': ['Fünf — nenn ein Thema, reihum Begriffe.', 'Kategorie gefragt, wer nichts findet, trinkt.', 'Denk dir schnell ein Thema aus.'],
+  '6': ['Sechs — alle Männer trinken.', 'Männerrunde, Prost.', 'Jungs, ran an die Becher.'],
+  '7': ['Sieben — Hand hoch, Letzter trinkt.', 'Himmel! Wer zuletzt oben ist, trinkt.', 'Alle Hände hoch, schnell!'],
+  '8': ['Acht — such dir einen Trinkpartner.', 'Trinkpartner gewählt, er zieht ab jetzt mit.', 'Ab jetzt trinkt ihr zusammen.'],
+  '9': ['Neun — gib ein Wort vor, reihum reimen.', 'Reimzeit! Wer nichts findet, trinkt.', 'Los, ein Reimwort vorgeben.'],
+  '10': ['Zehn — du bist Fragenmeister.', 'Fragenmeister! Wer antwortet, trinkt.', 'Stell Fragen, Antworten kosten einen Schluck.'],
+  'J': ['Bube — stell eine neue Regel auf.', 'Neue Tischregel! Wer sie bricht, trinkt.', 'Regel gefragt, überleg dir was Fieses.'],
+  'Q': ['Dame — du bist Daumenmeister.', 'Daumenmeister! Leg heimlich den Daumen auf.', 'Ab jetzt: Daumen im Blick behalten.'],
+  'K': ['König! Gieß einen Schluck in den Becher.', 'Kings Cup — dein Getränk kommt in die Mitte.', 'Becher wird voller, gieß was rein.']
+};
+function kcSpeak(card){
+  const pool = KC_SPEAK_LINES[card.rank];
+  if(!pool || !pool.length) return;
+  if(!state.kcBag) state.kcBag = {};
+  let bag = state.kcBag[card.rank];
+  if(!bag || !bag.length){ bag = shuffle(pool.map((_,i)=>i)); }
+  const idx = bag.pop();
+  state.kcBag[card.rank] = bag;
+  pfSpeak(pool[idx]);
+}
+
 // Nur Vorschläge, kein Zwang: Kategorien (5) und Reimwörter (9) müssen nicht
 // verwendet werden — sie helfen nur, wenn gerade nichts einfällt.
 const CATEGORY_SUGGESTIONS = ['Biersorten','Filme','Vornamen','Länder','Automarken','Serien','Cocktails','Berufe','Tiere','Farben','Bands','Süßigkeiten','Promis','Fußballvereine','Superhelden','Städte','Getränke','Comicfiguren'];
@@ -2245,7 +2309,6 @@ function kcInit(size){
   state.kcEffects = { J:null, '8':null, '10':null, 'Q':null, '5':null, '9':null }; // persistent per-player effects
   state.kcPendingAttrib = null;
   state.kcSuggestions = null;
-  state.kcHistory = []; // zuletzt gezogene Karten, neueste zuerst (fürs Landscape-Layout, linke Spalte)
 }
 function kcSetDeckSize(size){
   if(state.drawnCount>0) return; // locked once the round has started
@@ -2256,13 +2319,17 @@ function kcSetDeckSize(size){
 // The ring is rendered from the CURRENT remaining cards only, evenly spaced
 // around the circle — so it always looks like one unbroken, overlapping ring
 // (no visible holes). Any card can be picked freely.
+// Alle Maße in % statt px (Referenz: die alte 280px-Box, cx/cy=140/280*100,
+// r=114/280*100), damit die Slots automatisch mit .ringwrap mitskalieren —
+// .ringwrap hat seit dem Responsive-Fix keine feste Pixelgröße mehr (siehe
+// dortiger Kommentar), eine feste Pixel-Koordinate hier würde das brechen.
 function kcRingSVG(){
   const ring = state.ring;
   const n = ring.length;
   if(n===0) return '';
-  const cx=140, cy=140, r=114;
+  const cx=50, cy=50, r=40.71;
   const circumference = 2*Math.PI*r;
-  const slotW = Math.min(26, Math.max(12, (circumference/n)*1.35));
+  const slotW = Math.min(9.29, Math.max(4.29, (circumference/n)*1.35));
   const slotH = slotW*1.42;
   let slots = '';
   for(let i=0;i<n;i++){
@@ -2270,7 +2337,7 @@ function kcRingSVG(){
     const x = cx + r*Math.cos(angle);
     const y = cy + r*Math.sin(angle);
     const rot = (angle*180/Math.PI)+90;
-    slots += `<div class="ringslot ${state.kcPickFlash===i?'picked':''}" style="width:${slotW}px;height:${slotH}px;left:${x}px; top:${y}px; transform:translate(-50%,-50%) rotate(${rot}deg);" onclick="kcTapCard(${i})"></div>`;
+    slots += `<div class="ringslot ${state.kcPickFlash===i?'picked':''}" style="width:${slotW}%;height:${slotH}%;left:${x}%; top:${y}%; transform:translate(-50%,-50%) rotate(${rot}deg);" onclick="kcTapCard(${i})"></div>`;
   }
   return slots;
 }
@@ -2300,18 +2367,6 @@ function kcEffectsHTML(){
   `;
 }
 
-// Kompakte Verlaufsliste der zuletzt gezogenen Karten — nur sichtbar
-// genutzt im Landscape-3-Spalten-Layout (linke Spalte), im Hochformat
-// steht sie einfach oberhalb des Rings.
-function kcHistoryHTML(){
-  const hist = state.kcHistory || [];
-  if(!hist.length) return `<div class="kc-hist-empty">Noch keine Karte gezogen</div>`;
-  return hist.map(c=>`
-    <div class="kc-histrow">
-      <span class="kc-histcard ${c.color}">${c.rank}${c.suit}</span>
-      <span class="kc-histrule">${esc((KC_RULES[c.rank]||{}).t||'')}</span>
-    </div>`).join('');
-}
 function renderKingsCup(){
   if(!state.ring){ kcInit(); }
 
@@ -2385,6 +2440,7 @@ function renderKingsCup(){
         <div class="rulesub">${rule.s}</div>
       </div>
     ` : '';
+  const effectsHTML = kcEffectsHTML();
 
   app.innerHTML = `
    <div class="kc-screen">
@@ -2398,39 +2454,26 @@ function renderKingsCup(){
     </div>
 
     <div class="kc-layout">
-      <div class="kc-col kc-col-left">
-        <div class="kc-histlabel">Verlauf</div>
-        <div class="kc-histlist">${kcHistoryHTML()}</div>
+      <div class="kc-ringcol">
+        <div class="kingdots">${dots}</div>
+        <div class="ringwrap kc-stage">
+          <div class="ringglow"></div>
+          <div class="ringslots">${kcRingSVG()}</div>
+          <div class="ringcup">${cupSVG(cupPercent)}</div>
+        </div>
       </div>
 
-      <div class="kc-col kc-col-center">
-        <div class="section">
-          <div class="kingdots" style="margin-bottom:10px;">${dots}</div>
-          <div class="ringwrap kc-stage">
-            <div class="ringglow"></div>
-            <div class="ringslots">${kcRingSVG()}</div>
-            <div class="ringcup">${cupSVG(cupPercent)}</div>
-          </div>
-        </div>
-
+      <div class="kc-sidecol">
         <div class="section">
           ${cardHTML}
           ${undoSnap ? `<button class="btn btn-ghost btn-sm" style="margin:12px auto 0;" onclick="undo()">↶ Zug zurück</button>` : ''}
         </div>
-
-        <div class="kc-col-center-only">${ruleBlockHTML}</div>
-
+        ${ruleBlockHTML}
         ${suggestBlock ? `<div class="section">${suggestBlock}</div>` : ''}
         ${attribBlock ? `<div class="section">${attribBlock}</div>` : ''}
         ${wfBlock ? `<div class="section">${wfBlock}</div>` : ''}
         ${gameOverBlock ? `<div class="section">${gameOverBlock}</div>` : ''}
-      </div>
-
-      <div class="kc-col kc-col-right">
-        <div class="kc-col-right-only">${ruleBlockHTML}</div>
-        <div class="section">
-          ${kcEffectsHTML()}
-        </div>
+        ${effectsHTML ? `<div class="section">${effectsHTML}</div>` : ''}
       </div>
     </div>
    </div>
@@ -2490,11 +2533,8 @@ function kcPick(i){
   else state.kcSuggestions = null;
 
   triggerBurst(card);
-  state.kcHistory = state.kcHistory || [];
-  state.kcHistory.unshift(card);
-  if(state.kcHistory.length>10) state.kcHistory.length = 10;
-  // Sprecher liest die Regel der gezogenen Karte vor (falls aktiviert)
-  if(kcSpeaker){ const r = KC_RULES[card.rank]; if(r) pfSpeak(r.t + '. ' + r.s); }
+  // Sprecher: kurze, prägnante Ansage zur gezogenen Karte (falls aktiviert)
+  if(kcSpeaker) kcSpeak(card);
   render();
 }
 function kcToggleWF(){
