@@ -903,21 +903,13 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
    CARD DARTS — dark arcade dartboard built entirely from
    programmatic layers (no static board image per player count).
 =========================================================== */
-/* cover-cd.png hat einen eigenen Titel-Schriftzug eingebrannt, der aber je
-   nach Kachel-Zuschnitt (portraitiges Referenzbild in einer breiten/kurzen
-   Kachel via background:cover) teils gar nicht sichtbar ist oder mit dem
-   HTML-Titel kollidieren würde. Für ein einheitliches Bild wie bei
-   kc/pf/bf: kräftigerer Gradient blendet den Bildtext ab, der HTML-Titel
-   übernimmt (gleicher Stil wie die anderen 3 Spiele). */
+/* cover-cd.png: seit 17.08.26 ein eigens quadratisches (1254x1254), textfreies
+   GPT-Image-Motiv (Dartboard + Karten), analog zu kc/pf/bf — kein Zuschnitt-
+   Sonderfall mehr nötig. Gradient bleibt für einheitlichen Titel-Kontrast. */
 .cover-cd{
-  /* Quell-Bild ist Hochformat (1054x1492), die quadratische Kachel zeigte per
-     mittigem Zuschnitt zu wenig vom Dartboard und einen Rest des eingebrannten
-     Titeltexts ("...RTS") am unteren Rand. Zuschnitt nach oben verschoben,
-     damit Dartboard/Karten (der eigentliche Blickfang) voll sichtbar sind
-     und der Textrest komplett rausfällt (Titel kommt ohnehin per HTML). */
   background:
     linear-gradient(to top, rgba(10,8,20,0.92), rgba(10,8,20,0.35) 42%, rgba(10,8,20,0.1) 62%, transparent),
-    url('assets/cover-cd.png') center 12% / cover;
+    url('assets/cover-cd.png') center/cover;
 }
 .cover-cd .glyph{ display:none; }
 
@@ -1113,17 +1105,13 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
    bewusst von der App-Palette abweicht — dieselbe Konvention wie
    bei Card Darts' eigenem Dartboard-Look.
 =========================================================== */
-/* Gleiche Überlegung wie bei cover-cd (siehe Kommentar dort): kräftigerer
-   Gradient blendet den eingebrannten Bildtext ab, HTML-Titel übernimmt
-   einheitlich wie bei kc/pf/bf. */
+/* cover-cp.png: seit 17.08.26 ein eigens quadratisches (1254x1254), textfreies
+   GPT-Image-Motiv (Becherpyramide + fliegende Karte, Blau/Rot-Neon), analog
+   zu kc/pf/bf — kein Zuschnitt-Sonderfall mehr nötig. */
 .cover-cp{
-  /* Gleicher Grund wie bei cover-cd: Hochformat-Quellbild (1051x1496), Zuschnitt
-     nach oben verschoben auf die Becher-Pyramide + fliegende Karte (der
-     eigentliche Blickfang) statt den unteren Bereich mit dem eingebrannten
-     "CARD PONG"-Schriftzug mittig anzuschneiden. */
   background:
     linear-gradient(to top, rgba(8,8,16,0.92), rgba(8,8,16,0.35) 42%, rgba(8,8,16,0.1) 62%, transparent),
-    url('assets/cover-cp.png') center 18% / cover;
+    url('assets/cover-cp.png') center/cover;
 }
 .cover-cp .glyph{ display:none; }
 
