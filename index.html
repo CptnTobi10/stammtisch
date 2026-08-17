@@ -67,7 +67,7 @@ body{
   overscroll-behavior:contain;
   -webkit-overflow-scrolling:touch;
   padding-top:calc(env(safe-area-inset-top) + 8px);
-  padding-bottom:24px;
+  padding-bottom:calc(24px + env(safe-area-inset-bottom));
 }
 /* The app fills the screen edge-to-edge and the page itself never scrolls or
    bounces. #app is the only scrollable box, and only as a safety net for
@@ -1496,8 +1496,10 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
    Fortschrittsbalken unten.
 --------------------------------------------------------- */
 .ls-screen{
+  /* inset:0 auf einem fixed-Element = voller physischer Screen (inkl.
+     Safe-Areas dank viewport-fit=cover), unabhängig von der --app-vh-
+     Messung -> das Bild geht garantiert bis ganz unten. */
   position:fixed; inset:0;
-  width:100vw; height:var(--app-vh, 100dvh);
   overflow:hidden;
 }
 .ls-bg{
@@ -5124,7 +5126,18 @@ function setAppVH(){
   // dieses Skript in einer Minimal-Sandbox ohne echtes document.documentElement
   // — das darf hier nie hart crashen.
   try{
-    const h = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+    // Installierte PWA (Homescreen, display-mode: standalone) auf iOS soll den
+    // VOLLEN Screen nutzen. Dort meldet visualViewport.height teils zu wenig,
+    // wodurch unten ein toter, App-farbener Streifen entsteht. window.innerHeight
+    // ist in standalone die stabile volle Layout-Höhe (viewport-fit=cover).
+    // Im normalen Browser dagegen bleibt visualViewport richtig, weil dort die
+    // Adressleiste dynamisch ein-/ausfährt (löst weiterhin den alten "lilaner
+    // Rand"-Fall).
+    const standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
+      || window.navigator.standalone === true;
+    const h = standalone
+      ? window.innerHeight
+      : ((window.visualViewport && window.visualViewport.height) || window.innerHeight);
     document.documentElement.style.setProperty('--app-vh', h + 'px');
   }catch(e){}
 }
