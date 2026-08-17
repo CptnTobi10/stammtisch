@@ -39,6 +39,13 @@ html,body{margin:0;padding:0;height:100%;overflow:hidden;overscroll-behavior:non
    abgedeckt — ohne diese Farbe schiene dort ein andersfarbiges Rechteck
    durch. --ink matcht den App-Hintergrund, also nahtlos. */
 html{background:var(--ink);}
+/* TEMP Diagnose-Marker */
+#buildtag{
+  position:fixed; left:0; right:0; bottom:2px;
+  text-align:center; font-family:monospace; font-size:10px;
+  letter-spacing:0.15em; color:rgba(255,255,255,0.5);
+  z-index:99999; pointer-events:none;
+}
 body{
   background:
     radial-gradient(circle at 15% 8%, rgba(255,46,147,0.35) 0%, transparent 38%),
@@ -1543,6 +1550,10 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
 </head>
 <body>
 <div id="app"></div>
+<!-- TEMP Diagnose: winzige Versionsnummer ganz unten (fixed = echter unterer
+     Bildschirmrand). Zeigt sich auf allen Screens. Wird nach der Fehlersuche
+     wieder entfernt. -->
+<div id="buildtag">v40</div>
 
 <script>
 /* ---------------------------------------------------------
