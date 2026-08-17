@@ -6,9 +6,16 @@
  * the app is a single index.html (no bundler, no framework). This file
  * extracts the inline <script> block, runs it in a Node vm sandbox with
  * minimal DOM/localStorage/navigator stubs, reads the exposed
- * `window.LoadingScreenEngine` API, and exercises the pure timing/layout
+ * `window.LoadingScreenEngine` API, and exercises the pure timing
  * functions directly (no real timers, no real DOM) plus a UI smoke test
  * of renderLoading() itself.
+ *
+ * The loading screen shows one pre-composed background image
+ * (assets/loading/ls-bg.png) full-bleed, plus a native (never
+ * image-baked) progress bar/percentage and a decorative glow pulse.
+ * There is no suit-pulse sequence or lantern/vine layout anymore (that
+ * was the earlier, overlapping-composite version) — kept minimal on
+ * purpose.
  *
  * Run: node tests/loading-screen.test.js
  */
@@ -81,17 +88,14 @@ const { LS, sandbox } = loadEngine();
 // Same convention as tests/card_darts.test.js.
 function run(code){ return vm.runInContext(code, sandbox); }
 
-const { LS_CONFIG, lsProgressPercent, lsActiveSuitIndex, lsIsComplete,
-  lsPhaseDelay, lsLayoutRects, lsRectsOverlap } = LS;
+const { LS_CONFIG, lsProgressPercent, lsIsComplete, lsPhaseDelay } = LS;
 
-section('Config sanity (matches animation_manifest.json)');
-test('suit sequence matches manifest (heart, diamond, spade, club)', ()=>{
-  // Array.from() normalizes away the vm-realm Array prototype mismatch
-  // (LS_CONFIG.suits was created inside the sandbox's separate realm).
-  assert.deepStrictEqual(Array.from(LS_CONFIG.suits), ['heart','diamond','spade','club']);
-});
-test('pulse duration matches manifest pulse_seconds (0.4s = 400ms)', ()=>{
-  assert.strictEqual(LS_CONFIG.pulseMs, 400);
+section('Config sanity');
+test('total/hold/tick/glow durations are positive numbers', ()=>{
+  assert.ok(LS_CONFIG.totalMs > 0);
+  assert.ok(LS_CONFIG.holdMs >= 0);
+  assert.ok(LS_CONFIG.tickMs > 0);
+  assert.ok(LS_CONFIG.glowMs > 0);
 });
 
 section('Progress percentage (deterministic, native — never image-based)');
@@ -117,31 +121,6 @@ test('monotonically non-decreasing as elapsed time increases', ()=>{
   }
 });
 
-section('Suit pulse timing sequence (deterministic)');
-test('sequence over one full cycle visits every suit exactly once, in manifest order', ()=>{
-  const seen = [];
-  for(let i=0;i<LS_CONFIG.suits.length;i++){
-    const elapsed = i*LS_CONFIG.pulseMs + 1; // 1ms into each suit's window
-    seen.push(LS_CONFIG.suits[lsActiveSuitIndex(elapsed, LS_CONFIG.pulseMs, LS_CONFIG.suits.length)]);
-  }
-  assert.deepStrictEqual(seen, ['heart','diamond','spade','club']);
-});
-test('sequence loops back to heart after a full cycle', ()=>{
-  const cycle = LS_CONFIG.pulseMs*LS_CONFIG.suits.length;
-  const idx = lsActiveSuitIndex(cycle + 1, LS_CONFIG.pulseMs, LS_CONFIG.suits.length);
-  assert.strictEqual(LS_CONFIG.suits[idx], 'heart');
-});
-test('exactly one suit active at any given instant', ()=>{
-  for(let t=0; t<3200; t+=13){
-    const idx = lsActiveSuitIndex(t, LS_CONFIG.pulseMs, LS_CONFIG.suits.length);
-    assert.ok(idx>=0 && idx<LS_CONFIG.suits.length);
-  }
-});
-test('no crash / sane fallback with degenerate inputs (zero pulse, zero suits)', ()=>{
-  assert.strictEqual(lsActiveSuitIndex(100, 0, 4), 0);
-  assert.strictEqual(lsActiveSuitIndex(100, 400, 0), 0);
-});
-
 section('Completion / hand-off timing');
 test('not complete before totalMs+holdMs', ()=>{
   assert.strictEqual(lsIsComplete(LS_CONFIG.totalMs, LS_CONFIG.totalMs, LS_CONFIG.holdMs), false);
@@ -153,41 +132,21 @@ test('complete well after totalMs+holdMs', ()=>{
   assert.strictEqual(lsIsComplete(999999, LS_CONFIG.totalMs, LS_CONFIG.holdMs), true);
 });
 
-section('CSS phase-delay continuity helper (keeps loop animations seamless across re-renders)');
+section('CSS phase-delay continuity helper (keeps the glow loop seamless across re-renders)');
 test('delay is always <= 0 (never a positive/future delay)', ()=>{
   for(let t=0; t<10000; t+=137){
-    assert.ok(lsPhaseDelay(t, 2600, 0) <= 0);
+    assert.ok(lsPhaseDelay(t, 2600) <= 0);
   }
 });
 test('delay magnitude never exceeds the animation duration', ()=>{
   for(let t=0; t<10000; t+=137){
-    const d = lsPhaseDelay(t, 2600, 300);
+    const d = lsPhaseDelay(t, 2600);
     assert.ok(Math.abs(d) < 2600, `delay ${d} out of bounds at t=${t}`);
   }
 });
 test('does not crash with a zero/degenerate duration', ()=>{
-  assert.strictEqual(lsPhaseDelay(100, 0, 0), 0);
+  assert.strictEqual(lsPhaseDelay(100, 0), 0);
 });
-
-section('Layout — no overlap between decor and center content (programmatic check, rule: Überlappungsfreiheit)');
-const viewports = [
-  [320, 568],   // iPhone SE
-  [390, 844],   // iPhone 12/13/14
-  [430, 932],   // iPhone 14/15 Pro Max
-  [768, 1024],  // iPad portrait
-];
-for(const [vw, vh] of viewports){
-  test(`lantern/vines never overlap the center content column at ${vw}x${vh}`, ()=>{
-    const r = lsLayoutRects(vw, vh);
-    assert.ok(!lsRectsOverlap(r.lantern, r.center), `lantern overlaps center at ${vw}x${vh}`);
-    assert.ok(!lsRectsOverlap(r.vineLeft, r.center), `vineLeft overlaps center at ${vw}x${vh}`);
-    assert.ok(!lsRectsOverlap(r.vineRight, r.center), `vineRight overlaps center at ${vw}x${vh}`);
-  });
-  test(`left/right vines never overlap each other at ${vw}x${vh}`, ()=>{
-    const r = lsLayoutRects(vw, vh);
-    assert.ok(!lsRectsOverlap(r.vineLeft, r.vineRight), `vines overlap each other at ${vw}x${vh}`);
-  });
-}
 
 section('UI smoke test (real renderLoading(), not just pure functions)');
 // NOTE: `state`/`roster`/`timers` are top-level `let` bindings inside the
@@ -199,7 +158,17 @@ test('renderLoading() runs without throwing on first call (fresh state)', ()=>{
   assert.ok(run('typeof timers.ls !== "undefined"'), 'a tick timer should be scheduled');
   run('clearTimeout(timers.ls);');
 });
-test('renderLoading() does not crash even if asset files are unreachable (no real network/FS in sandbox)', ()=>{
+test('renderLoading() renders the background image and a native progress bar, no leftover placeholders', ()=>{
+  run(`state = { screen: 'loading', lsStart: Date.now() - 100 }; roster = [];`);
+  run('renderLoading();');
+  const html = run("document.getElementById('app').innerHTML");
+  run('clearTimeout(timers.ls);');
+  assert.ok(html.includes('ls-bg.png'), 'background image should be referenced');
+  assert.ok(html.includes('ls-progress-fill'), 'progress bar fill should be rendered');
+  assert.ok(html.includes('%'), 'a percentage should be rendered');
+  assert.ok(!/undefined/.test(html), 'no undefined leaking into rendered markup');
+});
+test('renderLoading() does not crash even if the asset file is unreachable (no real network/FS in sandbox)', ()=>{
   // The sandbox has no real <img> loading at all (jsdom-free stub DOM), so this
   // exercises the same code path a browser would take with a 404'd asset:
   // renderLoading() only ever writes <img src="..."> markup, it never reads

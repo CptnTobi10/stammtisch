@@ -1,7 +1,7 @@
 // Stammtisch — Service Worker
 // Cacht die App beim ersten Laden, damit sie danach auch ohne Internet
 // startet und funktioniert (die Spiele selbst brauchen ohnehin kein Netz).
-const CACHE_NAME = 'stammtisch-v34';
+const CACHE_NAME = 'stammtisch-v35';
 const APP_SHELL = [
   './',
   './index.html',
@@ -37,13 +37,7 @@ const APP_SHELL = [
   './assets/bg-party.png',
   './assets/turf.png',
   './assets/kc-bg.jpg',
-  './assets/loading/ls-logo.png',
-  './assets/loading/ls-suit-heart.png',
-  './assets/loading/ls-suit-diamond.png',
-  './assets/loading/ls-suit-spade.png',
-  './assets/loading/ls-suit-club.png',
-  './assets/loading/ls-lantern.png',
-  './assets/loading/ls-vines.png'
+  './assets/loading/ls-bg.png'
 ];
 
 self.addEventListener('install', (event) => {
