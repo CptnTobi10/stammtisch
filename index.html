@@ -41,7 +41,10 @@ body{
     radial-gradient(circle at 25% 92%, rgba(45,232,208,0.22) 0%, transparent 42%),
     radial-gradient(circle at 90% 85%, rgba(178,60,255,0.28) 0%, transparent 45%),
     var(--ink);
-  height:100dvh;
+  /* --app-vh: siehe Script am Seitenende (setAppVH) — echte, per JS
+     gemessene Viewport-Höhe statt dem auf iOS unzuverlässigen 100dvh.
+     Fallback 100dvh greift nur kurz vor dem ersten Skript-Durchlauf. */
+  height:var(--app-vh, 100dvh);
   font-family:'Inter',sans-serif;
   color:var(--cream);
   display:flex;
@@ -51,8 +54,8 @@ body{
 #app{
   width:100%;
   max-width:460px;
-  height:100dvh;
-  max-height:100dvh;
+  height:var(--app-vh, 100dvh);
+  max-height:var(--app-vh, 100dvh);
   background:linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.15) 100%);
   position:relative;
   overflow-y:auto;
@@ -699,11 +702,21 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
 .covergrid{ padding:10px 20px 0 20px; display:grid; grid-template-columns:1fr 1fr; gap:14px; }
 .covergrid .cover{ height:148px; }
 
-/* Per-game setup screens */
-.setup-screen{ position:relative; min-height:100dvh; display:flex; flex-direction:column; }
+/* Per-game setup screens. min-height:100% (nicht 100dvh, siehe Kommentar
+   bei .kc-screen weiter unten) — deckt die tatsächliche Content-Box von
+   #app ab, sonst blieb je nach Gerät/Bildschirm ein Streifen am unteren
+   Rand unbedeckt (App-Grundhintergrund schien durch). Betraf ALLE Spiele,
+   weil jeder Setup-Screen diese eine gemeinsame Klasse nutzt. */
+.setup-screen{ position:relative; min-height:100%; display:flex; flex-direction:column; }
 .setup-screen.kc{ background:radial-gradient(120% 260px at 50% 0, rgba(255,182,39,0.26), transparent 70%); }
 .setup-screen.pf{ background:radial-gradient(120% 260px at 50% 0, rgba(45,232,208,0.24), transparent 70%); }
 .setup-screen.bf{ background:radial-gradient(120% 260px at 50% 0, rgba(255,46,147,0.28), transparent 70%); }
+/* Busfahrer-Live-Screens (Phase 1-3) hatten bisher GAR keinen eigenen
+   Screen-Wrapper — bei kurzem Inhalt schien darunter direkt der bunte
+   Home-Hintergrund durch (der gemeldete "lilane Rand"). Jetzt wie die
+   anderen Spiele: min-height:100% + dezente Themenfarbe (Pink, wie im
+   Setup) füllt immer die volle Fläche. */
+.bus-screen{ position:relative; min-height:100%; background:radial-gradient(120% 260px at 50% 0, rgba(255,46,147,0.16), transparent 70%); }
 .setup-hero{ text-align:center; padding:8px 20px 8px; }
 .setup-hero .gtitle{
   font-family:'Bebas Neue',sans-serif; font-size:42px; line-height:0.95; letter-spacing:0.02em; color:#fff;
@@ -806,8 +819,12 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
 .wintrophy{ height:100px; width:auto; display:block; margin:6px auto 2px; filter:drop-shadow(0 8px 12px rgba(0,0,0,0.5)); }
 .wincrown{ height:82px; width:auto; display:block; margin:0 auto 6px; filter:drop-shadow(0 6px 10px rgba(0,0,0,0.5)); animation:winpopKF .5s cubic-bezier(.2,1.4,.4,1); }
 
-/* Stadion-Hintergrund hinter der Rennbahn */
-.race-screen{ position:relative; }
+/* Stadion-Hintergrund hinter der Rennbahn. min-height:100% (nicht nur
+   intrinsische Content-Höhe) — sonst endet die Stadion-Textur exakt dort,
+   wo der Inhalt aufhört, und darunter scheint bei kurzem Content (z.B.
+   kurz nach Rennstart) unvermittelt der App-Grundhintergrund durch, was
+   wie ein Bruch/Rand wirkt. */
+.race-screen{ position:relative; min-height:100%; }
 .race-screen::before{ content:''; position:absolute; inset:0; background:url('assets/pf-track-bg.png') center/cover; opacity:0.16; z-index:0; pointer-events:none; }
 .race-screen > *{ position:relative; z-index:1; }
 
@@ -907,7 +924,7 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
      insgesamt scrollen muss. */
   .kc-layout{
     flex-direction:row; align-items:stretch; gap:10px;
-    height:calc(100dvh - 64px); overflow:hidden;
+    height:calc(var(--app-vh, 100dvh) - 64px); overflow:hidden;
   }
   /* Ring ist durch die knappe Landscape-Höhe zwangsläufig höhenbegrenzt
      (Kreis kann nie höher als die verfügbare Höhe werden) — eine breitere
@@ -951,9 +968,11 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
 
 /* Opaque, near-black backdrop: deliberately overrides the app's usual
    colourful body gradient for this one screen so the board — not the
-   background — is what draws the eye. Nothing outside .cd-screen changes. */
+   background — is what draws the eye. Nothing outside .cd-screen changes.
+   min-height:100% (nicht 100dvh) — gleicher Bugfix wie bei .kc-screen/
+   .setup-screen, sonst blieb am unteren Rand ein Streifen unbedeckt. */
 .cd-screen{
-  position:relative; min-height:100dvh; display:flex; flex-direction:column;
+  position:relative; min-height:100%; display:flex; flex-direction:column;
   background:
     radial-gradient(120% 46% at 50% 0%, rgba(120,30,40,0.16) 0%, transparent 60%),
     radial-gradient(90% 40% at 50% 100%, rgba(20,60,45,0.14) 0%, transparent 65%),
@@ -3062,6 +3081,7 @@ function renderBusPhase1(){
   `;
 
   app.innerHTML = `
+   <div class="bus-screen">
     <div class="topbar">
       <div class="backbtn" onclick="askLeave('home')">‹</div>
       <div><h1>Busfahrer</h1><div class="sub">Runde ${state.busRound+1} von 4</div></div>
@@ -3081,6 +3101,7 @@ function renderBusPhase1(){
         <div class="seatgrid">${busTableHTML()}</div>
       </div>
     </div>
+   </div>
   `;
 }
 
@@ -3195,6 +3216,7 @@ function renderBusPhase2(){
   }).join('');
 
   app.innerHTML = `
+   <div class="bus-screen">
     <div class="topbar">
       <div class="backbtn" onclick="askLeave('home')">‹</div>
       <div><h1>Busfahrer</h1><div class="sub">Phase 2 · Pyramide</div></div>
@@ -3225,6 +3247,7 @@ function renderBusPhase2(){
         <div class="seatgrid">${remainingHTML}</div>
       </div>
     </div>
+   </div>
   `;
 }
 function busRevealNext(){
@@ -3346,6 +3369,7 @@ function renderBusPhase3(){
   const qProgress = !state.busP3Done ? [0,1,2,3].map(i=>`<div class="kdot ${i<state.busP3QIdx?'on':''} ${i===state.busP3QIdx?'active':''}"></div>`).join('') : '';
 
   app.innerHTML = `
+   <div class="bus-screen">
     <div class="topbar">
       <div class="backbtn" onclick="askLeave('home')">‹</div>
       <div><h1>Busfahrer</h1><div class="sub">Phase 3 · Die Busfahrt</div></div>
@@ -3380,6 +3404,7 @@ function renderBusPhase3(){
         </div>
       ` : `<div class="card-box" style="text-align:center;">${resultHTML}</div>`}
     </div>
+   </div>
   `;
 }
 function bus3Answer(val){
@@ -4930,6 +4955,33 @@ function cpRematch(){
   state = { screen:'cardpong', cp: fresh, cpMode:g.mode, cpRoster: state.cpRoster };
   render();
 }
+
+/* ---------------------------------------------------------
+   ECHTE VIEWPORT-HÖHE — 100dvh ist auf echten iOS-Geräten unzuverlässig,
+   besonders als installierte PWA mit "black-translucent" Statusleiste
+   (siehe <meta apple-mobile-web-app-status-bar-style>): der von dvh
+   gemeldete Wert kann größer sein als die tatsächlich sichtbare Fläche,
+   wodurch am unteren Rand eine unbedeckte Lücke entsteht (der App-eigene
+   Hintergrund scheint durch — genau das gemeldete "lilane Rand"-Problem,
+   bei allen Spielen, nicht nur einem). Fix: die wirkliche Höhe per JS
+   messen (visualViewport bevorzugt, da in Safari am zuverlässigsten) und
+   als CSS-Variable --app-vh bereitstellen, die body/#app statt 100dvh
+   nutzen (siehe dortige Regeln). Läuft bei jeder Größenänderung erneut
+   (Rotation, Adressleiste ein-/ausblenden, Tastatur).
+--------------------------------------------------------- */
+function setAppVH(){
+  // Defensiv wie pfSpeak() & Co: der Node-Testharness (tests/*.test.js) lädt
+  // dieses Skript in einer Minimal-Sandbox ohne echtes document.documentElement
+  // — das darf hier nie hart crashen.
+  try{
+    const h = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+    document.documentElement.style.setProperty('--app-vh', h + 'px');
+  }catch(e){}
+}
+setAppVH();
+window.addEventListener('resize', setAppVH);
+window.addEventListener('orientationchange', ()=> setTimeout(setAppVH, 60));
+if(window.visualViewport) window.visualViewport.addEventListener('resize', setAppVH);
 
 /* ---------------------------------------------------------
    START
