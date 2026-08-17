@@ -32,20 +32,33 @@ function loadEngine(){
   if(!m) throw new Error('Could not find <script> block in index.html');
   const src = m[1];
 
-  const fakeEl = {
-    innerHTML: '',
+  // Minimal-Shim statt eines einzigen generischen fakeEl: der Loading-Screen
+  // baut sein DOM nur einmal und liest/schreibt danach gezielt #lsFill/#lsPct
+  // (id-basiert). Damit dieses Verhalten (statt eines Neu-Aufbaus bei jedem
+  // Tick, das das Flackern verursacht hätte) korrekt getestet wird, muss
+  // getElementById('lsFill'/'lsPct') vor dem ersten Bauen null liefern und
+  // danach ein echtes style/textContent-Objekt.
+  const registry = {};
+  const appEl = {
+    _html: '',
+    get innerHTML(){ return this._html; },
+    set innerHTML(html){
+      this._html = html;
+      registry.lsFill = /id="lsFill"/.test(html) ? { style:{}, textContent:'' } : null;
+      registry.lsPct = /id="lsPct"/.test(html) ? { style:{}, textContent:'' } : null;
+    },
     clientWidth: 380,
     clientHeight: 700,
     addEventListener(){},
-    insertAdjacentHTML(){},
-    getElementById(){ return fakeEl; }
+    insertAdjacentHTML(){}
   };
+  const fakeEl = appEl; // backwards-compat alias for the test file below
   const store = new Map();
   const sandbox = {
     console,
     Math, Date, JSON, Array, Object, Set, Map,
     document: {
-      getElementById: ()=>fakeEl,
+      getElementById: (id)=> id==='app' ? appEl : (registry[id] || null),
       addEventListener(){}
     },
     localStorage: {

@@ -1491,13 +1491,14 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
    Fortschrittsbalken unten.
 --------------------------------------------------------- */
 .ls-screen{
-  position:relative; width:100%; height:100%;
+  position:fixed; inset:0;
+  width:100vw; height:var(--app-vh, 100dvh);
   overflow:hidden;
 }
 .ls-bg{
   position:absolute; inset:0;
   width:100%; height:100%;
-  object-fit:cover; object-position:center top;
+  object-fit:cover; object-position:center center;
   display:block;
 }
 .ls-glow{
@@ -1939,18 +1940,27 @@ function renderLoading(){
   const pct = lsProgressPercent(elapsed, LS_CONFIG.totalMs);
   const glowDelay = lsPhaseDelay(elapsed, LS_CONFIG.glowMs);
 
-  app.innerHTML = `
-    <div class="ls-screen">
-      <img class="ls-bg" src="assets/loading/ls-bg.png" alt="Stammtisch">
-      <div class="ls-glow" style="animation-delay:${glowDelay}ms"></div>
-      <div class="ls-progress">
-        <div class="ls-progress-track"><div class="ls-progress-fill" style="width:${pct}%"></div></div>
-        <div class="ls-progress-pct mono">${pct}%</div>
+  // Bild/Glow nur EINMAL bauen (verhindert Flackern durch wiederholtes
+  // Neu-Erzeugen des <img> bei jedem Tick). Danach nur noch die
+  // Fortschrittsanzeige direkt im DOM aktualisieren.
+  let fill = document.getElementById('lsFill');
+  if(!fill || !fill.style){
+    app.innerHTML = `
+      <div class="ls-screen">
+        <img class="ls-bg" src="assets/loading/ls-bg.png" alt="Stammtisch">
+        <div class="ls-glow" style="animation-delay:${glowDelay}ms"></div>
+        <div class="ls-progress">
+          <div class="ls-progress-track"><div class="ls-progress-fill" id="lsFill" style="width:${pct}%"></div></div>
+          <div class="ls-progress-pct mono" id="lsPct">${pct}%</div>
+        </div>
       </div>
-    </div>
-  `;
+    `;
+  } else {
+    fill.style.width = pct + '%';
+    document.getElementById('lsPct').textContent = pct + '%';
+  }
 
-  timers.ls = setTimeout(()=>{ render(); }, LS_CONFIG.tickMs);
+  timers.ls = setTimeout(()=>{ renderLoading(); }, LS_CONFIG.tickMs);
 }
 
 function burstHTML(card){
