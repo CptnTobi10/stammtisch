@@ -1,7 +1,7 @@
 // Stammtisch — Service Worker
 // Cacht die App beim ersten Laden, damit sie danach auch ohne Internet
 // startet und funktioniert (die Spiele selbst brauchen ohnehin kein Netz).
-const CACHE_NAME = 'stammtisch-v38';
+const CACHE_NAME = 'stammtisch-v39';
 const APP_SHELL = [
   './',
   './index.html',
@@ -61,14 +61,39 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  if (event.request.method !== 'GET') return;
-  event.respondWith(
-    caches.match(event.request).then((cached) => {
-      const network = fetch(event.request)
+  const req = event.request;
+  if (req.method !== 'GET') return;
+
+  // HTML-Navigationen (die index.html selbst): NETWORK-FIRST. So bekommt die
+  // App bei jedem Start sofort die neueste Version, statt erst 1-2 Neustarts
+  // später (das war die Ursache dafür, dass Änderungen scheinbar "nicht
+  // ankamen"). Offline fällt sie auf den Cache zurück.
+  const isHTML = req.mode === 'navigate'
+    || (req.headers.get('accept') || '').includes('text/html');
+  if (isHTML) {
+    event.respondWith(
+      fetch(req)
         .then((response) => {
           if (response && response.status === 200) {
             const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+            caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+          }
+          return response;
+        })
+        .catch(() => caches.match(req).then((c) => c || caches.match('./index.html')))
+    );
+    return;
+  }
+
+  // Alle anderen Assets (Bilder, sw-Sub-Ressourcen): CACHE-FIRST mit
+  // Hintergrund-Aktualisierung (stale-while-revalidate) — schnell und offline-fest.
+  event.respondWith(
+    caches.match(req).then((cached) => {
+      const network = fetch(req)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const copy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
           }
           return response;
         })

@@ -5127,17 +5127,20 @@ function setAppVH(){
   // — das darf hier nie hart crashen.
   try{
     // Installierte PWA (Homescreen, display-mode: standalone) auf iOS soll den
-    // VOLLEN Screen nutzen. Dort meldet visualViewport.height teils zu wenig,
-    // wodurch unten ein toter, App-farbener Streifen entsteht. window.innerHeight
-    // ist in standalone die stabile volle Layout-Höhe (viewport-fit=cover).
-    // Im normalen Browser dagegen bleibt visualViewport richtig, weil dort die
-    // Adressleiste dynamisch ein-/ausfährt (löst weiterhin den alten "lilaner
+    // VOLLEN Screen nutzen. Weder visualViewport.height noch innerHeight liefern
+    // dort zuverlässig die volle Höhe -> unten blieb ein toter, App-farbener
+    // Streifen. Lösung: die Variable NICHT setzen, sodass der CSS-Fallback
+    // 100dvh greift = voller Bildschirm (in standalone stabil, da keine
+    // dynamische Browser-Toolbar). Im normalen Browser bleibt die visualViewport-
+    // Messung (dort fährt die Adressleiste ein/aus -> löst den alten "lilaner
     // Rand"-Fall).
     const standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches)
       || window.navigator.standalone === true;
-    const h = standalone
-      ? window.innerHeight
-      : ((window.visualViewport && window.visualViewport.height) || window.innerHeight);
+    if(standalone){
+      document.documentElement.style.removeProperty('--app-vh');
+      return;
+    }
+    const h = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
     document.documentElement.style.setProperty('--app-vh', h + 'px');
   }catch(e){}
 }
