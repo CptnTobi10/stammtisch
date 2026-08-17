@@ -1280,35 +1280,23 @@ input[type=text]:focus, input[type=number]:focus{outline:1px solid var(--gold);}
   display:flex; align-items:center; justify-content:center; gap:10px;
 }
 .cp-drawbtn:disabled{ opacity:0.55; box-shadow:none; }
-/* Beer-Pong-Becher am Draw-Button: ComfyUI-Asset (assets/cp-cup.png) falls
-   vorhanden, sonst rein CSS-3D-Becher (Trapez + Glanzstreifen) als Fallback
-   — beide Varianten liegen als Geschwister im Button, nur eine ist sichtbar
-   (siehe .cp-drawbtn .cupimg / .cupcss unten). Text bleibt zentriert und
-   klickbar, der Becher stört die Klickfläche nicht (der ganze Button bleibt
-   ein einziges <button>-Element).
-*/
-.cp-drawbtn .cupimg{ height:clamp(26px,7dvh,38px); width:auto; flex-shrink:0; filter:drop-shadow(0 2px 6px rgba(0,0,0,0.5)); }
-.cp-drawbtn .cupcss{
-  position:relative; flex-shrink:0; width:clamp(16px,4.2dvh,22px); height:clamp(20px,5.2dvh,27px);
-  background:linear-gradient(180deg,#FF5A6B,#C21F2E 85%);
-  clip-path:polygon(14% 0%, 86% 0%, 100% 100%, 0% 100%);
-  box-shadow:inset -3px 0 4px rgba(0,0,0,0.35), inset 3px 0 3px rgba(255,255,255,0.25), 0 2px 5px rgba(0,0,0,0.4);
-}
-.cp-drawbtn .cupcss::after{
-  content:''; position:absolute; top:8%; left:22%; width:14%; height:78%;
-  background:linear-gradient(180deg, rgba(255,255,255,0.75), rgba(255,255,255,0.05));
-  border-radius:2px; filter:blur(0.3px);
-}
+/* Beer-Pong-Becher am Draw-Button: eigenes, inline generiertes SVG
+   (.cp-cupsvg, siehe cpCupSVG() im Script) statt externem PNG-Asset —
+   dadurch kein Ladefehler/Fallback-Fall mehr möglich, echte Transparenz,
+   scharf auf jeder Bildschirmgröße. Text bleibt zentriert und klickbar,
+   der Becher stört die Klickfläche nicht (der ganze Button bleibt ein
+   einziges <button>-Element). */
+.cp-drawbtn .cp-cupsvg{ height:clamp(26px,7dvh,38px); width:auto; flex-shrink:0; filter:drop-shadow(0 2px 6px rgba(0,0,0,0.5)); }
 
-/* --- decorative, non-interactive cups at the screen edges --- */
+/* --- decorative, non-interactive cups at the screen edges ---
+   Inline SVG (.cp-cupsvg, siehe cpCupSVG()) statt reinem CSS-Trapez —
+   echte Becherform mit Rand-Ellipse, Rillen und Glanzstreifen, weiterhin
+   reine Deko (pointer-events:none), volltransparenter Hintergrund. */
 .cp-decocup{
   position:absolute; width:16vw; max-width:92px; aspect-ratio:0.75;
-  clip-path:polygon(16% 0%, 84% 0%, 100% 100%, 0% 100%);
-  pointer-events:none; z-index:0; opacity:0.5;
-  box-shadow:inset 0 10px 18px rgba(255,255,255,0.08);
+  pointer-events:none; z-index:0; opacity:0.55;
 }
-.cp-decocup.blue{ background:linear-gradient(165deg, rgba(53,167,255,0.55), rgba(53,167,255,0.04) 75%); }
-.cp-decocup.red{ background:linear-gradient(165deg, rgba(255,59,77,0.5), rgba(255,59,77,0.04) 75%); }
+.cp-decocup .cp-cupsvg{ width:100%; height:100%; display:block; }
 .cp-decocup.tl{ top:-4%; left:-7%; transform:rotate(-10deg); }
 .cp-decocup.tr{ top:-4%; right:-7%; transform:rotate(10deg) scaleX(-1); }
 .cp-decocup.bl{ bottom:-4%; left:-7%; transform:rotate(10deg); }
@@ -1820,7 +1808,7 @@ const HELP_TEXT = {
       'Zwei Teams. Jedes Team hat eigene Zielkarten (eine Kartenpyramide) auf der Seite des Gegners. Verschwindet eine Karte, trinkt das Team auf dieser Seite.',
       'QUICK PONG: 6 Zielkarten pro Team (3-2-1), ein gemeinsamer Zugstapel. Reihum wird gezogen — passt die Karte zu einer aktiven Zielkarte, verschwindet sie und der Gegner trinkt. Kein Treffer = MISS. Wer zuerst alle eigenen 6 Karten abgeräumt hat, gewinnt sofort.',
       'ACTION PONG: 10 Zielkarten pro Team (4-3-2-1), Ass und König sind nie Ziel. Jedes Team zieht aus dem eigenen 34-Karten-Deck (32 Skatkarten + 2 Joker).',
-      'ASS = AIRBALL: Streak endet, du wählst eine gegnerische Zielkarte auf deiner Seite — sie verschwindet, dein Team trinkt. Bleibt dem Gegner nur noch 1 Karte, ist sie sicher (kein Airball möglich).',
+      'ASS = AIRBALL: Streak endet, eine eigene Zielkarte verschwindet — dein Team trinkt. Bleibt dir nur noch 1 Karte, ist sie sicher (kein Airball möglich).',
       'KÖNIG = TRICKSHOT: Kein Treffer, kein Miss, Streak bleibt — du ziehst sofort erneut.',
       'JOKER = DEFENSE: Aktiviert automatisch einen Schutz, der den nächsten regulären Treffer des Gegners blockiert (Karte geht zurück ins Zugdeck des Gegners, das dann gemischt wird). Ein zweiter Joker bei bereits aktivem Schutz zählt als MISS.',
       'Zwei Treffer in Folge (auch mit Gegnerzügen dazwischen) lösen BALLS BACK aus: du ziehst direkt weiter. Jeder weitere Treffer im Lauf gibt einen weiteren Bonuszug. Miss, Airball, Joker oder Block beenden den Lauf — der König unterbricht ihn nicht.',
@@ -4177,16 +4165,20 @@ function cpActionDraw(g){
       result = { type:'joker-ready', card, side };
     }
   } else if(card.rank==='A'){
-    // AIRBALL
+    // AIRBALL: Strafe für das ziehende Team selbst — eine eigene aktive
+    // Zielkarte verschwindet (nicht die des Gegners). Der Gegner bleibt
+    // unangetastet.
     team.streak = 0;
     team.discard.push(card);
     team.airballs++;
-    const oppActive = opp.targets.filter(t=>t.active);
-    if(oppActive.length<=1){
-      // Last-Cup-Airball-Schutz: darf die letzte gegnerische Karte nie entfernen.
+    const ownActive = team.targets.filter(t=>t.active);
+    if(ownActive.length<=1){
+      // Last-Cup-Airball-Schutz: darf die eigene letzte Karte nie entfernen
+      // (sonst könnte ein Airball unbeabsichtigt zum Sieg führen, siehe
+      // cpActionResolveAirball — Sieg darf nur durch echten Treffer entstehen).
       result = { type:'airball-safe', card, side };
     } else {
-      result = { type:'airball-pending', card, side, options: oppActive.map(t=>t.card.id) };
+      result = { type:'airball-pending', card, side, options: ownActive.map(t=>t.card.id) };
       switchTurn = false; // wartet auf Zielauswahl, siehe cpActionResolveAirball
       g.pendingAirball = { side };
     }
@@ -4236,13 +4228,13 @@ function cpActionResolveAirball(g, targetCardId){
   if(!g.pendingAirball) return null;
   const side = g.pendingAirball.side;
   const team = g.teams[side];
-  const opp = g.teams[cpOther(side)];
-  const oppActive = opp.targets.filter(t=>t.active);
-  const target = oppActive.find(t=>t.card.id===targetCardId);
+  const ownActive = team.targets.filter(t=>t.active);
+  const target = ownActive.find(t=>t.card.id===targetCardId);
   if(!target) return null;
   let result;
-  if(oppActive.length<=1){
-    // Defensive Zweitprüfung: die letzte gegnerische Karte darf nie fallen.
+  if(ownActive.length<=1){
+    // Defensive Zweitprüfung: die eigene letzte Karte darf nie fallen (siehe
+    // Last-Cup-Airball-Schutz in cpActionDraw).
     result = { type:'airball-safe', side };
   } else {
     target.active = false;
@@ -4368,12 +4360,35 @@ function cpPyramidHTML(g, side, mirror, opts){
   const compact = g.mode==='action' ? ' compact' : '';
   return `<div class="cp-pyramid${compact} ${mirror?'mirror':''}">${rowsHTML}</div>`;
 }
+// Inline SVG-Partybecher: echte transparente Vektorgrafik statt Rasterbild
+// (kein extern generiertes PNG verfügbar/nötig) — Randellipse, Trapezkörper,
+// 3 Rillen, ein Glanzstreifen. `uid` macht die SVG-Gradient-IDs pro Aufruf
+// eindeutig, damit mehrere Becher gleichzeitig im DOM nie kollidieren.
+let cpSvgUid = 0;
+function cpCupSVG(main, dark){
+  const id = 'cpCupGrad' + (cpSvgUid++);
+  return `<svg class="cp-cupsvg" viewBox="0 0 100 132" aria-hidden="true" focusable="false">
+    <defs><linearGradient id="${id}" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="${main}" stop-opacity="0.85"/>
+      <stop offset="55%" stop-color="${main}" stop-opacity="0.48"/>
+      <stop offset="100%" stop-color="${dark}" stop-opacity="0.62"/>
+    </linearGradient></defs>
+    <path d="M14 8 L86 8 L74 124 Q50 132 26 124 Z" fill="url(#${id})" stroke="${main}" stroke-width="2" stroke-opacity="0.65"/>
+    <ellipse cx="50" cy="8" rx="36" ry="7" fill="${main}" fill-opacity="0.32" stroke="${main}" stroke-opacity="0.75" stroke-width="1.5"/>
+    <path d="M22 30 L78 30" stroke="#fff" stroke-opacity="0.16" stroke-width="2"/>
+    <path d="M24 46 L76 46" stroke="#fff" stroke-opacity="0.12" stroke-width="2"/>
+    <path d="M26 62 L74 62" stroke="#fff" stroke-opacity="0.09" stroke-width="2"/>
+    <path d="M30 14 Q26 60 32 118" stroke="#fff" stroke-opacity="0.32" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </svg>`;
+}
 // Rein dekorative, nicht-interaktive Becher an den Bildschirmrändern
 // (siehe .cp-decocup) — pointer-events:none, verdecken nie Karten, werden
 // auf kleinen Displays per @media ausgeblendet.
 function cpDecoCupsHTML(){
-  return `<div class="cp-decocup blue tl"></div><div class="cp-decocup blue tr"></div>
-    <div class="cp-decocup red bl"></div><div class="cp-decocup red br"></div>`;
+  // Jeder Aufruf erzeugt eine frische, eindeutige Gradient-ID (siehe cpSvgUid) —
+  // deshalb bewusst 4 einzelne Aufrufe statt einer wiederverwendeten Variable.
+  return `<div class="cp-decocup tl">${cpCupSVG('#35A7FF','#145B91')}</div><div class="cp-decocup tr">${cpCupSVG('#35A7FF','#145B91')}</div>
+    <div class="cp-decocup bl">${cpCupSVG('#FF3B4D','#A81829')}</div><div class="cp-decocup br">${cpCupSVG('#FF3B4D','#A81829')}</div>`;
 }
 function cpCupHTML(t, side, opts){
   const colorClass = t.card.color==='red' ? 'red-suit' : 'black-suit';
@@ -4384,15 +4399,10 @@ function cpCupHTML(t, side, opts){
     <div class="r">${t.card.rank}</div><div class="s">${t.card.suit}</div>
   </div>`;
 }
-// Fällt zurück auf den reinen CSS-3D-Becher, falls das ComfyUI-Becher-PNG
-// aus irgendeinem Grund nicht lädt (z.B. Asset fehlt/beschädigt).
-function cpCupFallback(img){
-  const span = document.createElement('span');
-  span.className = 'cupcss';
-  img.replaceWith(span);
-}
+// Roter Partybecher links im DRAW-Button (siehe Design-Vorgabe) — inline
+// SVG statt Rasterbild, kein Ladefehler-Fallback mehr nötig.
 function cpDrawBtnCupHTML(){
-  return `<img class="cupimg" src="assets/cp-cup.png" alt="" onerror="cpCupFallback(this)">`;
+  return cpCupSVG('#FF5A6B', '#C21F2E');
 }
 function cpDeckZoneHTML(deckCount, discardCount, drawnCard){
   let drawnHTML;
@@ -4500,8 +4510,9 @@ function renderCardpongAction(g){
   const active = g.activeSide;
   const opts = {};
   if(g.pendingAirball){
-    const opp = cpOther(g.pendingAirball.side);
-    opts.selectableIds = new Set(g.teams[opp].targets.filter(t=>t.active).map(t=>t.card.id));
+    // Airball trifft die eigene Seite: die auswählbaren Becher gehören dem
+    // Team, das gerade den Airball gezogen hat, nicht dem Gegner.
+    opts.selectableIds = new Set(g.teams[g.pendingAirball.side].targets.filter(t=>t.active).map(t=>t.card.id));
   }
   const activeTeam = g.teams[active];
   app.innerHTML = `

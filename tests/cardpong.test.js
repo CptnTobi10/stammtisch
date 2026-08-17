@@ -345,43 +345,44 @@ test('King (Trickshot): no hit, no miss, streak unchanged, same player draws aga
   assert.strictEqual(g.teams[side].streak, 3, 'King must not touch the streak');
   assert.strictEqual(g.activeSide, side, 'King keeps the same active player');
 });
-test('Ace (Airball): with >1 opponent targets, requires target selection; drink goes to the active (drawing) side; turn switches only after resolution', ()=>{
+test('Ace (Airball): with >1 own targets, requires target selection from the drawing team\'s own cups; drink goes to the active (drawing) side; turn switches only after resolution', ()=>{
   const g = CP.cpStartAction({seed:16});
   const side = g.activeSide, other = CP.cpOther(side);
-  assert.ok(g.teams[other].targets.filter(t=>t.active).length > 1);
+  assert.ok(g.teams[side].targets.filter(t=>t.active).length > 1);
   forceNextDraw(g.teams[side], ACE_CARD);
   const result = CP.cpActionDraw(g);
   assert.strictEqual(result.type, 'airball-pending');
   assert.strictEqual(g.activeSide, side, 'turn must not switch yet, selection pending');
   assert.strictEqual(g.teams[side].streak, 0, 'airball ends the streak immediately');
-  const opponentActiveBefore = g.teams[other].targets.filter(t=>t.active).length;
+  const ownActiveBefore = g.teams[side].targets.filter(t=>t.active).length;
   const pickId = result.options[0];
   const res2 = CP.cpActionResolveAirball(g, pickId);
   assert.strictEqual(res2.type, 'airball-hit');
   assert.strictEqual(res2.drinkingSide, side, 'the active/attacking team drinks on Airball');
-  assert.strictEqual(g.teams[other].targets.filter(t=>t.active).length, opponentActiveBefore-1);
+  assert.strictEqual(g.teams[side].targets.filter(t=>t.active).length, ownActiveBefore-1, 'a cup is removed from the drawing team\'s own side, not the opponent\'s');
+  assert.strictEqual(g.teams[other].targets.filter(t=>t.active).length, g.teams[other].targets.length, 'the opponent\'s cups must be completely untouched by an Airball');
   assert.strictEqual(g.activeSide, other, 'turn switches after the Airball selection is resolved');
 });
-test('Airball can never remove the opponent\'s last cup and can never end the game (Last-Cup-Airball protection)', ()=>{
+test('Airball can never remove the drawing team\'s own last cup and can never end the game (Last-Cup-Airball protection)', ()=>{
   const g = CP.cpStartAction({seed:17});
   const side = g.activeSide, other = CP.cpOther(side);
-  // Reduce the opponent down to exactly one active target.
-  g.teams[other].targets.slice(1).forEach(t=> t.active=false);
+  // Reduce the drawing team itself down to exactly one active target.
+  g.teams[side].targets.slice(1).forEach(t=> t.active=false);
   forceNextDraw(g.teams[side], ACE_CARD);
   const result = CP.cpActionDraw(g);
-  assert.strictEqual(result.type, 'airball-safe', 'with exactly one opponent target left, no selection may be offered');
-  assert.strictEqual(g.teams[other].targets.filter(t=>t.active).length, 1, 'the last cup must survive');
+  assert.strictEqual(result.type, 'airball-safe', 'with exactly one own target left, no selection may be offered');
+  assert.strictEqual(g.teams[side].targets.filter(t=>t.active).length, 1, 'the last cup must survive');
   assert.strictEqual(g.winner, null, 'Airball must never end the game');
   assert.strictEqual(g.activeSide, other, 'turn still switches after a safe airball');
 });
-test('cpActionResolveAirball defends the last cup even if called directly with a stale 2-card option', ()=>{
+test('cpActionResolveAirball defends the drawing team\'s own last cup even if called directly with a stale 2-card option', ()=>{
   const g = CP.cpStartAction({seed:18});
-  const side = g.activeSide, other = CP.cpOther(side);
-  const oppTargets = g.teams[other].targets.filter(t=>t.active);
+  const side = g.activeSide;
+  const ownTargets = g.teams[side].targets.filter(t=>t.active);
   g.pendingAirball = { side };
-  // Artificially shrink the opponent's live targets to 1 between offer and resolve.
-  oppTargets.slice(1).forEach(t=> t.active=false);
-  const res = CP.cpActionResolveAirball(g, oppTargets[0].card.id);
+  // Artificially shrink the drawing team's own live targets to 1 between offer and resolve.
+  ownTargets.slice(1).forEach(t=> t.active=false);
+  const res = CP.cpActionResolveAirball(g, ownTargets[0].card.id);
   assert.strictEqual(res.type, 'airball-safe');
   assert.strictEqual(g.winner, null);
 });
@@ -428,7 +429,7 @@ test('Joker blocks neither Airball nor King nor a Miss; King never interrupts a 
   assert.ok(airballRes.type==='airball-pending' || airballRes.type==='airball-safe');
   assert.strictEqual(g.teams[defenderSide].jokerShield, true, 'joker must not intercept an Airball');
   if(g.pendingAirball){
-    const opts = g.teams[CP.cpOther(attackerSide)].targets.filter(t=>t.active);
+    const opts = g.teams[attackerSide].targets.filter(t=>t.active); // airball now targets the drawing team's own cups
     CP.cpActionResolveAirball(g, opts[0].card.id); // resolve so the next draw isn't blocked by a pending selection
   }
 
@@ -523,8 +524,8 @@ test('full random Action Pong game terminates with exactly one winner, no duplic
     while(!g.winner){
       if(guard++>2000) throw new Error('action pong did not terminate seed='+seed);
       if(g.pendingAirball){
-        const opp = CP.cpOther(g.pendingAirball.side);
-        const opts = g.teams[opp].targets.filter(t=>t.active);
+        // Airball now targets the drawing team's own cups, not the opponent's.
+        const opts = g.teams[g.pendingAirball.side].targets.filter(t=>t.active);
         CP.cpActionResolveAirball(g, opts[0].card.id);
       } else {
         CP.cpActionDraw(g);
@@ -637,8 +638,8 @@ test('Action Pong renders through a full random match without throwing or leakin
       (function(){
         var g = state.cp;
         if(g.pendingAirball){
-          var opp = cpOther(g.pendingAirball.side);
-          var opts = g.teams[opp].targets.filter(function(t){return t.active;});
+          // Airball now targets the drawing team's own cups, not the opponent's.
+          var opts = g.teams[g.pendingAirball.side].targets.filter(function(t){return t.active;});
           cpActionResolveAirball(g, opts[0].card.id);
         } else {
           cpActionDraw(g);
