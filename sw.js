@@ -1,7 +1,7 @@
 // Stammtisch — Service Worker
 // Cacht die App beim ersten Laden, damit sie danach auch ohne Internet
 // startet und funktioniert (die Spiele selbst brauchen ohnehin kein Netz).
-const CACHE_NAME = 'stammtisch-v40';
+const CACHE_NAME = 'stammtisch-v41';
 const APP_SHELL = [
   './',
   './index.html',
